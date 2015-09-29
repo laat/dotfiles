@@ -1,0 +1,17 @@
+if [ -d $HOME/.Xresources.d ]; then
+    for file in $HOME/.Xresources.d/*; do
+        if [ -f $file ]; then
+            xrdb -merge $file
+        fi
+    done
+    unset file
+fi
+
+if [ -d $HOME/.xprofile.d ]; then
+    for file in $HOME/.xprofile.d/*; do
+        if [ -f $file ]; then
+            . $file
+        fi
+    done
+    unset file
+fi

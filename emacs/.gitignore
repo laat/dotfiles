@@ -1,0 +1,4 @@
+.emacs.d/custom.el
+.emacs.d/ido.last
+.config/systemd/user/default.target.wants/
+emacs/.emacs.d/server/server

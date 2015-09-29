@@ -1,0 +1,3 @@
+XTerm*Background: black
+XTerm*Foreground: White
+XTerm*LoginShell: true

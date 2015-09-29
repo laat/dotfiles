@@ -1,0 +1,27 @@
+! disable printing to lpr by pressing prtsc
+URxvt.print-pipe: "cat > /dev/null"
+
+!look
+URxvt.background: #000000
+URxvt.foreground: #ffffff
+URxvt*scrollBar: false
+
+URxvt*font: xft:DejaVu Sans Mono:size=9:antialias=true:hinting=true
+URxvt*boldFont: xft:DejaVu Sans Mono:bold:size=9:antialias=true:hinting=true
+
+! url-click
+URxvt*urllauncher: firefox
+URxvt*matcher.button: 1
+URxvt.perl-ext-common: default,matcher
+URxvt*saveLines: 8192
+
+! ssh support
+!URxvt*termName: xterm
+URxvt*termName: xterm-256color
+
+!irssi bell
+URxvt.urgentOnBell: true
+
+!home & end! =)
+URxvt*keysym.Home: \033[1~
+URxvt*keysym.End: \033[4~
