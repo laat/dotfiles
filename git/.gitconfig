@@ -17,7 +17,6 @@
 	ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate
 	ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
 	lol = log --graph --decorate --pretty=oneline --abbrev-commit --all
-	wtf = !git-wtf
 	panic = !tar cvf ../git_panic.tar *
 	changelog = !git-changelog
 	ignore = "!gi() { curl -L -s https://www.gitignore.io/api/$@ ;}; gi"
