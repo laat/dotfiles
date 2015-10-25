@@ -637,6 +637,12 @@
     (use-package helm-gitignore
       :ensure t)
 
+    (use-package diff-hl
+      :ensure t
+      :init
+      (diff-hl-mode)
+      (diff-hl-flydiff-mode))
+
     (use-package gist
       :ensure t)
 
