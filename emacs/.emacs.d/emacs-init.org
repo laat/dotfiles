@@ -141,7 +141,12 @@
      (setq auto-save-file-name-transforms
            `((".*" ,my-auto-save-folder t)))
    #+end_src
-
+** Browser
+   #+begin_src emacs-lisp
+     (if window-system
+         (setq browse-url-browser-function 'browse-url-generic
+               browse-url-generic-program "x-www-browser"))
+   #+end_src
 * OS X
   #+begin_src emacs-lisp
     (when (memq window-system '(mac ns))
