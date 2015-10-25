@@ -276,6 +276,13 @@
          (smartparens-global-mode 1)
          (show-smartparens-global-mode 1)))
    #+end_src
+** Vertikal linje ved 80 tegn
+   #+begin_src emacs-lisp :tangle no
+     (use-package fill-column-indicator
+       :ensure t
+       :init (add-hook 'prog-mode-hook 'fci-mode)
+       :config (setq-default fci-rule-column 80))
+   #+end_src
 * Langs
 ** Webutvikling
 *** emmet
@@ -938,14 +945,6 @@
 ** GnuPG
 ** Python
 ** Dash
-** Vertikal linje ved 80 tegn
-   #+begin_src emacs-lisp :tangle no
-     (use-package fill-column-indicator
-       :ensure t
-       :disabled t ;; company completion?
-       :init (add-hook 'prog-mode-hook 'fci-mode)
-       :config (setq-default fci-rule-column 80))
-   #+end_src
 ** JIRA
    1) jira-markup-mode
    2) jira.el
