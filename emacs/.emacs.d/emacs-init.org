@@ -169,6 +169,8 @@
        :init (load-theme 'ample t))
    #+end_src
 
+   #+RESULTS:
+
 ** Smooth scroll
 
    #+begin_src emacs-lisp
@@ -182,21 +184,19 @@
                scroll-step 1)
          (smooth-scroll-mode)))
    #+end_src
-
-** Powerline tema for smart-mode-line
-   #+begin_src emacs-lisp
-     (use-package smart-mode-line
+   
+** Spaceline
+   #+begin_src emacs-lisp 
+     (use-package spaceline
        :ensure t
-       :init (sml/setup)
+       :init
+       (require 'spaceline-config)
+       (spaceline-emacs-theme)
        :config
-       (use-package smart-mode-line-powerline-theme
-         :ensure t
-         :config (sml/apply-theme 'powerline))
-
-       (after 'projectile
-         (setq sml/use-projectile-p 'before-prefixes
-               sml/projectile-replacement-format "[%s]")))
+       (setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
+       (setq powerline-default-separator 'wave))
    #+end_src
+
 * Helm
   #+begin_src emacs-lisp
     (use-package helm
@@ -268,6 +268,7 @@
    #+begin_src emacs-lisp
      (use-package smartparens
        :ensure t
+       :diminish smartparens-mode
        :init
        (progn
          (use-package smartparens-config)
@@ -497,7 +498,7 @@
      (use-package org-bullets
        :ensure t
        :init (add-hook 'org-mode-hook 'org-bullets-mode)
-       :config (setq org-bullets-bullet-list '("✿" "❀" "☢" "☯" "✸" )))
+       :config (setq org-bullets-bullet-list '("▸" "•")))
    #+end_src
 ** Presentation mode
    #+begin_src emacs-lisp
@@ -522,6 +523,7 @@
 ** Org config
    #+begin_src emacs-lisp
      (use-package org
+       :pin manual
        :mode ("\\.org$" . org-mode)
        :config
        (add-hook 'org-mode-hook #'yas-minor-mode)
@@ -687,11 +689,8 @@
   #+begin_src emacs-lisp
     (use-package dockerfile-mode
       :ensure t)
-  #+end_src
-** Tramp
-   #+begin_src emacs-lisp
-     (use-package docker-tramp
-       :ensure t)
+    (use-package docker-tramp
+      :ensure t)
    #+end_src
    
 * Projectile
@@ -792,7 +791,12 @@
           :config
           (progn
             (evil-leader/set-leader ",")
-            (evil-leader/set-key "b" 'laat/indent-region-or-buffer)))))
+            (evil-leader/set-key "b" 'laat/indent-region-or-buffer)))
+
+        (use-package evil-mc
+          :ensure t
+          :diminish evil-mc-mode
+          :init (global-evil-mc-mode 1))))
   #+end_src
 
 ** Expand-region
@@ -908,42 +912,33 @@
     (define-key evil-normal-state-map " " 'laat/global-hydra/body)
   #+end_src
 
-  #+RESULTS:
-  : laat/global-hydra/body
-
-  
 * TODO TODO
-** TODO volatile-highlights
-** TODO Weechat
-   Må få opp igjen server...
-** TODO Twitter
-   hydra prosjektet på github har et godt oppsett i wiki
-** TODO GnuPG
-** TODO Multiple Cursors
-   Does not play nice with evil, and I have no idea how to use
-   it. Disabled for now, but must research this more because it is
-   freaking awesome-looking.
-   
+** Powerline tema for smart-mode-line
+   spaceline overtar
    #+begin_src emacs-lisp
-     (use-package multiple-cursors
-       :disabled t ;; I do not understand it yet.
-       ;;:ensure t
-       :init
-       (after 'evil
-         (add-hook 'multiple-cursors-mode-enabled-hook 'evil-emacs-state)
-         (add-hook 'multiple-cursors-mode-disabled-hook 'evil-normal-state))
+     (use-package smart-mode-line
+       :ensure t
+       :disabled t
+       :init (sml/setup)
        :config
-       (setq mc/unsupported-minor-modes
-             '(company-mode auto-complete-mode flyspell-mode jedi-mode))
-       (global-set-key (kbd "C->") 'mc/mark-next-like-this)
-       (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
-       (global-unset-key (kbd "M-<down-mouse-1>"))
-       (global-set-key (kbd "M-<mouse-1>") 'mc/add-cursor-on-click))
+       (use-package smart-mode-line-powerline-theme
+         :ensure t
+         :config (sml/apply-theme 'powerline))
+
+       (after 'projectile
+         (setq sml/use-projectile-p 'before-prefixes
+               sml/projectile-replacement-format "[%s]")))
    #+end_src
-** TODO Python
-   
-** TODO Dash
-** TODO Vertikal linje ved 80 tegn
+
+** volatile-highlights
+** Weechat
+   Må få opp igjen server...
+** Twitter
+   hydra prosjektet på github har et godt oppsett i wiki
+** GnuPG
+** Python
+** Dash
+** Vertikal linje ved 80 tegn
    #+begin_src emacs-lisp :tangle no
      (use-package fill-column-indicator
        :ensure t
@@ -955,3 +950,4 @@
    1) jira-markup-mode
    2) jira.el
 ** Css Comb
+   
