@@ -192,6 +192,10 @@
    
 ** Spaceline
    #+begin_src emacs-lisp 
+     (use-package window-numbering
+       :ensure t
+       :init
+       (window-numbering-mode))
      (use-package spaceline
        :ensure t
        :init
