@@ -291,6 +291,14 @@
        :init
        (add-hook 'prog-mode-hook #'unicode-troll-stopper-mode))
    #+end_src
+** agressive-indent
+   #+begin_src emacs-lisp
+     (use-package aggressive-indent
+       :ensure t
+       :init
+       (add-hook 'emacs-lisp-mode-hook #'aggressive-indent-mode))
+   #+end_src
+
 * Langs
 ** Webutvikling
 *** emmet
