@@ -492,6 +492,11 @@
    #+end_src
 
 * Nyttig Diverse
+** paradox
+   #+begin_src emacs-lisp
+     (use-package paradox
+       :ensure t)
+   #+end_src
 ** discover-my-major
    #+begin_src emacs-lisp
      (use-package discover-my-major
