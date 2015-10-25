@@ -777,54 +777,52 @@
       :ensure t
       :init (evil-mode 1)
       :config
-      (progn
-        ;; its a silly binding, but i am an additct
-        (define-key evil-normal-state-map (kbd "C-h") 'evil-window-left)
-        (define-key evil-normal-state-map (kbd "C-j") 'evil-window-down)
-        (define-key evil-normal-state-map (kbd "C-k") 'evil-window-up)
-        (define-key evil-normal-state-map (kbd "C-l") 'evil-window-right)
-        (define-key evil-motion-state-map (kbd "C-h") 'evil-window-left)
-        (define-key evil-motion-state-map (kbd "C-j") 'evil-window-down)
-        (define-key evil-motion-state-map (kbd "C-k") 'evil-window-up)
-        (define-key evil-motion-state-map (kbd "C-l") 'evil-window-right)
+      ;; its a silly binding, but i am an additct
+      (define-key evil-normal-state-map (kbd "C-h") 'evil-window-left)
+      (define-key evil-normal-state-map (kbd "C-j") 'evil-window-down)
+      (define-key evil-normal-state-map (kbd "C-k") 'evil-window-up)
+      (define-key evil-normal-state-map (kbd "C-l") 'evil-window-right)
+      (define-key evil-motion-state-map (kbd "C-h") 'evil-window-left)
+      (define-key evil-motion-state-map (kbd "C-j") 'evil-window-down)
+      (define-key evil-motion-state-map (kbd "C-k") 'evil-window-up)
+      (define-key evil-motion-state-map (kbd "C-l") 'evil-window-right)
 
-        ;; esc quits
-        (defun minibuffer-keyboard-quit ()
-          "Abort recursive edit.
+      ;; esc quits
+      (defun minibuffer-keyboard-quit ()
+        "Abort recursive edit.
     In Delete Selection mode, if the mark is active, just deactivate it;
     then it takes a second \\[keyboard-quit] to abort the minibuffer."
-          (interactive)
-          (if (and delete-selection-mode transient-mark-mode mark-active)
-              (setq deactivate-mark  t)
-            (when (get-buffer "*Completions*") (delete-windows-on "*Completions*"))
-            (abort-recursive-edit)))
+        (interactive)
+        (if (and delete-selection-mode transient-mark-mode mark-active)
+            (setq deactivate-mark  t)
+          (when (get-buffer "*Completions*") (delete-windows-on "*Completions*"))
+          (abort-recursive-edit)))
 
-        (define-key evil-normal-state-map [escape] 'keyboard-quit)
-        (define-key evil-visual-state-map [escape] 'keyboard-quit)
-        (define-key minibuffer-local-map [escape] 'minibuffer-keyboard-quit)
-        (define-key minibuffer-local-ns-map [escape] 'minibuffer-keyboard-quit)
-        (define-key minibuffer-local-completion-map [escape] 'minibuffer-keyboard-quit)
-        (define-key minibuffer-local-must-match-map [escape] 'minibuffer-keyboard-quit)
-        (define-key minibuffer-local-isearch-map [escape] 'minibuffer-keyboard-quit)
-        (global-set-key [escape] 'evil-exit-emacs-state)
+      (define-key evil-normal-state-map [escape] 'keyboard-quit)
+      (define-key evil-visual-state-map [escape] 'keyboard-quit)
+      (define-key minibuffer-local-map [escape] 'minibuffer-keyboard-quit)
+      (define-key minibuffer-local-ns-map [escape] 'minibuffer-keyboard-quit)
+      (define-key minibuffer-local-completion-map [escape] 'minibuffer-keyboard-quit)
+      (define-key minibuffer-local-must-match-map [escape] 'minibuffer-keyboard-quit)
+      (define-key minibuffer-local-isearch-map [escape] 'minibuffer-keyboard-quit)
+      (global-set-key [escape] 'evil-exit-emacs-state)
 
-        (use-package evil-surround
-          :ensure t
-          :config (global-evil-surround-mode 1))
+      (use-package evil-surround
+        :ensure t
+        :config (global-evil-surround-mode 1))
 
-        (use-package evil-leader
-          :ensure t
-          :commands (evil-leader-mode global-evil-leader-mode)
-          :init (global-evil-leader-mode t)
-          :config
-          (progn
-            (evil-leader/set-leader ",")
-            (evil-leader/set-key "b" 'laat/indent-region-or-buffer)))
+      (use-package evil-leader
+        :ensure t
+        :commands (evil-leader-mode global-evil-leader-mode)
+        :init (global-evil-leader-mode t)
+        :config
+        (evil-leader/set-leader ",")
+        (evil-leader/set-key "b" 'laat/indent-region-or-buffer))
 
-        (use-package evil-mc
-          :ensure t
-          :diminish evil-mc-mode
-          :init (global-evil-mc-mode 1))))
+      (use-package evil-mc
+        :ensure t
+        :diminish evil-mc-mode
+        :init (global-evil-mc-mode 1)))
   #+end_src
 
 ** Expand-region
