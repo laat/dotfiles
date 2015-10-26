@@ -10,10 +10,10 @@ zstyle ':vcs_info:*' check-for-changes true
 zstyle ':vcs_info:*' check-for-staged-changes true
 
 zstyle ':vcs_info:*' stagedstr '%F{red}✗%f'
-zstyle ':vcs_info:*' unstagedstr '%F{red}✗%f'
+zstyle ':vcs_info:*' unstagedstr "%F{red}⚑%f"
 
-zstyle ':vcs_info:*' formats "(%b%u%c)"
-zstyle ':vcs_info:*' actionformats "(%b%u%c|%a)"
+zstyle ':vcs_info:*' formats "(%{$fg_bold[yellow]%}%b%c%u%{$reset_color%})"
+zstyle ':vcs_info:*' actionformats "(%{$fg_bold[yellow]%}%b%c%u|%a%{$reset_color%})"
 
 zstyle ':vcs_info:git*+set-message:*' hooks git-untracked
 
