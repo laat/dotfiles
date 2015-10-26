@@ -147,6 +147,12 @@
          (setq browse-url-browser-function 'browse-url-generic
                browse-url-generic-program "x-www-browser"))
    #+end_src
+** Undotree
+   #+begin_src emacs-lisp
+     (use-package undo-tree
+       :diminish undo-tree-mode
+       :init (global-undo-tree-mode))
+   #+end_src
 * OS X
   #+begin_src emacs-lisp
     (when (memq window-system '(mac ns))
