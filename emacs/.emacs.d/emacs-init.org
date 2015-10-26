@@ -648,7 +648,7 @@
     (use-package diff-hl
       :ensure t
       :init
-      (diff-hl-mode)
+      (global-diff-hl-mode)
       (diff-hl-flydiff-mode))
 
     (use-package gist
@@ -991,4 +991,3 @@
    1) jira-markup-mode
    2) jira.el
 ** Css Comb
-   
