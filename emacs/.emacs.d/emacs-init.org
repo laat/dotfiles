@@ -419,8 +419,10 @@
           (js2r-forward-barf)
           (laat/js2r-slurp-barf-hydra/body))
 
-        (evil-leader/set-key-for-mode 'js2-mode "s" 'laat/js2r-slurp)
-        (evil-leader/set-key-for-mode 'js2-mode "S" 'laat/js2r-barf))
+
+        (after 'evil
+          (evil-leader/set-key-for-mode 'js2-mode "s" 'laat/js2r-slurp)
+          (evil-leader/set-key-for-mode 'js2-mode "S" 'laat/js2r-barf)))
 
       (use-package json-mode
         :ensure t
