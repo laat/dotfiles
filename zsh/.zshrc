@@ -7,3 +7,6 @@ fi
 
 [ -f $HOME/.shrc ] && . $HOME/.shrc
 [ -f $HOME/.zshrc.local ] && . $HOME/.zshrc.local
+
+# forced by worplace
+[ -f /etc/shrc ] && . /etc/shrc
