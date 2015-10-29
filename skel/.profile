@@ -2,7 +2,6 @@
 # exists.
 
 # source my profile.d
-ls $HOME/.profile.d
 if [ -d $HOME/.profile.d ]; then
     for file in $HOME/.profile.d/*; do
         if [ -f $file ]; then
