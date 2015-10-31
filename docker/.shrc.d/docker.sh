@@ -33,3 +33,5 @@ dori() { docker rmi $(docker images -q); }
 
 # Show all alias related docker
 doalias() { alias | grep 'docker' | sed "s/^\([^=]*\)=\(.*\)/\1 => \2/"| sed "s/['|\']//g" | sort; }
+
+alias doc="docker-compose"
