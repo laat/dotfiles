@@ -753,27 +753,63 @@
 
     (use-package helm-projectile
       :ensure t
-      :commands (helm-projectile-ack
-                 helm-projectile-ag
-                 helm-projectile-switch-to-buffer
-                 helm-projectile-find-dir
-                 helm-projectile-dired-find-dir
-                 helm-projectile-recentf
-                 helm-projectile-find-file
-                 helm-projectile-grep
-                 helm-projectile
-                 helm-projectile-switch-project))
+      :init
+      (setq projectile-completion-system 'helm)
+      (helm-projectile-on))
 
     (after 'hydra
-      (defhydra laat/projectile-hydra (:color teal)
-        "projectile"
-        ("b" helm-projectile-switch-to-buffer "switch to buffer")
-        ("d" helm-projectile-find-dir "find dir")
-        ("e" helm-projectile-recentf "rethcentf")
-        ("p" helm-projectile "projectile")
-        ("o" helm-projectile-switch-project "switch project")
-        ("a" helm-projectile-ag "ag")
-        ("g" helm-projectile-grep "grep")))
+      (defhydra laat/projectile-hydra (:color teal :hint nil :idle 0.4)
+        "
+                                                                        ╭────────────┐
+        Files             Search          Buffer             extra      │ Projectile │
+      ╭─────────────────────────────────────────────────────────────────┴────────────╯
+        [_f_] file          [_a_] ag          [_b_] switch         [_o_] other project
+        [_l_] file dwim     [_g_] grep        [_v_] show all       [_p_] projectile
+        [_r_] recent file   [_s_] occur       [_V_] ibuffer        [_i_] info
+        [_d_] dir           [_S_] replace     [_K_] kill all
+        [_o_] other         [_t_] find tag
+        [_u_] test file     [_T_] make tags
+        [_h_] root
+
+        Run             Cache
+      ╭───────────────────────────────────╯
+        [_U_] test        [_kc_] clear
+        [_m_] compile     [_kk_] add current
+        [_c_] shell       [_ks_] cleanup
+        [_C_] command     [_kd_] remove
+      --------------------------------------------------------------------------------
+            "
+        ("<tab>" hydra-master/body "back")
+        ("<ESC>" nil "quit")
+        ("a"   helm-projectile-ag)
+        ("b"   helm-projectile-switch-to-buffer)
+        ("c"   projectile-run-async-shell-command-in-root)
+        ("C"   projectile-run-command-in-root)
+        ("d"   helm-projectile-find-dir)
+        ("f"   helm-projectile-find-file)
+        ("g"   helm-projectile-grep)
+        ("h"   projectile-dired)
+        ("i"   projectile-project-info)
+        ("kc"  projectile-invalidate-cache)
+        ("kd"  projectile-remove-known-project)
+        ("kk"  projectile-cache-current-file)
+        ("K"   projectile-kill-buffers)
+        ("ks"  projectile-cleanup-known-projects)
+        ("l"   projectile-find-file-dwim)
+        ("m"   projectile-compile-project)
+        ("o"   helm-projectile-switch-project)
+        ("p"   helm-projectile)
+        ("r"   helm-projectile-recentf)
+        ("s"   projectile-multi-occur)
+        ("S"   projectile-replace)
+        ("t"   projectile-find-tag)
+        ("T"   projectile-regenerate-tags)
+        ("u"   projectile-find-test-file)
+        ("U"   projectile-test-project)
+        ("v"   projectile-display-buffer)
+        ("V"   projectile-ibuffer)
+        )
+      )
   #+end_src
 * Editorconfig.org
   Jeg trives best etter major-modes for filer.
