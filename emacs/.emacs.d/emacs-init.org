@@ -153,6 +153,18 @@
        :diminish undo-tree-mode
        :init (global-undo-tree-mode))
    #+end_src
+** anzu
+   vis søketreff i modeline
+   #+begin_src emacs-lisp
+     (use-package anzu
+       :ensure t
+       :init
+       (global-anzu-mode)
+       :config
+       (setq anzu-search-threshold 1000
+             anzu-cons-mode-line-p nil))
+   #+end_src
+
 * OS X
   #+begin_src emacs-lisp
     (when (memq window-system '(mac ns))
