@@ -239,6 +239,12 @@
   #+end_src
   
 * Dev
+** tabs
+
+   #+begin_src emacs-lisp
+     (setq-default tab-width 2)
+   #+end_src
+
 ** Uthev TODO
   #+begin_src emacs-lisp
     (defun laat/add-watchwords ()
