@@ -358,10 +358,19 @@
       (use-package web-mode
         :ensure t
         :mode (("\\.html?$" . web-mode)
-               ("\\.jsx$" . web-mode)))
+               ("\\.jsx$" . web-mode))
+        :config
+        (after 'flycheck
+          (flycheck-add-mode 'javascript-eslint 'web-mode)))
     #+end_src
+
 *** JavaScript
     #+begin_src emacs-lisp
+      (after 'flycheck
+        (setq-default flycheck-disabled-checkers
+                      (append flycheck-disabled-checkers
+                              '(javascript-jshint))))
+
       (use-package tern
         :init (add-hook 'js2-mode-hook 'tern-mode)
         :ensure t)
@@ -376,6 +385,7 @@
         :ensure t
         :mode (("\\.js$" . js2-mode))
         :config
+        (setq js2-include-node-externs t)
         (add-hook 'js2-mode-hook 'flycheck-mode))
 
       (use-package js2-refactor
