@@ -353,55 +353,6 @@
           (evil-define-key 'emacs emmet-mode-keymap (kbd "<tab>") 'emmet-expand-yas)))
     #+end_src
 
-*** beautify buffer
-    #+begin_src emacs-lisp
-      (defun laat/indent-buffer ()
-        (interactive)
-        (indent-region (point-min) (point-max) nil))
-
-      (defun laat/indent-region-or-buffer ()
-        (interactive)
-        (save-excursion
-          (if (region-active-p)
-              (progn
-                (indent-region (region-beginning) (region-end))
-                (message "Intented selected region"))
-            (progn
-              (laat/indent-buffer)
-              (message "Indented buffer")))))
-
-      (use-package web-beautify
-        :ensure t
-        :config
-
-        (defun laat/maybe-web-mode-beautify ()
-          (interactive)
-          (if (string-equal "jsx" web-mode-content-type)
-              ;; web-beautify does not support jsx, just indent region
-              (laat/indent-region-or-buffer)
-            (web-beautify-html)))
-
-        (after 'evil
-          ;;(evil-leader/set-key-for-mode 'css-mode "b" 'web-beautify-css)
-          (evil-leader/set-key-for-mode 'web-mode "b" 'laat/maybe-web-mode-beautify)
-          (evil-leader/set-key-for-mode 'json-mode "b" 'web-beautify-js)
-          (evil-leader/set-key-for-mode 'js2-mode "b" 'web-beautify-js)
-          (evil-leader/set-key-for-mode 'js-mode "b" 'web-beautify-js)))
-    #+end_src
-
-    og en ~.jsbeautifyrc~ som fungerer med Intellj
-
-    #+begin_src json :tanlge no
-      {
-        "indent_size": 2,
-        "space_after_anon_function": true,
-        "keep_array_indentation": true,
-        "unformatted": ["script", "style", "body"],
-        "selector-separator-newline": false,
-        "newline-between-rules": true
-      }
-    #+end_src
-
 *** HTML og templates
     #+begin_src emacs-lisp
       (use-package web-mode
@@ -895,6 +846,21 @@
         :commands (evil-leader-mode global-evil-leader-mode)
         :init (global-evil-leader-mode t)
         :config
+        (defun laat/indent-buffer ()
+          (interactive)
+          (indent-region (point-min) (point-max) nil))
+
+        (defun laat/indent-region-or-buffer ()
+          (interactive)
+          (save-excursion
+            (if (region-active-p)
+                (progn
+                  (indent-region (region-beginning) (region-end))
+                  (message "Intented selected region"))
+              (progn
+                (laat/indent-buffer)
+                (message "Indented buffer")))))
+
         (evil-leader/set-leader ",")
         (evil-leader/set-key "b" 'laat/indent-region-or-buffer))
 
