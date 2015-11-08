@@ -490,6 +490,21 @@
    #+end_src
 
 * Nyttig Diverse
+** emoji
+   #+begin_src emacs-lisp
+     (use-package emoji-fontset
+       :ensure t
+       :if window-system
+       :config
+       ;; apt-get install ttf-ancient-fonts
+       (emoji-fontset-enable "Symbola"))
+
+     (after 'company
+       (use-package company-emoji
+         :ensure t
+         :config
+         (add-to-list 'company-backends 'company-emoji)))
+   #+end_src
 ** paradox
    #+begin_src emacs-lisp
      (use-package paradox
