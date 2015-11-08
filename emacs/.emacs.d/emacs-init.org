@@ -546,6 +546,27 @@
                 (:connection-type . ssl)))))
   #+end_src
 * Org
+  #+begin_src emacs-lisp
+    (use-package org
+      :pin manual
+      :mode ("\\.org$" . org-mode)
+      :config
+      (add-hook 'org-mode-hook #'yas-minor-mode)
+      (setq org-src-fontify-natively t)
+      ;;(setq org-confirm-babel-evaluate nil) ;; TODO: research this
+      (after 'evil
+        (evil-define-key 'normal 'org-mode-map
+          "$" 'org-end-of-line
+          "^" 'org-beginning-of-line
+          "<" 'org-metaleft
+          ">" 'org-metaright)
+        (evil-leader/set-key-for-mode 'org-mode "t" 'org-todo)
+        (evil-leader/set-key-for-mode 'org-mode "a" 'org-agenda)
+        (evil-leader/set-key-for-mode 'org-mode "e" 'org-export-dispatch)
+        (evil-leader/set-key-for-mode 'org-mode "r" 'org-babel-remove-result)
+        (evil-leader/set-key-for-mode 'org-mode "x" 'org-edit-special)
+        (evil-leader/set-key-for-mode 'org-mode "c" 'org-ctrl-c-ctrl-c)))
+  #+end_src
 ** Pretty bulletpoings
    #+begin_src emacs-lisp
      (use-package org-bullets
@@ -573,27 +594,7 @@
                    (org-present-show-cursor)
                    (org-present-read-write))))
    #+end_src
-** Org config
-   #+begin_src emacs-lisp
-     (use-package org
-       :pin manual
-       :mode ("\\.org$" . org-mode)
-       :config
-       (add-hook 'org-mode-hook #'yas-minor-mode)
-       (setq org-src-fontify-natively t)
-       ;;(setq org-confirm-babel-evaluate nil) ;; TODO: research this
-       (after 'evil
-         (evil-define-key 'normal 'org-mode-map
-           "$" 'org-end-of-line
-           "^" 'org-beginning-of-line
-           "<" 'org-metaleft
-           ">" 'org-metaright)
-         (evil-leader/set-key-for-mode 'org-mode "t" 'org-todo)
-         (evil-leader/set-key-for-mode 'org-mode "a" 'org-agenda)
-         (evil-leader/set-key-for-mode 'org-mode "r" 'org-babel-remove-result)
-         (evil-leader/set-key-for-mode 'org-mode "c" 'org-ctrl-c-ctrl-c)))
-   #+end_src
-   
+
 ** Literate programming
 *** HTTP
     https://github.com/zweifisch/ob-http
