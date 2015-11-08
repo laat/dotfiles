@@ -521,6 +521,19 @@
      (use-package htmlize
        :ensure t)
    #+end_src
+** Spotify
+   #+begin_src emacs-lisp
+     (use-package spotify
+       :ensure t
+       :config
+       (after 'hydra
+         (defhydra laat/spotify-hydra (:color teal)
+           "spotify"
+           ("p" spotify-playpause "play/pause")
+           ("n" spotify-next "next")
+           ("N" spotify-previous "previous")
+           ("Q" spotify-quit "quit"))))
+   #+end_src
 * Jabber
   #+begin_src emacs-lisp :tangle no
      (use-package jabber
@@ -926,6 +939,7 @@
       ("z" laat/zoom-hydra/body "zoom")
       ("w" laat/window-hydra/body "window")
       ("x" laat/hydra-toggle/body "toggle")
+      ("s" laat/spotify-hydra/body "emacs-mode")
 
       ("b" helm-buffers-list "buffers")
       ("e" evil-emacs-state "emacs-mode")
