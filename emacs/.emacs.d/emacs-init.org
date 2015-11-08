@@ -192,8 +192,6 @@
        :init (load-theme 'ample t))
    #+end_src
 
-   #+RESULTS:
-
 ** Smooth scroll
 
    #+begin_src emacs-lisp
@@ -366,11 +364,6 @@
 
 *** JavaScript
     #+begin_src emacs-lisp
-      (after 'flycheck
-        (setq-default flycheck-disabled-checkers
-                      (append flycheck-disabled-checkers
-                              '(javascript-jshint))))
-
       (use-package tern
         :init (add-hook 'js2-mode-hook 'tern-mode)
         :ensure t)
@@ -417,6 +410,12 @@
         (add-hook 'json-mode-hook 'flycheck-mode))
     #+end_src
     
+**** eslint i prosjekter
+     legg dette i ~.dir-locals.el~
+     #+begin_src emacs-lisp :tangle no
+       ((js2-mode (flycheck-disabled-checkers . (javascript-jshint))))
+     #+end_src
+     
 *** AngularJS
     #+begin_src emacs-lisp
       (after 'web-mode
