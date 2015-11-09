@@ -182,7 +182,6 @@
      (add-hook 'focus-out-hook (lambda () (save-some-buffers t)))
    #+end_src
 
-   
 * OS X
   #+begin_src emacs-lisp
     (when (memq window-system '(mac ns))
@@ -371,6 +370,8 @@
 
 *** HTML og templates
     #+begin_src emacs-lisp
+      (use-package haml-mode
+        :ensure t)
       (use-package web-mode
         :ensure t
         :mode (("\\.html?$" . web-mode)
@@ -379,6 +380,28 @@
         (after 'flycheck
           (flycheck-add-mode 'javascript-eslint 'web-mode)))
     #+end_src
+
+*** CSS
+    #+begin_src emacs-lisp
+      (use-package less-css-mode
+        :ensure t
+        :defer t
+        :mode ("\\.less\\'" . less-css-mode))
+      (use-package sass-mode
+        :ensure t
+        :defer t
+        :mode ("\\.sass\\'" . sass-mode))
+      (use-package scss-mode
+        :ensure t
+        :defer t
+        :mode ("\\.scss\\'" . scss-mode))
+      (use-package rainbow-mode
+        :ensure t
+        :defer t
+        :commands rainbow-mode)
+    #+end_src
+
+    #+RESULTS:
 
 *** JavaScript
     #+begin_src emacs-lisp
