@@ -164,7 +164,25 @@
        (setq anzu-search-threshold 1000
              anzu-cons-mode-line-p nil))
    #+end_src
+** auto-save like Intellij
+   
+   #+begin_src emacs-lisp
+     (defadvice switch-to-buffer (before save-buffer-now activate)
+       (when (and buffer-file-name (buffer-modified-p)) (save-buffer)))
+     (defadvice other-window (before other-window-now activate)
+       (when (and buffer-file-name (buffer-modified-p)) (save-buffer)))
+     (defadvice windmove-up (before other-window-now activate)
+       (when buffer-file-name (save-buffer)))
+     (defadvice windmove-down (before other-window-now activate)
+       (when buffer-file-name (save-buffer)))
+     (defadvice windmove-left (before other-window-now activate)
+       (when buffer-file-name (save-buffer)))
+     (defadvice windmove-right (before other-window-now activate)
+       (when buffer-file-name (save-buffer)))
+     (add-hook 'focus-out-hook (lambda () (save-some-buffers t)))
+   #+end_src
 
+   
 * OS X
   #+begin_src emacs-lisp
     (when (memq window-system '(mac ns))
