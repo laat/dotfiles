@@ -151,7 +151,7 @@
    #+begin_src emacs-lisp
      (use-package undo-tree
        :diminish undo-tree-mode
-       :init (global-undo-tree-mode))
+       :config (global-undo-tree-mode))
    #+end_src
 ** anzu
    vis søketreff i modeline
@@ -159,10 +159,10 @@
      (use-package anzu
        :ensure t
        :init
-       (global-anzu-mode)
-       :config
        (setq anzu-search-threshold 1000
-             anzu-cons-mode-line-p nil))
+             anzu-cons-mode-line-p nil)
+       :config
+       (global-anzu-mode))
    #+end_src
 ** auto-save like Intellij
    
@@ -197,50 +197,50 @@
   #+end_src
 * Utseende
 ** Fargetema
-
+   
    #+begin_src emacs-lisp
      (use-package monokai-theme
        :ensure t
        :disabled t
-       :init (load-theme 'monokai t))
+       :config (load-theme 'monokai t))
 
      (use-package ample-theme
        :ensure t
-       :init (load-theme 'ample t))
+       :config (load-theme 'ample t))
    #+end_src
-
+   
 ** Smooth scroll
-
+   
    #+begin_src emacs-lisp
      (use-package smooth-scroll
        :ensure t
        :diminish smooth-scroll-mode
+       :init
+       (setq scroll-margin 5
+             scroll-conservatively 9999
+             scroll-step 1)
        :config
-       (progn
-         (setq scroll-margin 5
-               scroll-conservatively 9999
-               scroll-step 1)
-         (smooth-scroll-mode)))
+       (smooth-scroll-mode))
    #+end_src
    
 ** Spaceline
    #+begin_src emacs-lisp 
      (use-package window-numbering
        :ensure t
-       :init
+       :config
        (window-numbering-mode))
      (use-package spaceline
        :ensure t
        :init
-       (require 'spaceline-config)
-       (spaceline-spacemacs-theme)
-       :config
        (setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
        (setq spaceline-window-numbers-unicode t)
        (setq spaceline-workspace-numbers-unicode t)
-       (setq powerline-default-separator 'wave))
+       (setq powerline-default-separator 'wave)
+       :config
+       (require 'spaceline-config)
+       (spaceline-spacemacs-theme))
    #+end_src
-
+   
 * Helm
   #+begin_src emacs-lisp
     (use-package helm
@@ -255,35 +255,35 @@
   
 * Dev
 ** tabs
-
+   
    #+begin_src emacs-lisp
      (setq-default tab-width 2)
    #+end_src
-
+   
 ** Uthev TODO
-  #+begin_src emacs-lisp
+   #+begin_src emacs-lisp
     (defun laat/add-watchwords ()
       (font-lock-add-keywords
        nil '(("\\<\\(FIXME\\|TODO\\|NOCOMMIT\\|XXX\\)\\>"
               1 '((:foreground "#d7a3ad") (:weight bold)) t))))
     (add-hook 'prog-mode-hook 'laat/add-watchwords)
-  #+end_src
-
+   #+end_src
+   
 ** whitespace cleanup
    #+begin_src emacs-lisp
      (use-package whitespace-cleanup-mode
        :ensure t
        :diminish whitespace-cleanup-mode
        :commands whitespace-cleanup-mode
-       :init (add-hook 'prog-mode-hook 'whitespace-cleanup-mode))
+       :config (add-hook 'prog-mode-hook 'whitespace-cleanup-mode))
    #+end_src
 ** Rainbow-delimiters
-  #+begin_src emacs-lisp
+   #+begin_src emacs-lisp
     (use-package rainbow-delimiters
       :ensure
       :config (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
-  #+end_src
-
+   #+end_src
+   
 ** Snippets
    #+begin_src emacs-lisp
      (use-package yasnippet
@@ -294,17 +294,18 @@
        (yas-reload-all)
        (add-hook 'prog-mode-hook #'yas-minor-mode))
    #+end_src
-
+   
 ** Flycheck
    #+begin_src emacs-lisp
      (use-package flycheck
        :ensure t
        :diminish flycheck-mode
-       :init (add-hook 'after-init-hook 'global-flycheck-mode)
+       :init 
+       (setq flycheck-check-syntax-automatically '(save mode-enabled))
        :config
-       (setq flycheck-check-syntax-automatically '(save mode-enabled)))
+       (add-hook 'after-init-hook 'global-flycheck-mode))
    #+end_src
-
+   
 ** Autocomplete
    #+begin_src emacs-lisp
      (use-package company
@@ -313,42 +314,41 @@
        :config
        (global-company-mode))
    #+end_src
-
+   
 ** Smartparens
    #+begin_src emacs-lisp
      (use-package smartparens
        :ensure t
        :diminish smartparens-mode
-       :init
-       (progn
-         (use-package smartparens-config)
-         (use-package smartparens-html)
-         (smartparens-global-mode 1)
-         (show-smartparens-global-mode 1)))
+       :config
+       (use-package smartparens-config)
+       (use-package smartparens-html)
+       (smartparens-global-mode 1)
+       (show-smartparens-global-mode 1))
    #+end_src
 ** Vertikal linje ved 80 tegn
    #+begin_src emacs-lisp :tangle no
      (use-package fill-column-indicator
        :ensure t
-       :init (add-hook 'prog-mode-hook 'fci-mode)
-       :config (setq-default fci-rule-column 80))
+       :init (setq-default fci-rule-column 80)
+       :config (add-hook 'prog-mode-hook 'fci-mode))
    #+end_src
 ** unicode troll stopper
    #+begin_src emacs-lisp
      (use-package unicode-troll-stopper
        :ensure t
        :diminish unicode-troll-stopper-mode
-       :init
+       :config
        (add-hook 'prog-mode-hook #'unicode-troll-stopper-mode))
    #+end_src
 ** agressive-indent
    #+begin_src emacs-lisp
      (use-package aggressive-indent
        :ensure t
-       :init
+       :config
        (add-hook 'emacs-lisp-mode-hook #'aggressive-indent-mode))
    #+end_src
-
+   
 * Langs
 ** Webutvikling
 *** emmet
@@ -356,18 +356,17 @@
       (use-package emmet-mode
         :ensure t
         :init
-        (progn
-          (add-hook 'web-mode-hook 'emmet-mode)
-          (add-hook 'html-mode-hook 'emmet-mode)
-          (add-hook 'css-mode-hook 'emmet-mode))
         :config
+        (add-hook 'web-mode-hook 'emmet-mode)
+        (add-hook 'html-mode-hook 'emmet-mode)
+        (add-hook 'css-mode-hook 'emmet-mode)
         (after 'evil
           (evil-define-key 'insert emmet-mode-keymap (kbd "TAB") 'emmet-expand-yas)
           (evil-define-key 'insert emmet-mode-keymap (kbd "<tab>") 'emmet-expand-yas)
           (evil-define-key 'emacs emmet-mode-keymap (kbd "TAB") 'emmet-expand-yas)
           (evil-define-key 'emacs emmet-mode-keymap (kbd "<tab>") 'emmet-expand-yas)))
     #+end_src
-
+    
 *** HTML og templates
     #+begin_src emacs-lisp
       (use-package haml-mode
@@ -380,31 +379,27 @@
         (after 'flycheck
           (flycheck-add-mode 'javascript-eslint 'web-mode)))
     #+end_src
-
+    
 *** CSS
     #+begin_src emacs-lisp
       (use-package less-css-mode
         :ensure t
-        :defer t
         :mode ("\\.less\\'" . less-css-mode))
       (use-package sass-mode
         :ensure t
-        :defer t
         :mode ("\\.sass\\'" . sass-mode))
       (use-package scss-mode
         :ensure t
-        :defer t
         :mode ("\\.scss\\'" . scss-mode))
       (use-package rainbow-mode
         :ensure t
-        :defer t
         :commands rainbow-mode)
     #+end_src
-
+    
 *** JavaScript
     #+begin_src emacs-lisp
       (use-package tern
-        :init (add-hook 'js2-mode-hook 'tern-mode)
+        :config (add-hook 'js2-mode-hook 'tern-mode)
         :ensure t)
 
       (use-package company-tern
@@ -416,32 +411,34 @@
       (use-package js2-mode
         :ensure t
         :mode (("\\.js$" . js2-mode))
-        :config
+        :init 
         (setq js2-include-node-externs t)
-        (add-hook 'js2-mode-hook 'flycheck-mode))
+        :config
+        (add-hook 'js2-mode-hook 'flycheck-mode)
+        (use-package js2-refactor
+          :ensure t
+          :config (add-hook 'js2-mode-hook 'js2-refactor-mode)))
 
-      (use-package js2-refactor
-        :ensure t
-        :init (add-hook 'js2-mode-hook 'js2-refactor-mode))
 
       (after 'hydra
-        (defhydra laat/js2r-slurp-barf-hydra (:color red)
-          "slurp barf"
-          ("s" js2r-forward-slurp "slurp")
-          ("S" js2r-forward-barf "barf"))
-        (defun laat/js2r-slurp ()
-          (interactive)
-          (js2r-forward-slurp)
-          (laat/js2r-slurp-barf-hydra/body))
-        (defun laat/js2r-barf ()
-          (interactive)
-          (js2r-forward-barf)
-          (laat/js2r-slurp-barf-hydra/body))
+        (after 'js2-refactor
+          (defhydra laat/js2r-slurp-barf-hydra (:color red)
+            "slurp barf"
+            ("s" js2r-forward-slurp "slurp")
+            ("S" js2r-forward-barf "barf"))
+          (defun laat/js2r-slurp ()
+            (interactive)
+            (js2r-forward-slurp)
+            (laat/js2r-slurp-barf-hydra/body))
+          (defun laat/js2r-barf ()
+            (interactive)
+            (js2r-forward-barf)
+            (laat/js2r-slurp-barf-hydra/body))
 
 
-        (after 'evil
-          (evil-leader/set-key-for-mode 'js2-mode "s" 'laat/js2r-slurp)
-          (evil-leader/set-key-for-mode 'js2-mode "S" 'laat/js2r-barf)))
+          (after 'evil-leader
+            (evil-leader/set-key-for-mode 'js2-mode "s" 'laat/js2r-slurp)
+            (evil-leader/set-key-for-mode 'js2-mode "S" 'laat/js2r-barf))))
 
       (use-package json-mode
         :ensure t
@@ -475,20 +472,20 @@
                    (electric-indent-mode -1))))
    #+end_src
 ** Yaml
-  #+begin_src emacs-lisp
-    (use-package yaml-mode
-      :ensure t
-      :mode (("\\.yaml\\'" . yaml-mode)
-             ("\\.yml\\'" . yaml-mode)))
-  #+end_src
-
+   #+begin_src emacs-lisp
+     (use-package yaml-mode
+       :ensure t
+       :mode (("\\.yaml\\'" . yaml-mode)
+              ("\\.yml\\'" . yaml-mode)))
+   #+end_src
+   
 ** Markdown
-  #+begin_src emacs-lisp
+   #+begin_src emacs-lisp
     (use-package markdown-mode
       :ensure t
       :mode ("\\.\\(m\\(ark\\)?down\\|md\\)$" . markdown-mode)
       :config (add-hook 'markdown-mode-hook 'visual-line-mode))
-  #+end_src
+   #+end_src
 ** ssh-config-mode
    #+begin_src emacs-lisp
      (use-package ssh-config-mode
@@ -503,7 +500,7 @@
    #+begin_src emacs-lisp
      (use-package systemd
        :ensure t
-       :init
+       :config
        (after 'company
          (add-to-list 'company-backends 'systemd-company-backend)))
    #+end_src
@@ -515,8 +512,9 @@
      (use-package ansible-doc
        :ensure t
        :config
-       (after 'evil
-         (evil-leader/set-key-for-mode 'yaml-mode "a" 'ansible-doc)))
+       (after 'evil-leader
+         (after 'yaml-mode
+           (evil-leader/set-key-for-mode 'yaml-mode "a" 'ansible-doc))))
 
      (defun laat/enable-ansible-hook ()
        (cond ((string-match "\\(site\.yml\\|roles/.+\.yml\\|group_vars/.+\\|host_vars/.+\\)" buffer-file-name)
@@ -564,6 +562,10 @@
    #+begin_src emacs-lisp
      (use-package spotify
        :ensure t
+       :commands (spotify-playpause
+                  spotify-quit
+                  spotify-previous
+                  spotify-next)
        :config
        (after 'hydra
          (defhydra laat/spotify-hydra (:color teal)
@@ -587,7 +589,7 @@
 * Org
   #+begin_src emacs-lisp
     (use-package org
-      :pin manual
+      :pin org
       :mode ("\\.org$" . org-mode)
       :config
       (add-hook 'org-mode-hook #'yas-minor-mode)
@@ -598,7 +600,8 @@
           "$" 'org-end-of-line
           "^" 'org-beginning-of-line
           "<" 'org-metaleft
-          ">" 'org-metaright)
+          ">" 'org-metaright))
+      (after 'evil-leader
         (evil-leader/set-key-for-mode 'org-mode "t" 'org-todo)
         (evil-leader/set-key-for-mode 'org-mode "a" 'org-agenda)
         (evil-leader/set-key-for-mode 'org-mode "e" 'org-export-dispatch)
@@ -610,14 +613,14 @@
    #+begin_src emacs-lisp
      (use-package org-bullets
        :ensure t
-       :init (add-hook 'org-mode-hook 'org-bullets-mode)
-       :config (setq org-bullets-bullet-list '("▸" "•")))
+       :init (setq org-bullets-bullet-list '("▸" "•"))
+       :config (add-hook 'org-mode-hook 'org-bullets-mode))
    #+end_src
 ** Presentation mode
    #+begin_src emacs-lisp
      (use-package org-present
        :ensure t
-       :init
+       :config
        (add-hook 'org-present-mode-hook
                  (lambda ()
                    (evil-emacs-state)
@@ -695,7 +698,7 @@
 
     (use-package diff-hl
       :ensure t
-      :init
+      :config
       (global-diff-hl-mode)
       (diff-hl-flydiff-mode))
 
@@ -719,26 +722,27 @@
         ("C" magit-commit "Commit")
         ("i" helm-gitignore "gitignore")))
   #+end_src
-
+  
 * Docker
   #+begin_src emacs-lisp
     (use-package dockerfile-mode
       :ensure t)
     (use-package docker-tramp
       :ensure t)
-   #+end_src
-   
+  #+end_src
+  
 * Projectile
   #+begin_src emacs-lisp
     (use-package projectile
       :ensure
       :diminish projectile-mode
-      :init (projectile-global-mode))
+      :config (projectile-global-mode))
 
     (use-package helm-projectile
       :ensure t
       :init
       (setq projectile-completion-system 'helm)
+      :config
       (helm-projectile-on))
 
     (after 'hydra
@@ -795,33 +799,32 @@
         )
       )
   #+end_src
-
+  
 * Editorconfig.org
   Jeg trives best etter major-modes for filer.
   #+begin_src emacs-lisp
     (use-package editorconfig
       :ensure t
-      :init (editorconfig-mode 1))
+      :config (editorconfig-mode 1))
   #+end_src
-
+  
 * Edit with emacs
   http://github.com/stsquad/emacs_chrome
   #+begin_src emacs-lisp
     (use-package edit-server
       :ensure t
-      :init (edit-server-start)
-      :config (setq edit-server-default-major-mode 'markdown-mode))
+      :config (edit-server-start)
+      :init (setq edit-server-default-major-mode 'markdown-mode))
 
     (use-package gmail-message-mode
       :ensure t)
   #+end_src
-
+  
 * Evil mode
   #+begin_src emacs-lisp
     (use-package evil
       :ensure t
-      :init (evil-mode 1)
-      :config
+      :config 
       ;; its a silly binding, but i am an additct
       (define-key evil-normal-state-map (kbd "C-h") 'evil-window-left)
       (define-key evil-normal-state-map (kbd "C-j") 'evil-window-down)
@@ -832,11 +835,12 @@
       (define-key evil-motion-state-map (kbd "C-k") 'evil-window-up)
       (define-key evil-motion-state-map (kbd "C-l") 'evil-window-right)
 
+      (evil-mode 1)
       ;; esc quits
       (defun minibuffer-keyboard-quit ()
         "Abort recursive edit.
-    In Delete Selection mode, if the mark is active, just deactivate it;
-    then it takes a second \\[keyboard-quit] to abort the minibuffer."
+        In Delete Selection mode, if the mark is active, just deactivate it;
+        then it takes a second \\[keyboard-quit] to abort the minibuffer."
         (interactive)
         (if (and delete-selection-mode transient-mark-mode mark-active)
             (setq deactivate-mark  t)
@@ -882,9 +886,9 @@
       (use-package evil-mc
         :ensure t
         :diminish evil-mc-mode
-        :init (global-evil-mc-mode 1)))
+        :config (global-evil-mc-mode 1)))
   #+end_src
-
+  
 ** Expand-region
    #+begin_src emacs-lisp
      (use-package expand-region
@@ -901,7 +905,7 @@
 
     ;; Window
     (use-package winner
-      :init (winner-mode 1))
+      :config (winner-mode 1))
 
     (defhydra laat/window-hydra (:color red)
       "window"
