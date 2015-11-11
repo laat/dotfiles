@@ -401,8 +401,6 @@
         :commands rainbow-mode)
     #+end_src
 
-    #+RESULTS:
-
 *** JavaScript
     #+begin_src emacs-lisp
       (use-package tern
@@ -797,11 +795,13 @@
         )
       )
   #+end_src
+
 * Editorconfig.org
   Jeg trives best etter major-modes for filer.
   #+begin_src emacs-lisp
-   (use-package editorconfig
-     :ensure t)
+    (use-package editorconfig
+      :ensure t
+      :init (editorconfig-mode 1))
   #+end_src
 
 * Edit with emacs
