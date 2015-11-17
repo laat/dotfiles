@@ -275,13 +275,14 @@
        :ensure t
        :diminish whitespace-cleanup-mode
        :commands whitespace-cleanup-mode
-       :config (add-hook 'prog-mode-hook 'whitespace-cleanup-mode))
+       :init (add-hook 'prog-mode-hook 'whitespace-cleanup-mode))
    #+end_src
 ** Rainbow-delimiters
    #+begin_src emacs-lisp
-    (use-package rainbow-delimiters
-      :ensure
-      :config (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
+     (use-package rainbow-delimiters
+       :ensure t
+       :commands (rainbow-delimiters-mode)
+       :init (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
    #+end_src
    
 ** Snippets
@@ -289,10 +290,12 @@
      (use-package yasnippet
        :ensure t
        :diminish yas-minor-mode
+       :commands (yas-minor-mode)
        :mode ("/\\.emacs.d/snippets/" . snippet-mode)
+       :init
+       (add-hook 'prog-mode-hook #'yas-minor-mode)
        :config
-       (yas-reload-all)
-       (add-hook 'prog-mode-hook #'yas-minor-mode))
+       (yas-reload-all))
    #+end_src
    
 ** Flycheck
@@ -350,19 +353,22 @@
          (add-hook 'company-completion-finished-hook 'company-maybe-turn-on-fci)
          (add-hook 'company-completion-cancelled-hook 'company-maybe-turn-on-fci)))
    #+end_src
+
 ** unicode troll stopper
    #+begin_src emacs-lisp
      (use-package unicode-troll-stopper
        :ensure t
        :diminish unicode-troll-stopper-mode
-       :config
-       (add-hook 'prog-mode-hook #'unicode-troll-stopper-mode))
+       :commands (unicode-troll-stopper-mode)
+       :init
+       (add-hook 'prog-mode-hook 'unicode-troll-stopper-mode))
    #+end_src
 ** agressive-indent
    #+begin_src emacs-lisp
      (use-package aggressive-indent
        :ensure t
-       :config
+       :commands aggressive-indent-mode
+       :init
        (add-hook 'emacs-lisp-mode-hook #'aggressive-indent-mode))
    #+end_src
    
@@ -372,22 +378,21 @@
     #+begin_src emacs-lisp
       (use-package emmet-mode
         :ensure t
+        :commands (emmet-mode)
         :init
-        :config
         (add-hook 'web-mode-hook 'emmet-mode)
         (add-hook 'html-mode-hook 'emmet-mode)
         (add-hook 'css-mode-hook 'emmet-mode)
+        :config
         (after 'evil
           (evil-define-key 'insert emmet-mode-keymap (kbd "TAB") 'emmet-expand-yas)
           (evil-define-key 'insert emmet-mode-keymap (kbd "<tab>") 'emmet-expand-yas)
           (evil-define-key 'emacs emmet-mode-keymap (kbd "TAB") 'emmet-expand-yas)
           (evil-define-key 'emacs emmet-mode-keymap (kbd "<tab>") 'emmet-expand-yas)))
     #+end_src
-    
+
 *** HTML og templates
     #+begin_src emacs-lisp
-      (use-package haml-mode
-        :ensure t)
       (use-package web-mode
         :ensure t
         :mode (("\\.html?$" . web-mode)
@@ -415,16 +420,6 @@
     
 *** JavaScript
     #+begin_src emacs-lisp
-      (use-package tern
-        :config (add-hook 'js2-mode-hook 'tern-mode)
-        :ensure t)
-
-      (use-package company-tern
-        :ensure t
-        :config
-        (after 'company
-          (add-to-list 'company-backends 'company-tern)))
-
       (use-package js2-mode
         :ensure t
         :mode (("\\.js$" . js2-mode))
@@ -432,6 +427,16 @@
         (setq js2-include-node-externs t)
         :config
         (add-hook 'js2-mode-hook 'flycheck-mode)
+        (use-package tern
+          :ensure t
+          :commands (tern-mode)
+          :init (add-hook 'js2-mode-hook 'tern-mode)
+          :config
+          (after 'company
+            (use-package company-tern
+              :ensure t
+              :config
+              (add-to-list 'company-backends 'company-tern))))
         (use-package js2-refactor
           :ensure t
           :config (add-hook 'js2-mode-hook 'js2-refactor-mode)))
@@ -568,17 +573,18 @@
        :config
        (emoji-fontset-enable))
    #+end_src
+
 ** discover-my-major
    #+begin_src emacs-lisp
      (use-package discover-my-major
-       :ensure t)
+       :ensure t :defer t)
    #+end_src
 ** Htmlize
    Lag html av buffere og tekst med syntaxhighlighting.
 
    #+begin_src emacs-lisp
      (use-package htmlize
-       :ensure t)
+       :ensure t :defer t)
    #+end_src
 ** Spotify
    #+begin_src emacs-lisp
@@ -598,10 +604,11 @@
            ("N" spotify-previous "previous")
            ("Q" spotify-quit "quit"))))
    #+end_src
+
 * Jabber
   #+begin_src emacs-lisp :tangle no
      (use-package jabber
-       :ensure
+       :ensure t
        :commands jabber-connect
        :config
        (setq jabber-account-list
@@ -636,13 +643,16 @@
    #+begin_src emacs-lisp
      (use-package org-bullets
        :ensure t
-       :init (setq org-bullets-bullet-list '("▸" "•"))
-       :config (add-hook 'org-mode-hook 'org-bullets-mode))
+       :commands org-bullets-mode
+       :init
+       (setq org-bullets-bullet-list '("▸" "•"))
+       (add-hook 'org-mode-hook 'org-bullets-mode))
    #+end_src
+
 ** Presentation mode
    #+begin_src emacs-lisp
      (use-package org-present
-       :ensure t
+       :ensure t :defer t
        :config
        (add-hook 'org-present-mode-hook
                  (lambda ()
@@ -671,22 +681,21 @@
 
 **** package
      #+begin_src emacs-lisp
-        (use-package ob-http
-          :ensure t)
+       (use-package ob-http
+         :ensure t :defer t)
      #+end_src
      
 *** Browser
     https://github.com/krisajenkins/ob-browser
 **** package
      #+begin_src emacs-lisp
-        (use-package ob-browser
-          :ensure t)
+       (use-package ob-browser
+         :ensure t :defer t)
      #+end_src
-
 *** TODO Mongo
     #+begin_src emacs-lisp :tangle no
       (use-package ob-mongo
-        :ensure t)
+        :ensure t :defer t)
     #+end_src
 *** org-babel språk
     #+begin_src emacs-lisp
@@ -717,7 +726,7 @@
       :mode "\\.?gitattributes\\'")
 
     (use-package helm-gitignore
-      :ensure t)
+      :ensure t :defer t)
 
     (use-package diff-hl
       :ensure t
@@ -726,7 +735,7 @@
       (diff-hl-flydiff-mode))
 
     (use-package gist
-      :ensure t)
+      :ensure t :defer t)
 
     (use-package magit
       :ensure t
@@ -753,20 +762,20 @@
 * Docker
   #+begin_src emacs-lisp
     (use-package dockerfile-mode
-      :ensure t)
+      :ensure t :defer t)
     (use-package docker-tramp
-      :ensure t)
+      :ensure t :defer t)
   #+end_src
   
 * Projectile
   #+begin_src emacs-lisp
     (use-package projectile
-      :ensure
+      :ensure t :defer t
       :diminish projectile-mode
       :config (projectile-global-mode))
 
     (use-package helm-projectile
-      :ensure t
+      :ensure t :defer t
       :init
       (setq projectile-completion-system 'helm)
       :config
@@ -822,16 +831,14 @@
         ("u"   projectile-find-test-file)
         ("U"   projectile-test-project)
         ("v"   projectile-display-buffer)
-        ("V"   projectile-ibuffer)
-        )
-      )
+        ("V"   projectile-ibuffer)))
   #+end_src
   
 * Editorconfig.org
   Jeg trives best etter major-modes for filer.
   #+begin_src emacs-lisp
     (use-package editorconfig
-      :ensure t
+      :ensure t :defer t
       :config (editorconfig-mode 1))
   #+end_src
   
@@ -839,12 +846,12 @@
   http://github.com/stsquad/emacs_chrome
   #+begin_src emacs-lisp
     (use-package edit-server
-      :ensure t
+      :defer t :ensure t
       :config (edit-server-start)
       :init (setq edit-server-default-major-mode 'markdown-mode))
 
     (use-package gmail-message-mode
-      :ensure t)
+      :defer t :ensure t)
   #+end_src
   
 * Evil mode
