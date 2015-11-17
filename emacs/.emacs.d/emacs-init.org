@@ -526,25 +526,30 @@
    #+end_src
 
 * Nyttig Diverse
-** emoji
+** emoji 
    #+begin_src emacs-lisp
-     (use-package emoji-fontset
+     (use-package emojify
        :ensure t
        :if window-system
+       :init
+       (emojify-set-emoji-styles '(unicode github))
        :config
-       ;; apt-get install ttf-ancient-fonts
-       (emoji-fontset-enable "Symbola"))
+       (global-emojify-mode))
 
      (after 'company
        (use-package company-emoji
          :ensure t
          :config
          (add-to-list 'company-backends 'company-emoji)))
-   #+end_src
-** paradox
-   #+begin_src emacs-lisp
-     (use-package paradox
-       :ensure t)
+
+     (use-package emoji-fontset
+       :disabled t
+       :ensure t
+       :if window-system
+       :init
+       (emoji-fontset-enable "Symbola")
+       :config
+       (emoji-fontset-enable))
    #+end_src
 ** discover-my-major
    #+begin_src emacs-lisp
