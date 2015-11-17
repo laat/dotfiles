@@ -712,11 +712,15 @@
 
     (use-package magit
       :ensure t
+      :commands (magit-status
+                 magit-blame-mode
+                 magit-log
+                 magit-commit)
       :config
-      (setq magit-last-seen-setup-instructions "1.4.0"))
+      (setq magit-last-seen-setup-instructions "1.4.0")
+      (use-package evil-magit
+        :ensure t))
 
-    (use-package evil-magit
-      :ensure t)
 
     (after 'hydra
       (defhydra laat/git-hydra (:color teal :idle 0.5)
