@@ -587,7 +587,8 @@
        :commands (spotify-playpause
                   spotify-quit
                   spotify-previous
-                  spotify-next)
+                  spotify-next
+                  laat/spotify-hydra/body)
        :config
        (after 'hydra
          (defhydra laat/spotify-hydra (:color teal)
