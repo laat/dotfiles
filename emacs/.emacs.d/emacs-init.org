@@ -928,108 +928,117 @@
 * Hydra
   #+begin_src emacs-lisp
     (use-package hydra
-      :ensure t)
-
-    ;; Window
-    (use-package winner
-      :config (winner-mode 1))
-
-    (defhydra laat/window-hydra (:color red)
-      "window"
-      ("h" hydra-move-splitter-left)
-      ("j" hydra-move-splitter-down)
-      ("k" hydra-move-splitter-up)
-      ("l" hydra-move-splitter-right)
-      ("v" (lambda ()
-             (interactive)
-             (split-window-below)
-             (windmove-down)) 
-       "split below" :exit t)
-      ("s" (lambda ()
-             (interactive)
-             (split-window-right)
-             (windmove-right)) "split right" :exit t )
-      ("u" winner-undo "undo")
-      ("r" winner-redo "redo"))
-
-    (defun hydra-move-splitter-left (arg)
-      "Move window splitter left."
-      (interactive "p")
-      (if (let ((windmove-wrap-around))
-            (windmove-find-other-window 'right))
-          (shrink-window-horizontally arg)
-        (enlarge-window-horizontally arg)))
-
-    (defun hydra-move-splitter-right (arg)
-      "Move window splitter right."
-      (interactive "p")
-      (if (let ((windmove-wrap-around))
-            (windmove-find-other-window 'right))
-          (enlarge-window-horizontally arg)
-        (shrink-window-horizontally arg)))
-
-    (defun hydra-move-splitter-up (arg)
-      "Move window splitter up."
-      (interactive "p")
-      (if (let ((windmove-wrap-around))
-            (windmove-find-other-window 'up))
-          (enlarge-window arg)
-        (shrink-window arg)))
-
-    (defun hydra-move-splitter-down (arg)
-      "Move window splitter down."
-      (interactive "p")
-      (if (let ((windmove-wrap-around))
-            (windmove-find-other-window 'up))
-          (shrink-window arg)
-        (enlarge-window arg)))
-
-    ;; Zoom
-    (defhydra laat/zoom-hydra ()
-      "zoom"
-      ("0" (text-scale-set 0) "reset" :exit t)
-      ("j" text-scale-increase "in")
-      ("k" text-scale-decrease "out"))
-
-    (defvar whitespace-mode nil)
-    (defhydra laat/hydra-toggle ()
-      "
-                      _a_ abbrev-mode:       %`abbrev-mode
-                      _d_ debug-on-error:    %`debug-on-error
-                      _f_ auto-fill-mode:    %`auto-fill-function
-                      _t_ truncate-lines:    %`truncate-lines
-                      _w_ whitespace-mode:   %`whitespace-mode
-                      "
-      ("a" abbrev-mode nil)
-      ("d" toggle-debug-on-error nil)
-      ("f" auto-fill-mode nil)
-      ("t" toggle-truncate-lines nil)
-      ("w" whitespace-mode nil)
-      ("q" nil "quit"))
-
-    (defhydra laat/global-hydra (:color teal :idle 0.8)
-      "global hydra"
-      ("z" laat/zoom-hydra/body "zoom")
-      ("w" laat/window-hydra/body "window")
-      ("x" laat/hydra-toggle/body "toggle")
-      ("s" laat/spotify-hydra/body "emacs-mode")
-
-      ("b" helm-buffers-list "buffers")
-      ("e" evil-emacs-state "emacs-mode")
-
-      ("do" delete-other-windows :exit t)
-      ("dw" delete-window :exit t)
-      ("df" delete-frame :exit t)
-      ("db" kill-this-buffer: :exit t)
-
-      ("g" laat/git-hydra/body "git")
-      ("p" laat/projectile-hydra/body "projectile")
-      ("T" eshell "eshell")
-      ("t" ansi-term "terminal"))
-
-    (define-key evil-normal-state-map " " 'laat/global-hydra/body)
+      :ensure t :defer t)
   #+end_src
+** Windows
+   #+begin_src emacs-lisp
+     (use-package winner
+       :ensure t
+       :commands (winner-undo winner-redo)
+       :config (winner-mode 1)
+       :init
+       (after 'hydra
+         (defhydra laat/window-hydra (:color red)
+           "window"
+           ("h" hydra-move-splitter-left)
+           ("j" hydra-move-splitter-down)
+           ("k" hydra-move-splitter-up)
+           ("l" hydra-move-splitter-right)
+           ("v" (lambda ()
+                  (interactive)
+                  (split-window-below)
+                  (windmove-down))
+            "split below" :exit t)
+           ("s" (lambda ()
+                  (interactive)
+                  (split-window-right)
+                  (windmove-right)) "split right" :exit t )
+           ("u" winner-undo "undo")
+           ("r" winner-redo "redo"))
 
+         (defun hydra-move-splitter-left (arg)
+           "Move window splitter left."
+           (interactive "p")
+           (if (let ((windmove-wrap-around))
+                 (windmove-find-other-window 'right))
+               (shrink-window-horizontally arg)
+             (enlarge-window-horizontally arg)))
+
+         (defun hydra-move-splitter-right (arg)
+           "Move window splitter right."
+           (interactive "p")
+           (if (let ((windmove-wrap-around))
+                 (windmove-find-other-window 'right))
+               (enlarge-window-horizontally arg)
+             (shrink-window-horizontally arg)))
+
+         (defun hydra-move-splitter-up (arg)
+           "Move window splitter up."
+           (interactive "p")
+           (if (let ((windmove-wrap-around))
+                 (windmove-find-other-window 'up))
+               (enlarge-window arg)
+             (shrink-window arg)))
+
+         (defun hydra-move-splitter-down (arg)
+           "Move window splitter down."
+           (interactive "p")
+           (if (let ((windmove-wrap-around))
+                 (windmove-find-other-window 'up))
+               (shrink-window arg)
+             (enlarge-window arg)))))
+   #+end_src
+** Zoom
+   #+begin_src emacs-lisp
+     ;; Zoom
+     (defhydra laat/zoom-hydra ()
+       "zoom"
+       ("0" (text-scale-set 0) "reset" :exit t)
+       ("j" text-scale-increase "in")
+       ("k" text-scale-decrease "out"))
+   #+end_src
+** Toggle
+   #+begin_src emacs-lisp
+     (defvar whitespace-mode nil)
+     (defhydra laat/hydra-toggle ()
+       "
+                       _a_ abbrev-mode:       %`abbrev-mode
+                       _d_ debug-on-error:    %`debug-on-error
+                       _f_ auto-fill-mode:    %`auto-fill-function
+                       _t_ truncate-lines:    %`truncate-lines
+                       _w_ whitespace-mode:   %`whitespace-mode
+                       "
+       ("a" abbrev-mode nil)
+       ("d" toggle-debug-on-error nil)
+       ("f" auto-fill-mode nil)
+       ("t" toggle-truncate-lines nil)
+       ("w" whitespace-mode nil)
+       ("q" nil "quit"))
+   #+end_src
+** global
+   #+begin_src emacs-lisp
+     (defhydra laat/global-hydra (:color teal :idle 0.8)
+       "global hydra"
+       ("z" laat/zoom-hydra/body "zoom")
+       ("w" laat/window-hydra/body "window")
+       ("x" laat/hydra-toggle/body "toggle")
+       ("s" laat/spotify-hydra/body "emacs-mode")
+
+       ("b" helm-buffers-list "buffers")
+       ("e" evil-emacs-state "emacs-mode")
+
+       ("do" delete-other-windows :exit t)
+       ("dw" delete-window :exit t)
+       ("df" delete-frame :exit t)
+       ("db" kill-this-buffer: :exit t)
+
+       ("g" laat/git-hydra/body "git")
+       ("p" laat/projectile-hydra/body "projectile")
+       ("T" eshell "eshell")
+       ("t" ansi-term "terminal"))
+
+     (define-key evil-normal-state-map " " 'laat/global-hydra/body)
+   #+end_src
 * TODO TODO
 ** Powerline tema for smart-mode-line
    spaceline overtar
