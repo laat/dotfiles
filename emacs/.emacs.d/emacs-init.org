@@ -621,10 +621,12 @@
     (use-package org
       :pin org
       :mode ("\\.org$" . org-mode)
-      :config
-      (add-hook 'org-mode-hook #'yas-minor-mode)
+      :init
+      (setq org-log-done t)
       (setq org-src-fontify-natively t)
       ;;(setq org-confirm-babel-evaluate nil) ;; TODO: research this
+      :config
+      (add-hook 'org-mode-hook #'yas-minor-mode)
       (after 'evil
         (evil-define-key 'normal 'org-mode-map
           "$" 'org-end-of-line
@@ -632,13 +634,20 @@
           "<" 'org-metaleft
           ">" 'org-metaright))
       (after 'evil-leader
+        (evil-leader/set-key-for-mode 'org-mode "l" 'org-insert-link)
+        (evil-leader/set-key-for-mode 'org-mode "o" 'org-open-at-point)
         (evil-leader/set-key-for-mode 'org-mode "t" 'org-todo)
         (evil-leader/set-key-for-mode 'org-mode "a" 'org-agenda)
-        (evil-leader/set-key-for-mode 'org-mode "e" 'org-export-dispatch)
+        (evil-leader/set-key-for-mode 'org-mode "e" 'org-expot-dispatch)
         (evil-leader/set-key-for-mode 'org-mode "r" 'org-babel-remove-result)
         (evil-leader/set-key-for-mode 'org-mode "x" 'org-edit-special)
-        (evil-leader/set-key-for-mode 'org-mode "c" 'org-ctrl-c-ctrl-c)))
+        (evil-leader/set-key-for-mode 'org-mode "c" 'org-ctrl-c-ctrl-c))
+      (after 'hydra
+        (defhydra laat/org-hydra (:color teal :idle 0.5)
+          "org"
+          ("l" org-store-link "store link"))))
   #+end_src
+
 ** Pretty bulletpoings
    #+begin_src emacs-lisp
      (use-package org-bullets
@@ -1040,6 +1049,7 @@
        ("db" kill-this-buffer: :exit t)
 
        ("g" laat/git-hydra/body "git")
+       ("o" laat/org-hydra/body "org")
        ("p" laat/projectile-hydra/body "projectile")
        ("T" eshell "eshell")
        ("t" ansi-term "terminal"))
