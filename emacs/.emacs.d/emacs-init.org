@@ -624,7 +624,7 @@
       :init
       (setq org-log-done t)
       (setq org-src-fontify-natively t)
-      ;;(setq org-confirm-babel-evaluate nil) ;; TODO: research this
+      (setq org-confirm-babel-evaluate nil)
       :config
       (add-hook 'org-mode-hook #'yas-minor-mode)
       (after 'evil
