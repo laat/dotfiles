@@ -188,6 +188,38 @@
      (add-hook 'focus-out-hook (lambda () (save-some-buffers t)))
    #+end_src
 
+* Buffer Local Hydra
+  Jeg har i hovedsak to hydra der det er en [[*Global%20Hydra][Global Hydra]] for globale verktøy som
+  git, projectile og spotify, og en for de forskjellige modes som
+  jobber lokalt i bufferet.
+
+  #+begin_src emacs-lisp
+    (use-package hydra
+      :ensure t
+      :config
+      (defun laat/indent-buffer ()
+        (interactive)
+        (indent-region (point-min) (point-max) nil))
+
+      (defun laat/indent-region-or-buffer ()
+        (interactive)
+        (save-excursion
+          (if (region-active-p)
+              (progn
+                (indent-region (region-beginning) (region-end))
+                (message "Intented selected region"))
+            (progn
+              (laat/indent-buffer)
+              (message "Indented buffer")))))
+
+      (defhydra laat/buffer-hydra (:color teal :delay 0.8)
+        "buffer"
+        ("b" laat/indent-region-or-buffer "indent region/buffer"))
+
+      (after 'evil
+       (define-key evil-normal-state-map "," 'laat/buffer-hydra/body)))
+  #+end_src
+
 * OS X
   #+begin_src emacs-lisp
     (when (memq window-system '(mac ns))
@@ -448,8 +480,8 @@
           :config (add-hook 'js2-mode-hook 'js2-refactor-mode)))
 
 
-      (after 'hydra
-        (after 'js2-refactor
+      (after 'evil
+        (after 'hydra
           (defhydra laat/js2r-slurp-barf-hydra (:color red)
             "slurp barf"
             ("s" js2r-forward-slurp "slurp")
@@ -463,10 +495,12 @@
             (js2r-forward-barf)
             (laat/js2r-slurp-barf-hydra/body))
 
-
-          (after 'evil-leader
-            (evil-leader/set-key-for-mode 'js2-mode "s" 'laat/js2r-slurp)
-            (evil-leader/set-key-for-mode 'js2-mode "S" 'laat/js2r-barf))))
+          (defhydra laat/js2-buffer-hydra
+            (:color teal :idle 0.8 :inherit (laat/buffer-hydra/heads))
+            "buffer js2-mode"
+            ("s" laat/js2-slurp "slurp")
+            ("S" laat/js2-barf "barf"))
+          (evil-declare-key 'normal js2-mode-map "," 'laat/js2-buffer-hydra/body)))
 
       (use-package json-mode
         :ensure t
@@ -537,12 +571,17 @@
      (use-package ansible
        :ensure t)
 
-     (use-package ansible-doc
-       :ensure t
-       :config
-       (after 'evil-leader
-         (after 'yaml-mode
-           (evil-leader/set-key-for-mode 'yaml-mode "a" 'ansible-doc))))
+     (after 'yaml-mode
+       (use-package ansible-doc
+         :ensure t
+         :config
+         (after 'evil
+           (after 'hydra
+             (defhydra laat/yaml-buffer-hydra
+               (:color teal :idle 0.8 :inherit (laat/buffer-hydra/heads))
+               "buffer yaml-mode"
+               ("a" ansibl-doc "ansible doc"))
+             (evil-declare-key 'normal yaml-mode-map "," 'laat/yaml-buffer-hydra/body)))))
 
      (defun laat/enable-ansible-hook ()
        (cond ((string-match "\\(site\.yml\\|roles/.+\.yml\\|group_vars/.+\\|host_vars/.+\\)" buffer-file-name)
@@ -630,28 +669,28 @@
       :init
       (setq org-log-done t)
       (setq org-src-fontify-natively t)
+      ;; (setq org-src-tab-acts-natively t) //TODO: wth is this?
       (setq org-confirm-babel-evaluate nil)
       :config
       (add-hook 'org-mode-hook #'yas-minor-mode)
       (after 'evil
-        (evil-define-key 'normal 'org-mode-map
-          "$" 'org-end-of-line
-          "^" 'org-beginning-of-line
-          "<" 'org-metaleft
-          ">" 'org-metaright))
-      (after 'evil-leader
-        (evil-leader/set-key-for-mode 'org-mode "l" 'org-insert-link)
-        (evil-leader/set-key-for-mode 'org-mode "o" 'org-open-at-point)
-        (evil-leader/set-key-for-mode 'org-mode "t" 'org-todo)
-        (evil-leader/set-key-for-mode 'org-mode "a" 'org-agenda)
-        (evil-leader/set-key-for-mode 'org-mode "e" 'org-expot-dispatch)
-        (evil-leader/set-key-for-mode 'org-mode "r" 'org-babel-remove-result)
-        (evil-leader/set-key-for-mode 'org-mode "x" 'org-edit-special)
-        (evil-leader/set-key-for-mode 'org-mode "c" 'org-ctrl-c-ctrl-c))
-      (after 'hydra
-        (defhydra laat/org-hydra (:color teal :idle 0.5)
-          "org"
-          ("l" org-store-link "store link"))))
+        (after 'hydra
+          (defhydra laat/org-buffer-hydra
+            (:color teal :idle 0.8 :inherit (laat/buffer-hydra/heads))
+            "buffer org-mode"
+            ("l" org-insert-link "insert link")
+            ("o" org-open-at-point "open at point")
+            ("t" org-todo "todo")
+            ("a" org-agenda "agenda")
+            ("e" org-export-dispatch "export")
+            ("r" org-babel-remove-result "remove result")
+            ("x" org-edit-special "edit src")
+            ("c" org-ctrl-c-ctrl-c "C-c C-c"))
+          (evil-declare-key 'normal org-mode-map "," 'laat/org-buffer-hydra/body)
+
+          (defhydra laat/org-hydra (:color teal :idle 0.5)
+            "global org-mode"
+            ("l" org-store-link "store link")))))
   #+end_src
 
 ** Pretty bulletpoings
@@ -909,35 +948,12 @@
         :ensure t
         :config (global-evil-surround-mode 1))
 
-      (use-package evil-leader
-        :ensure t
-        :commands (evil-leader-mode global-evil-leader-mode)
-        :init (global-evil-leader-mode t)
-        :config
-        (defun laat/indent-buffer ()
-          (interactive)
-          (indent-region (point-min) (point-max) nil))
-
-        (defun laat/indent-region-or-buffer ()
-          (interactive)
-          (save-excursion
-            (if (region-active-p)
-                (progn
-                  (indent-region (region-beginning) (region-end))
-                  (message "Intented selected region"))
-              (progn
-                (laat/indent-buffer)
-                (message "Indented buffer")))))
-
-        (evil-leader/set-leader ",")
-        (evil-leader/set-key "b" 'laat/indent-region-or-buffer))
-
       (use-package evil-mc
         :ensure t
         :diminish evil-mc-mode
         :config (global-evil-mc-mode 1)))
   #+end_src
-  
+
 ** Expand-region
    #+begin_src emacs-lisp
      (use-package expand-region
@@ -947,11 +963,7 @@
          (define-key evil-normal-state-map (kbd "+") 'er/expand-region)))
    #+end_src
 
-* Hydra
-  #+begin_src emacs-lisp
-    (use-package hydra
-      :ensure t :defer t)
-  #+end_src
+* Global Hydra
 ** Windows
    #+begin_src emacs-lisp
      (use-package winner
