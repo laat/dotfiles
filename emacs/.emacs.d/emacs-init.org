@@ -500,8 +500,8 @@
           (defhydra laat/js2-buffer-hydra
             (:color teal :idle 0.8 :inherit (laat/buffer-hydra/heads))
             "buffer js2-mode"
-            ("s" laat/js2-slurp "slurp")
-            ("S" laat/js2-barf "barf"))
+            ("s" laat/js2r-slurp "slurp")
+            ("S" laat/js2r-barf "barf"))
           (evil-declare-key 'normal js2-mode-map "," 'laat/js2-buffer-hydra/body)))
 
       (use-package json-mode
