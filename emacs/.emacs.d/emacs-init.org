@@ -525,6 +525,30 @@
             :config
             (angular-snippets-initialize))))
     #+end_src
+** Typescript
+
+   #+begin_src emacs-lisp
+     (use-package tide
+       :ensure t
+       :commands (tide-setup)
+       :init
+       (add-hook 'typescript-mode-hook 'company-mode)
+       (add-hook 'typescript-mode-hook 'eldoc-mode)
+       (add-hook 'typescript-mode-hook 'flycheck-mode)
+       (add-hook 'typescript-mode-hook 'tide-setup)
+       (setq flycheck-check-syntax-automatically '(save mode-enabled))
+       :config
+       (after 'evil
+         (after 'hydra
+           (defhydra laat/typescript-buffer-hydra
+             (:color teal :idle 0.8 :inherit laat/buffer-hydra/heads)
+             ("g" tide-jump-to-definition "goto definition")
+             ("d" tide-documentation-at-point "show documentation")
+             ("r" tide-rename-symbol))
+           (evil-declare-key 'normal typescript-mode
+             "," 'laat/typescript-buffer-hydra/body))))
+   #+end_src
+
 ** Cucumber
    #+begin_src emacs-lisp
      (use-package feature-mode
