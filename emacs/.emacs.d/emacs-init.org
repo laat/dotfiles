@@ -463,6 +463,8 @@
         :mode (("\\.js$" . js2-mode))
         :init
         (setq js2-include-node-externs t)
+        (setq js2-show-parse-errors nil)
+        (setq js2-strict-missing-semi-warning nil)
         :config
         (add-hook 'js2-mode-hook 'flycheck-mode)
         (use-package tern
