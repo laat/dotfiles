@@ -500,6 +500,8 @@
           (defhydra laat/js2-buffer-hydra
             (:color teal :idle 0.8 :inherit (laat/buffer-hydra/heads))
             "buffer js2-mode"
+            ("g" tern-find-definition "goto definition")
+            ("r" tern-rename-variable "rename")
             ("s" laat/js2r-slurp "slurp")
             ("S" laat/js2r-barf "barf"))
           (evil-declare-key 'normal js2-mode-map "," 'laat/js2-buffer-hydra/body)))
