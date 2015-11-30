@@ -787,6 +787,13 @@
       (use-package ob-mongo
         :ensure t :defer t)
     #+end_src
+*** my-langs
+
+    #+begin_src emacs-lisp
+      (add-to-list 'load-path "~/.emacs.d/elisp/")
+      (require 'ob-less)
+      (require 'ob-babel)
+    #+end_src
 *** org-babel språk
     #+begin_src emacs-lisp
       (after 'org
