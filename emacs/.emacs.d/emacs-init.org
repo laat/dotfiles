@@ -721,6 +721,14 @@
             ("l" org-store-link "store link")))))
   #+end_src
 
+** iosilde
+
+   #+begin_src emacs-lisp
+     (use-package ox-ioslide
+       :ensure t
+       :config
+       (require 'ox-ioslide-helper))
+   #+end_src
 ** Pretty bulletpoings
    #+begin_src emacs-lisp
      (use-package org-bullets
