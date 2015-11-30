@@ -543,7 +543,7 @@
        (after 'evil
          (after 'hydra
            (defhydra laat/typescript-buffer-hydra
-             (:color teal :idle 0.8 :inherit laat/buffer-hydra/heads)
+             (:color teal :idle 0.8 :inherit (laat/buffer-hydra/heads))
              ("g" tide-jump-to-definition "goto definition")
              ("d" tide-documentation-at-point "show documentation")
              ("r" tide-rename-symbol))
