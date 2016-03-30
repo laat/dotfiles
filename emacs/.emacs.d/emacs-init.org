@@ -711,6 +711,9 @@
       (setq org-src-fontify-natively t)
       ;; (setq org-src-tab-acts-natively t) //TODO: wth is this?
       (setq org-confirm-babel-evaluate nil)
+      ;; add @flow comment to js blocks
+      (setq org-babel-js-function-wrapper "/* @flow */\nrequire('sys').print(require('sys').inspect(function(){%s}()));")
+
       :config
       (eval-after-load 'ox-html
         ;; If you prefer to use ~ for <code> tags. Replace "code" with
@@ -817,12 +820,14 @@
         (org-babel-do-load-languages
          'org-babel-load-languages
          '((emacs-lisp . t)
-           (http . t)
-           (sh . t)
-           ;;(mongo . t)
-           (browser . t)
-           (python . t)
-           )))
+           (http       . t)
+           (sh         . t)
+           (js         . t)
+           (browser    . t)
+           (css        . t)
+           (dot        . t)
+           ;;(mongo    . t)
+           (python     . t))))
     #+end_src
 
 * Git
