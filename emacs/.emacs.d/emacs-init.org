@@ -549,6 +549,22 @@
              ("r" tide-rename-symbol))
            (evil-declare-key 'normal typescript-mode
              "," 'laat/typescript-buffer-hydra/body))))
+
+
+     (flycheck-def-config-file-var flycheck-typescript-tslint-config typescript-tslint "tslint.json"
+       :safe #'stringp
+       :package-version '(flycheck . "0.22"))
+
+     (flycheck-define-checker typescript-tslint
+       "Use tslint to flycheck TypeScript code."
+       :command ("tslint"
+                 (config-file "--config" flycheck-typescript-tslint-config)
+                 "-t" "prose"
+                 source)
+       :error-patterns ((warning (file-name) "[" line ", " column "]: " (message)))
+       :modes typescript-mode)
+
+     (add-to-list 'flycheck-checkers 'typescript-tslint)
    #+end_src
 
 ** Cucumber
