@@ -693,6 +693,52 @@
            ("N" spotify-previous "previous")
            ("Q" spotify-quit "quit"))))
    #+end_src
+** search engines
+   #+begin_src emacs-lisp
+     (use-package engine-mode
+       :ensure t
+       :init
+       (setq engine/browser-function 'browse-url-generic)
+       :config
+       (engine-mode t)
+
+       (defengine google
+         "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s"
+         :keybinding "g")
+       (defengine stack-overflow
+         "https://stackoverflow.com/search?q=%s"
+         :keybinding "s")
+       (defengine npm
+         "https://www.npmjs.com/search?q=%s"
+         :keybinding "n")
+       (defengine github
+         "https://github.com/search?ref=simplesearch&q=%s"
+         :keybinding "g")
+       (defengine rfcs
+         "http://pretty-rfc.herokuapp.com/search?q=%s"
+         :keybinding "r")
+       (defengine twitter
+         "https://twitter.com/search?q=%s"
+         :keybinding "t")
+       (defengine wikipedia
+         "http://www.wikipedia.org/search-redirect.php?language=en&go=Go&search=%s"
+         :keybinding "w")
+       (defengine wolfram-alpha
+         "http://www.wolframalpha.com/input/?i=%s"
+         :keybinding "W")
+
+       (after 'hydra
+         (defhydra laat/engine-hydra (:color teal)
+           "search engines"
+           ("g" engine/search-google "google")
+           ("G" engine/search-github "github")
+           ("s" engine/search-stack-overflow "StackOverflow")
+           ("n" engine/search-npm "npm")
+           ("r" engine/search-rfcs "rfcs")
+           ("t" engine/search-twitter "twitter")
+           ("w" engine/search-wikipedia "wikipedia")
+           ("W" engine/search-wolfram-alpha "wolfram-alpha"))))
+   #+end_src
 
 * Jabber
   #+begin_src emacs-lisp :tangle no
@@ -1140,6 +1186,7 @@
        ("w" laat/window-hydra/body "window")
        ("x" laat/hydra-toggle/body "toggle")
        ("s" laat/spotify-hydra/body "emacs-mode")
+       ("q" laat/engine-hydra/body "search")
 
        ("b" helm-buffers-list "buffers")
        ("e" evil-emacs-state "emacs-mode")
