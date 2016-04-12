@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: bdd.it.asynchronous
+# key: ita
+# --
+it('$1', function(done) {$0});

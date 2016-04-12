@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: es6.export.const
+# key: ec
+# --
+export const $1 = $0

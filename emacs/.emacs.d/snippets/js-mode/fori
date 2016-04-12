@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: fori
+# key: fori
+# --
+for (var i = 0, l = ${num}; i < l; i++) {$0}

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: es6.let
+# key: let
+# --
+let $1 = $0
