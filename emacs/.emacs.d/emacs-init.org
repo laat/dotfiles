@@ -637,6 +637,11 @@
    #+end_src
 
 * Nyttig Diverse
+** Ordbok
+   #+begin_src emacs-lisp
+     (add-hook 'text-mode-hook 'flyspell-mode)
+     (add-hook 'prog-mode-hook 'flyspell-prog-mode)
+   #+end_src
 ** emoji
    #+begin_src emacs-lisp
      (use-package emojify
