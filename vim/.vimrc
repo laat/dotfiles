@@ -35,7 +35,8 @@ NeoBundleFetch 'Shougo/neobundle.vim'
 "essential
 NeoBundle 'tomasr/molokai'
 "Bundle 'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
-NeoBundle 'bling/vim-airline'
+NeoBundle 'vim-airline/vim-airline'
+NeoBundle 'vim-airline/vim-airline-themes'
 NeoBundle 'scrooloose/nerdtree'
 NeoBundle 'ervandew/supertab'
 NeoBundle 'scrooloose/syntastic'
