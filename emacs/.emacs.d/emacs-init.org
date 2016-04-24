@@ -944,7 +944,7 @@
       (defhydra laat/git-hydra (:color teal :idle 0.5)
         "git"
         ("s" magit-status "status")
-        ("b" magit-blame-mode "blame")
+        ("b" magit-blame "blame")
         ("l" magit-log "log")
         ("C" magit-commit "Commit")
         ("i" helm-gitignore "gitignore")))
