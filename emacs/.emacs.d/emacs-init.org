@@ -343,6 +343,9 @@
        :diminish flycheck-mode
        :init
        (setq flycheck-check-syntax-automatically '(save mode-enabled))
+       (setq-default flycheck-disabled-checkers
+                     '(javascript-jshint
+                       javascript-jscs ))
        :config
        (add-hook 'after-init-hook 'global-flycheck-mode))
    #+end_src
@@ -435,6 +438,14 @@
         :ensure t
         :mode (("\\.html?$" . web-mode)
                ("\\.jsx$" . web-mode))
+        :init
+        (setq web-mode-content-types-alist
+              '(("jsx" . "\\.js[x]?\\'")))
+        (setq web-mode-markup-indent-offset 2)
+        (setq web-mode-css-indent-offset 2)
+        (setq web-mode-code-indent-offset 2)
+        (setq css-indent-offset 2)
+        (setq-default js-indent-level 2)
         :config
         (after 'flycheck
           (flycheck-add-mode 'javascript-eslint 'web-mode)))
