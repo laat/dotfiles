@@ -1,0 +1,16 @@
+#!/bin/bash
+apm install vim-mode vim-surround ex-mode
+
+apm install seti-ui monokai-seti
+apm install monokai
+apm install bottom-dock
+
+apm install autosave
+apm install atom-ternjs
+apm install nuclide
+apm install pigments
+apm install hyperclick js-hyperclick
+apm install refactor js-refactor
+apm install emmet
+apm install color-picker
+apm install linter-eslint linter-shellcheck linter-jsonlint linter-spell
