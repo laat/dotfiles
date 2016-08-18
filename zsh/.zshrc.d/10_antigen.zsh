@@ -10,6 +10,7 @@ antigen use oh-my-zsh
 antigen bundle command-not-found
 antigen bundle pip
 antigen bundle gulp
+antigen bundle tmuxinator
 
 antigen bundle zsh-users/zsh-syntax-highlighting
 antigen apply
