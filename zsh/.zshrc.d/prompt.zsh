@@ -2,7 +2,17 @@
 autoload -U colors && colors
 
 autoload -Uz vcs_info
-precmd() { vcs_info }
+precmd() {
+    vcs_info
+
+    if [[ "$DOCKER_MACHINE_NAME" == "default" ]];
+    then
+        _DM_NAME="";
+    else
+        echo ""
+        _DM_NAME="$DOCKER_MACHINE_NAME";
+    fi
+}
 setopt prompt_subst
 
 zstyle ':vcs_info:*' enable git hg
@@ -36,7 +46,7 @@ _linedown=$'\e[1B'
 _newline=$'\n'
 #clean prompt with host
 if [ $UID -eq 0 ]; then NCOLOR="red"; else NCOLOR="white"; fi
-PROMPT='%{$fg[$NCOLOR]%}%B%n%b@$FG[145]%m%{$reset_color%}:%{$fg[blue]%}%B%c/%b%{$reset_color%} ${vcs_info_msg_0_} ${_newline}%(!.#.$) '
+PROMPT='%{$fg[$NCOLOR]%}%B%n%b@$FG[145]%m%{$reset_color%}:%{$fg[blue]%}%B%c/%b%{$reset_color%} ${vcs_info_msg_0_} %{$fg[red]%}${_DM_NAME}%{$reset_color%}${_newline}%(!.#.$) '
 
 RPROMPT='%{${_lineup}%}%F{008}[%D{%H:%M:%S}]%f%{${_linedown}%}'
 
