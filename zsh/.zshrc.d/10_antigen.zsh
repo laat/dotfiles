@@ -11,6 +11,7 @@ antigen bundle command-not-found
 antigen bundle pip
 antigen bundle gulp
 antigen bundle tmuxinator
+antigen bundle lukechilds/zsh-better-npm-completion
 
 antigen bundle zsh-users/zsh-syntax-highlighting
 antigen apply
