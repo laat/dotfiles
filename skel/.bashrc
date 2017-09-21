@@ -4,6 +4,9 @@ case $- in
     *) return;;
 esac
 
+# files located here at work.. enforced by employer...
+[ -f /etc/shrc ] && . /etc/shrc
+
 # source bashrc.d files
 if [ -d $HOME/.bashrc.d ]; then
     for file in $HOME/.bashrc.d/*; do
