@@ -1,13 +1,15 @@
 ! disable printing to lpr by pressing prtsc
 URxvt.print-pipe: "cat > /dev/null"
 
-!look
+! look
 URxvt.background: #000000
 URxvt.foreground: #ffffff
 URxvt*scrollBar: false
 
-URxvt*font: xft:DejaVu Sans Mono:size=9:antialias=true:hinting=true
-URxvt*boldFont: xft:DejaVu Sans Mono:bold:size=9:antialias=true:hinting=true
+URxvt.font: xft:DejaVu Sans Mono:size=12:antialias=true:hinting=true,\
+            xft:Noto Sans Mono CJK JP:pixelsize=12:antialias=true:hinting=true,\
+            xft:Noto Mono:size=12:antialias=true:hinting=true,\
+            xft:Noto Emoji
 
 ! url-click
 URxvt*urllauncher: firefox
