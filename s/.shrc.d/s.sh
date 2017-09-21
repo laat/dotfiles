@@ -1,4 +1,6 @@
 # https://github.com/zquestz/s
-alias sw="s -p wikipedia"
-alias so="s -p stackoverflow"
-alias sa="s -p wolframalpha"
+alias ssg="s -p google"
+alias ssw="s -p wikipedia"
+alias sso="s -p stackoverflow"
+alias ssa="s -p wolframalpha"
+alias ssn="s -p npm"
