@@ -151,8 +151,9 @@
    #+begin_src emacs-lisp
      (if window-system
          (setq browse-url-browser-function 'browse-url-generic
-               browse-url-generic-program "x-www-browser"))
+               browse-url-generic-program "xdg-open"))
    #+end_src
+
 ** Undotree
    #+begin_src emacs-lisp
      (use-package undo-tree
