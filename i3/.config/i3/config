@@ -114,8 +114,8 @@ bindsym $mod+Shift+8 move container to workspace 8
 bindsym $mod+Shift+9 move container to workspace 9
 bindsym $mod+Shift+0 move container to workspace 10
 
-bindcode $mod+60 move workspace to output right
-bindcode $mod+59 move workspace to output left
+bindsym $mod+n move workspace to output left
+bindsym $mod+m move workspace to output right
 
 # reload the configuration file
 bindsym $mod+Shift+c reload
