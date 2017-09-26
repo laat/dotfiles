@@ -439,6 +439,7 @@
     #+begin_src emacs-lisp
       (use-package web-mode
         :ensure t
+        :disabled t
         :mode (("\\.html?$" . web-mode)
                ("\\.jsx$" . web-mode))
         :init
@@ -472,19 +473,22 @@
 
 *** JavaScript
     #+begin_src emacs-lisp
-      (use-package js2-mode
+      (use-package rjsx-mode
         :ensure t
-        :mode (("\\.js$" . js2-mode))
+        :mode (("\\.js$" . rjsx-mode))
         :init
         (setq js2-include-node-externs t)
         (setq js2-show-parse-errors nil)
         (setq js2-strict-missing-semi-warning nil)
         :config
         (add-hook 'js2-mode-hook 'flycheck-mode)
+        (add-hook 'rjsx-mode-hook 'flycheck-mode)
         (use-package tern
           :ensure t
           :commands (tern-mode)
-          :init (add-hook 'js2-mode-hook 'tern-mode)
+          :init
+          (add-hook 'js2-mode-hook 'tern-mode)
+          (add-hook 'rjsx-mode-hook 'tern-mode)
           :config
           (after 'company
             (use-package company-tern
@@ -494,7 +498,9 @@
 
         (use-package js2-refactor
           :ensure t
-          :config (add-hook 'js2-mode-hook 'js2-refactor-mode)))
+          :config
+          (add-hook 'rjsx-mode-hook 'js2-refactor-mode)
+          (add-hook 'js2-mode-hook 'js2-refactor-mode)))
 
 
       (after 'evil
@@ -519,6 +525,7 @@
             ("r" tern-rename-variable "rename")
             ("s" laat/js2r-slurp "slurp")
             ("S" laat/js2r-barf "barf"))
+          (evil-declare-key 'normal rjsx-mode-map "," 'laat/js2-buffer-hydra/body)
           (evil-declare-key 'normal js2-mode-map "," 'laat/js2-buffer-hydra/body)))
 
       (use-package json-mode
