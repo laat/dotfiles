@@ -35,20 +35,14 @@
      (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
      (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
 
-     (defun ensure-packages-installed (packages)
-       (unless package-archive-contents
-         (package-refresh-contents))
-       (mapcar
-        (lambda (package)
-          (if (package-installed-p package)
-              package
-            (progn (message (format "Installing package %s." package))
-                   (package-install package))))
-        packages))
-     (package-initialize)
-
-     (ensure-packages-installed '(epl use-package))
-     (require 'use-package)
+     (unless (package-installed-p 'use-package)
+       (package-refresh-contents)
+       (package-install 'use-package))
+     (eval-when-compile
+       (require 'use-package))
+     (require 'diminish)                ;; if you use :diminish
+     (require 'bind-key)
+     (setq use-package-verbose t)
    #+end_src
 ** Konfigurering med use-package
    For å konfigurere pakker brukes use-package. Dessverre er det slik
@@ -133,7 +127,6 @@
      ;; y=yes n=no
      (defalias 'yes-or-no-p 'y-or-n-p)
    #+End_src
-
 
 ** fjern whitespace på slutten av linjer
    #+begin_src emacs-lisp
@@ -290,6 +283,7 @@
              ("M-b" . helm-buffers-list)))
 
     (use-package helm-ag
+      :after helm
       :ensure t
       :commands (helm-do-ag))
   #+end_src
@@ -322,7 +316,7 @@
    #+begin_src emacs-lisp
      (use-package rainbow-delimiters
        :ensure t
-       :commands (rainbow-delimiters-mode)
+       :commands rainbow-delimiters-mode
        :init (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
    #+end_src
 
@@ -331,7 +325,7 @@
      (use-package yasnippet
        :ensure t
        :diminish yas-minor-mode
-       :commands (yas-minor-mode)
+       :commands yas-minor-mode
        :mode ("/\\.emacs.d/snippets/" . snippet-mode)
        :init
        (add-hook 'prog-mode-hook #'yas-minor-mode)
@@ -403,7 +397,7 @@
      (use-package unicode-troll-stopper
        :ensure t
        :diminish unicode-troll-stopper-mode
-       :commands (unicode-troll-stopper-mode)
+       :commands unicode-troll-stopper-mode
        :init
        (add-hook 'prog-mode-hook 'unicode-troll-stopper-mode))
    #+end_src
@@ -422,7 +416,7 @@
     #+begin_src emacs-lisp
       (use-package emmet-mode
         :ensure t
-        :commands (emmet-mode)
+        :commands emmet-mode
         :init
         (add-hook 'web-mode-hook 'emmet-mode)
         (add-hook 'html-mode-hook 'emmet-mode)
@@ -439,7 +433,6 @@
     #+begin_src emacs-lisp
       (use-package web-mode
         :ensure t
-        :disabled t
         :mode (("\\.html?$" . web-mode)
                ("\\.jsx$" . web-mode))
         :init
@@ -459,49 +452,71 @@
     #+begin_src emacs-lisp
       (use-package less-css-mode
         :ensure t
-        :mode ("\\.less\\'" . less-css-mode))
+        :mode "\\.less\\'")
       (use-package sass-mode
         :ensure t
-        :mode ("\\.sass\\'" . sass-mode))
+        :mode "\\.sass\\'")
       (use-package scss-mode
         :ensure t
-        :mode ("\\.scss\\'" . scss-mode))
+        :mode "\\.scss\\'")
       (use-package rainbow-mode
         :ensure t
-        :commands rainbow-mode)
+        :diminish rainbow-mode
+        :commands rainbow-mode
+        :init
+        (add-hook 'less-mode-hook 'rainbow-mode)
+        (add-hook 'sass-mode-hook 'rainbow-mode)
+        (add-hook 'less-css-mode-hook 'rainbow-mode)
+        (add-hook 'css-mode-hook 'rainbow-mode))
+
     #+end_src
 
 *** JavaScript
     #+begin_src emacs-lisp
-      (use-package rjsx-mode
+      (use-package js2-mode
         :ensure t
-        :mode (("\\.js$" . rjsx-mode))
         :init
         (setq js2-include-node-externs t)
         (setq js2-show-parse-errors nil)
         (setq js2-strict-missing-semi-warning nil)
         :config
-        (add-hook 'js2-mode-hook 'flycheck-mode)
-        (add-hook 'rjsx-mode-hook 'flycheck-mode)
-        (use-package tern
-          :ensure t
-          :commands (tern-mode)
-          :init
-          (add-hook 'js2-mode-hook 'tern-mode)
-          (add-hook 'rjsx-mode-hook 'tern-mode)
-          :config
-          (after 'company
-            (use-package company-tern
-              :ensure t
-              :config
-              (add-to-list 'company-backends 'company-tern))))
+        (add-hook 'js2-mode-hook 'flycheck-mode))
 
-        (use-package js2-refactor
-          :ensure t
-          :config
-          (add-hook 'rjsx-mode-hook 'js2-refactor-mode)
-          (add-hook 'js2-mode-hook 'js2-refactor-mode)))
+      (use-package rjsx-mode
+        :ensure t
+        :mode "\\.js\\'"
+        :init
+        (setq js2-include-node-externs t)
+        (setq js2-show-parse-errors nil)
+        (setq js2-strict-missing-semi-warning nil)
+        :config
+        (add-hook 'rjsx-mode-hook 'flycheck-mode))
 
+      (use-package tern
+        :if (executable-find "tern")
+        :ensure t
+        :commands tern-mode
+        :init
+        (add-hook 'rjsx-mode-hook 'tern-mode)
+        (add-hook 'js2-mode-hook 'tern-mode))
+
+      (use-package company-tern
+        :ensure t
+        :after (tern company)
+        :init (add-to-list 'company-backends 'company-tern))
+
+      (use-package js2-refactor
+        :ensure t
+        :commands js2-refactor-mode
+        :init
+        (add-hook 'rjsx-mode-hook 'js2-refactor-mode)
+        (add-hook 'js2-mode-hook 'js2-refactor-mode))
+
+      (use-package json-mode
+        :ensure t
+        :mode "\\.json\\'"
+        :config
+        (add-hook 'json-mode-hook 'flycheck-mode))
 
       (after 'evil
         (after 'hydra
@@ -527,11 +542,6 @@
             ("S" laat/js2r-barf "barf"))
           (evil-declare-key 'normal rjsx-mode-map "," 'laat/js2-buffer-hydra/body)
           (evil-declare-key 'normal js2-mode-map "," 'laat/js2-buffer-hydra/body)))
-
-      (use-package json-mode
-        :ensure t
-        :config
-        (add-hook 'json-mode-hook 'flycheck-mode))
     #+end_src
 
 **** eslint i prosjekter
@@ -540,15 +550,6 @@
        ((js2-mode (flycheck-disabled-checkers . (javascript-jshint))))
      #+end_src
 
-*** AngularJS
-    #+begin_src emacs-lisp
-      (after 'web-mode
-        (after 'yasnippet
-          (use-package angular-snippets
-            :ensure t
-            :config
-            (angular-snippets-initialize))))
-    #+end_src
 ** Typescript
 
    #+begin_src emacs-lisp
@@ -593,7 +594,7 @@
    #+begin_src emacs-lisp
      (use-package feature-mode
        :ensure t
-       :mode ("\\.feature$" . feature-mode)
+       :mode "\\.feature$"
        :config
        (add-hook 'feature-mode-hook
                  (lambda ()
@@ -603,21 +604,24 @@
    #+begin_src emacs-lisp
      (use-package yaml-mode
        :ensure t
-       :mode (("\\.yaml\\'" . yaml-mode)
-              ("\\.yml\\'" . yaml-mode)))
+       :mode ("\\.yaml\\'" "\\.yml\\'"))
    #+end_src
 
 ** Markdown
    #+begin_src emacs-lisp
     (use-package markdown-mode
       :ensure t
-      :mode ("\\.\\(m\\(ark\\)?down\\|md\\)$" . markdown-mode)
+      :mode "\\.\\(m\\(ark\\)?down\\|md\\)$"
       :config (add-hook 'markdown-mode-hook 'visual-line-mode))
    #+end_src
 ** ssh-config-mode
    #+begin_src emacs-lisp
      (use-package ssh-config-mode
-       :ensure t)
+       :ensure t
+       :mode (("/\\.ssh/config\\'"     . ssh-config-mode)
+              ("/sshd?_config\\'"      . ssh-config-mode)
+              ("/known_hosts\\'"       . ssh-known-hosts-mode)
+              ("/authorized_keys2?\\'" . ssh-authorized-keys-mode)))
    #+end_src
 ** nginx-mode
    #+begin_src emacs-lisp
@@ -637,17 +641,17 @@
      (use-package ansible
        :ensure t)
 
-     (after 'yaml-mode
-       (use-package ansible-doc
-         :ensure t
-         :config
-         (after 'evil
-           (after 'hydra
-             (defhydra laat/yaml-buffer-hydra
-               (:color teal :idle 0.8 :inherit (laat/buffer-hydra/heads))
-               "buffer yaml-mode"
-               ("a" ansibl-doc "ansible doc"))
-             (evil-declare-key 'normal yaml-mode-map "," 'laat/yaml-buffer-hydra/body)))))
+     (use-package ansible-doc
+       :ensure t
+       :after yaml-mode
+       :config
+       (after 'evil
+         (after 'hydra
+           (defhydra laat/yaml-buffer-hydra
+             (:color teal :idle 0.8 :inherit (laat/buffer-hydra/heads))
+             "buffer yaml-mode"
+             ("a" ansibl-doc "ansible doc"))
+           (evil-declare-key 'normal yaml-mode-map "," 'laat/yaml-buffer-hydra/body))))
 
      (defun laat/enable-ansible-hook ()
        (cond ((string-match "\\(site\.yml\\|roles/.+\.yml\\|group_vars/.+\\|host_vars/.+\\)" buffer-file-name)
@@ -677,11 +681,11 @@
        :config
        (global-emojify-mode))
 
-     (after 'company
-       (use-package company-emoji
-         :ensure t
-         :config
-         (add-to-list 'company-backends 'company-emoji)))
+     (use-package company-emoji
+       :ensure t
+       :after company
+       :config
+       (add-to-list 'company-backends 'company-emoji))
 
      (use-package emoji-fontset
        :disabled t
@@ -696,25 +700,26 @@
 ** discover-my-major
    #+begin_src emacs-lisp
      (use-package discover-my-major
-       :ensure t :defer t)
+       :ensure t)
    #+end_src
 ** Htmlize
    Lag html av buffere og tekst med syntaxhighlighting.
 
    #+begin_src emacs-lisp
      (use-package htmlize
-       :ensure t :defer t)
+       :ensure t)
    #+end_src
 ** Spotify
    #+begin_src emacs-lisp
      (use-package spotify
        :ensure t
+       :defer t
        :commands (spotify-playpause
                   spotify-quit
                   spotify-previous
                   spotify-next
                   laat/spotify-hydra/body)
-       :config
+       :init
        (after 'hydra
          (defhydra laat/spotify-hydra (:color teal)
            "spotify"
@@ -723,6 +728,7 @@
            ("N" spotify-previous "previous")
            ("Q" spotify-quit "quit"))))
    #+end_src
+
 ** search engines
    #+begin_src emacs-lisp
      (use-package engine-mode
@@ -837,8 +843,9 @@
 
 ** iosilde
 
-   #+begin_src emacs-lisp
+   #+begin_src emacs-lisp :tangle no
      (use-package ox-ioslide
+       :after org
        :ensure t
        :config
        (require 'ox-ioslide-helper))
@@ -846,6 +853,7 @@
 ** Pretty bulletpoings
    #+begin_src emacs-lisp
      (use-package org-bullets
+       :after org
        :ensure t
        :commands org-bullets-mode
        :init
@@ -856,7 +864,8 @@
 ** Presentation mode
    #+begin_src emacs-lisp
      (use-package org-present
-       :ensure t :defer t
+       :after org
+       :ensure t
        :config
        (add-hook 'org-present-mode-hook
                  (lambda ()
@@ -886,7 +895,8 @@
 **** package
      #+begin_src emacs-lisp
        (use-package ob-http
-         :ensure t :defer t)
+         :after org
+         :ensure t)
      #+end_src
 
 *** Browser
@@ -894,20 +904,15 @@
 **** package
      #+begin_src emacs-lisp
        (use-package ob-browser
-         :ensure t :defer t)
+         :after org
+         :ensure t)
      #+end_src
 
 *** TODO Mongo
     #+begin_src emacs-lisp :tangle no
       (use-package ob-mongo
-        :ensure t :defer t)
-    #+end_src
-*** my-langs
-
-    #+begin_src emacs-lisp
-      (add-to-list 'load-path "~/.emacs.d/elisp/")
-      (require 'ob-less)
-      (require 'ob-babel)
+        :after org
+        :ensure t)
     #+end_src
 *** org-babel språk
     #+begin_src emacs-lisp
@@ -940,7 +945,8 @@
       :mode "\\.?gitattributes\\'")
 
     (use-package helm-gitignore
-      :ensure t :defer t)
+      :ensure t
+      :commands helm-gitignroe)
 
     (use-package diff-hl
       :ensure t
@@ -949,7 +955,7 @@
       (diff-hl-flydiff-mode))
 
     (use-package gist
-      :ensure t :defer t)
+      :ensure t)
 
     (use-package magit
       :ensure t
@@ -976,47 +982,52 @@
 * Docker
   #+begin_src emacs-lisp
     (use-package dockerfile-mode
-      :ensure t :defer t)
+      :mode "Dockerfile\\'"
+      :ensure t)
     (use-package docker-tramp
-      :ensure t :defer t)
+      :ensure t)
   #+end_src
 
 * Projectile
   #+begin_src emacs-lisp
     (use-package projectile
-      :ensure t :defer t
+      :ensure t
       :diminish projectile-mode
       :config (projectile-global-mode))
 
+    ;; helm-projectile-ag
+    (use-package ag
+      :ensure t)
+
     (use-package helm-projectile
-      :ensure t :defer t
+      :ensure t
+      :after (helm projectile)
       :init
       (setq projectile-completion-system 'helm)
       :config
       (helm-projectile-on))
-
     (after 'hydra
       (defhydra laat/projectile-hydra (:color teal :hint nil :idle 0.4)
         "
-                                                                        ╭────────────┐
-        Files             Search          Buffer             extra      │ Projectile │
-      ╭─────────────────────────────────────────────────────────────────┴────────────╯
-        [_f_] file          [_a_] ag          [_b_] switch         [_o_] other project
-        [_l_] file dwim     [_g_] grep        [_v_] show all       [_p_] projectile
-        [_r_] recent file   [_s_] occur       [_V_] ibuffer        [_i_] info
-        [_d_] dir           [_S_] replace     [_K_] kill all
-        [_o_] other         [_t_] find tag
-        [_u_] test file     [_T_] make tags
-        [_h_] root
+                                                                               ╭────────────┐
+               Files             Search          Buffer             extra      │ Projectile │
+             ╭─────────────────────────────────────────────────────────────────┴────────────╯
+               [_f_] file          [_a_] ag          [_b_] switch         [_o_] other project
+               [_l_] file dwim     [_g_] grep        [_v_] show all       [_p_] projectile
+               [_r_] recent file   [_s_] occur       [_V_] ibuffer        [_i_] info
+               [_d_] dir           [_S_] replace     [_K_] kill all
+               [_o_] other         [_t_] find tag
+               [_u_] test file     [_T_] make tags
+               [_h_] root
 
-        Run             Cache
-      ╭───────────────────────────────────╯
-        [_U_] test        [_kc_] clear
-        [_m_] compile     [_kk_] add current
-        [_c_] shell       [_ks_] cleanup
-        [_C_] command     [_kd_] remove
-      --------------------------------------------------------------------------------
-            "
+               Run             Cache
+             ╭───────────────────────────────────╯
+               [_U_] test        [_kc_] clear
+               [_m_] compile     [_kk_] add current
+               [_c_] shell       [_ks_] cleanup
+               [_C_] command     [_kd_] remove
+             --------------------------------------------------------------------------------
+                   "
         ("<tab>" hydra-master/body "back")
         ("<ESC>" nil "quit")
         ("a"   helm-projectile-ag)
@@ -1046,13 +1057,14 @@
         ("U"   projectile-test-project)
         ("v"   projectile-display-buffer)
         ("V"   projectile-ibuffer)))
+
   #+end_src
 
 * Editorconfig.org
   Jeg trives best etter major-modes for filer.
   #+begin_src emacs-lisp
     (use-package editorconfig
-      :ensure t :defer t
+      :ensure t
       :config (editorconfig-mode 1))
   #+end_src
 
@@ -1060,12 +1072,14 @@
   http://github.com/stsquad/emacs_chrome
   #+begin_src emacs-lisp
     (use-package edit-server
-      :defer t :ensure t
+      :disabled t
+      :ensure t
       :config (edit-server-start)
       :init (setq edit-server-default-major-mode 'markdown-mode))
 
     (use-package gmail-message-mode
-      :defer t :ensure t)
+      :disabled t
+      :ensure t)
   #+end_src
 
 * Evil mode
@@ -1102,16 +1116,18 @@
       (define-key minibuffer-local-completion-map [escape] 'minibuffer-keyboard-quit)
       (define-key minibuffer-local-must-match-map [escape] 'minibuffer-keyboard-quit)
       (define-key minibuffer-local-isearch-map [escape] 'minibuffer-keyboard-quit)
-      (global-set-key [escape] 'evil-exit-emacs-state)
+      (global-set-key [escape] 'evil-exit-emacs-state))
 
-      (use-package evil-surround
-        :ensure t
-        :config (global-evil-surround-mode 1))
+    (use-package evil-surround
+      :ensure t
+      :after evil
+      :config (global-evil-surround-mode 1))
 
-      (use-package evil-mc
-        :ensure t
-        :diminish evil-mc-mode
-        :config (global-evil-mc-mode 1)))
+    (use-package evil-mc
+      :ensure t
+      :after evil
+      :diminish evil-mc-mode
+      :config (global-evil-mc-mode 1))
   #+end_src
 
 ** Expand-region
@@ -1186,55 +1202,60 @@
 ** Zoom
    #+begin_src emacs-lisp
      ;; Zoom
-     (defhydra laat/zoom-hydra ()
-       "zoom"
-       ("0" (text-scale-set 0) "reset" :exit t)
-       ("j" text-scale-increase "in")
-       ("k" text-scale-decrease "out"))
+     (after 'hydra
+       (defhydra laat/zoom-hydra ()
+         "zoom"
+         ("0" (text-scale-set 0) "reset" :exit t)
+         ("j" text-scale-increase "in")
+         ("k" text-scale-decrease "out")))
    #+end_src
 ** Toggle
    #+begin_src emacs-lisp
-     (defvar whitespace-mode nil)
-     (defhydra laat/hydra-toggle ()
-       "
+     (after 'hydra
+       (defvar whitespace-mode nil)
+       (defhydra laat/hydra-toggle ()
+         "
                        _a_ abbrev-mode:       %`abbrev-mode
                        _d_ debug-on-error:    %`debug-on-error
                        _f_ auto-fill-mode:    %`auto-fill-function
                        _t_ truncate-lines:    %`truncate-lines
                        _w_ whitespace-mode:   %`whitespace-mode
                        "
-       ("a" abbrev-mode nil)
-       ("d" toggle-debug-on-error nil)
-       ("f" auto-fill-mode nil)
-       ("t" toggle-truncate-lines nil)
-       ("w" whitespace-mode nil)
-       ("q" nil "quit"))
+         ("a" abbrev-mode nil)
+         ("d" toggle-debug-on-error nil)
+         ("f" auto-fill-mode nil)
+         ("t" toggle-truncate-lines nil)
+         ("w" whitespace-mode nil)
+         ("q" nil "quit")))
    #+end_src
 ** global
    #+begin_src emacs-lisp
-     (defhydra laat/global-hydra (:color teal :idle 0.8)
-       "global hydra"
-       ("z" laat/zoom-hydra/body "zoom")
-       ("w" laat/window-hydra/body "window")
-       ("x" laat/hydra-toggle/body "toggle")
-       ("s" laat/spotify-hydra/body "spotify")
-       ("q" laat/engine-hydra/body "search")
 
-       ("b" helm-buffers-list "buffers")
-       ("e" evil-emacs-state "emacs-mode")
+     (after 'hydra
+       (after 'evil
+         (defhydra laat/global-hydra (:color teal :idle 0.8)
+           "global hydra"
+           ("z" laat/zoom-hydra/body "zoom")
+           ("w" laat/window-hydra/body "window")
+           ("x" laat/hydra-toggle/body "toggle")
+           ("s" laat/spotify-hydra/body "spotify")
+           ("q" laat/engine-hydra/body "search")
 
-       ("do" delete-other-windows :exit t)
-       ("dw" delete-window :exit t)
-       ("df" delete-frame :exit t)
-       ("db" kill-this-buffer: :exit t)
+           ("b" helm-buffers-list "buffers")
+           ("e" evil-emacs-state "emacs-mode")
 
-       ("g" laat/git-hydra/body "git")
-       ("o" laat/org-hydra/body "org")
-       ("p" laat/projectile-hydra/body "projectile")
-       ("T" eshell "eshell")
-       ("t" ansi-term "terminal"))
+           ("do" delete-other-windows :exit t)
+           ("dw" delete-window :exit t)
+           ("df" delete-frame :exit t)
+           ("db" kill-this-buffer: :exit t)
 
-     (define-key evil-normal-state-map " " 'laat/global-hydra/body)
+           ("g" laat/git-hydra/body "git")
+           ("o" laat/org-hydra/body "org")
+           ("p" laat/projectile-hydra/body "projectile")
+           ("T" eshell "eshell")
+           ("t" ansi-term "terminal"))
+
+         (define-key evil-normal-state-map " " 'laat/global-hydra/body)))
    #+end_src
 
 * TODO TODO
@@ -1242,17 +1263,19 @@
    spaceline overtar
    #+begin_src emacs-lisp
      (use-package smart-mode-line
-       :ensure t
        :disabled t
+       :ensure t
        :init (sml/setup)
        :config
-       (use-package smart-mode-line-powerline-theme
-         :ensure t
-         :config (sml/apply-theme 'powerline))
-
        (after 'projectile
          (setq sml/use-projectile-p 'before-prefixes
                sml/projectile-replacement-format "[%s]")))
+
+     (use-package smart-mode-line-powerline-theme
+       :ensure t
+       :after smart-mode-line
+       :config (sml/apply-theme 'powerline))
+
    #+end_src
 
 ** volatile-highlights
@@ -1269,3 +1292,13 @@
 ** Css Comb
 ** emacs-pbr er kult. Må testes
 ** jenkins.el kan kanskje brukes?
+* Language Server Protocol
+
+  #+begin_src emacs-lisp
+    ;;(use-package lsp-mode
+    ;;  :ensure t)
+
+    ;;(use-package lsp-flycheck
+    ;;  :ensure t
+    ;;  :after (lsp-mode flycheck))
+  #+end_src
