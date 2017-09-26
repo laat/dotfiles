@@ -15,3 +15,4 @@ if [ -d $HOME/.xprofile.d ]; then
     done
     unset file
 fi
+[ -f $HOME/.xprofile.local $HOME/.xprofile.local
