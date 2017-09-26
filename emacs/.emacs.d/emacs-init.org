@@ -165,12 +165,14 @@
    #+begin_src emacs-lisp
      (use-package anzu
        :ensure t
+       :diminish anzu-mode
        :init
        (setq anzu-search-threshold 1000
              anzu-cons-mode-line-p nil)
        :config
        (global-anzu-mode))
    #+end_src
+
 ** auto-save like Intellij
 
    #+begin_src emacs-lisp
@@ -489,6 +491,7 @@
               :ensure t
               :config
               (add-to-list 'company-backends 'company-tern))))
+
         (use-package js2-refactor
           :ensure t
           :config (add-hook 'js2-mode-hook 'js2-refactor-mode)))
@@ -776,7 +779,7 @@
     (defun laat/insert-key (key)
       "Ask for a key then insert its description.
         Will work on both org-mode and any mode that accepts plain html."
-      (interactive "kType key sequence: ")
+      (interactive "Type key sequence: ")
       (let* ((orgp (derived-mode-p 'org-mode))
              (tag (if orgp "~%s~" "<kbd>%s</kbd>")))
         (if (null (equal key "\C-m"))
@@ -886,6 +889,7 @@
        (use-package ob-browser
          :ensure t :defer t)
      #+end_src
+
 *** TODO Mongo
     #+begin_src emacs-lisp :tangle no
       (use-package ob-mongo
@@ -1171,6 +1175,7 @@
                (shrink-window arg)
              (enlarge-window arg)))))
    #+end_src
+
 ** Zoom
    #+begin_src emacs-lisp
      ;; Zoom
