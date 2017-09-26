@@ -20,15 +20,18 @@ alias dokd="docker run -d -P"
 alias doki="docker run -i -t -P"
 
 # Stop all containers
+# shellcheck disable=SC2046
 dostop() { docker stop $(docker ps -a -q); }
 
 # Remove all containers
+# shellcheck disable=SC2046
 dorm() { docker rm $(docker ps -a -q); }
 
 # Stop and Remove all containers
 alias dormf='docker stop $(docker ps -a -q) && docker rm $(docker ps -a -q)'
 
 # Remove all images
+# shellcheck disable=SC2046
 dori() { docker rmi $(docker images -q); }
 
 # Show all alias related docker
