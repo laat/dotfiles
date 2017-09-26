@@ -1210,7 +1210,7 @@
        ("z" laat/zoom-hydra/body "zoom")
        ("w" laat/window-hydra/body "window")
        ("x" laat/hydra-toggle/body "toggle")
-       ("s" laat/spotify-hydra/body "emacs-mode")
+       ("s" laat/spotify-hydra/body "spotify")
        ("q" laat/engine-hydra/body "search")
 
        ("b" helm-buffers-list "buffers")
@@ -1229,6 +1229,7 @@
 
      (define-key evil-normal-state-map " " 'laat/global-hydra/body)
    #+end_src
+
 * TODO TODO
 ** Powerline tema for smart-mode-line
    spaceline overtar
