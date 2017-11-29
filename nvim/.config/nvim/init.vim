@@ -126,6 +126,9 @@ Plug 'tpope/vim-repeat'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'ntpeters/vim-better-whitespace'
 
+Plug 'google/vim-maktaba'
+Plug 'bazelbuild/vim-bazel'
+Plug 'bazelbuild/vim-ft-bzl'
 
 " filetypes
 Plug 'sheerun/vim-polyglot'
