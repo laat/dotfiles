@@ -153,11 +153,11 @@ set noshowmode                               " Hide the default mode text
 " space as vertical character
 set fcs+=vert:\ 
 
-" colorcolumn                                                                                  
-if exists('+colorcolumn')                                                                      
-  set colorcolumn=81                           " A line at 81 characters                       
-  hi ColorColumn ctermbg=black guibg=#232728                                                   
-endif  
+" colorcolumn
+if exists('+colorcolumn')
+  set colorcolumn=81                           " A line at 81 characters
+  hi ColorColumn ctermbg=black guibg=#232728
+endif
 
 " Show special characters (tab and eol)
 " set list
