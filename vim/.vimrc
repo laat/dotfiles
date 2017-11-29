@@ -60,6 +60,7 @@ NeoBundle 'mattn/emmet-vim'
 NeoBundle 'groenewege/vim-less'
 
 NeoBundle 'ekalinin/Dockerfile.vim'
+NeoBundle 'alunny/pegjs-vim'
 
 call neobundle#end()
 
