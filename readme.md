@@ -11,9 +11,7 @@ stow --restow --no-folding --stow git emacs vim
 
 ## Skeleton(s)
 
-I have decided to provide "plugin" support in my dotfiles, the stow
-folder `skel`, `zsh`, and `X` can be further configured with folders
-and machine specific files.
+I have decided to provide "plugin" support in my dotfiles.
 
 Folders:
 
