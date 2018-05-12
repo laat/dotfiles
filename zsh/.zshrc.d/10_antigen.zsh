@@ -7,11 +7,9 @@ source $ANTIGEN_FOLDER/antigen.zsh
 unset ANTIGEN_FOLDER
 
 antigen use oh-my-zsh
-antigen bundle <<EOBUNDLES
-    command-not-found
-    tmuxinator
-    lukechilds/zsh-better-npm-completion
-    zsh-users/zsh-syntax-highlighting
-EOBUNDLES
+antigen bundle command-not-found
+antigen bundle lukechilds/zsh-better-npm-completion
+antigen bundle zsh-users/zsh-syntax-highlighting
+
 
 antigen apply
