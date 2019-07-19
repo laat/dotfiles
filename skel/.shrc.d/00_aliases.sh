@@ -13,4 +13,3 @@ alias ll='ls -lh'
 
 alias ..='cd ..'
 
-alias fuck='sudo $(history -p \!\!)'
