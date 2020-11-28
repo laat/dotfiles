@@ -12,6 +12,3 @@ fi
 
 [ -f $HOME/.shrc ] && . $HOME/.shrc
 [ -f $HOME/.zshrc.local ] && . $HOME/.zshrc.local
-
-eval $(thefuck --alias)
-
