@@ -10,6 +10,7 @@ antigen use oh-my-zsh
 antigen bundle command-not-found
 antigen bundle lukechilds/zsh-better-npm-completion
 antigen bundle zsh-users/zsh-syntax-highlighting
+antigen bundle thefuck
 
 
 antigen apply

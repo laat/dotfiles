@@ -1,5 +1,6 @@
 alias g='git'
 alias gc='git commit -v'
+alias gcz='git cz -v'
 alias gca='git commit -v -a'
 alias gcam='git commit -a -m'
 alias gd='git diff'
