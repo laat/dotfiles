@@ -44,3 +44,5 @@
   user = laat
 [diff "orgmode"]
       xfuncname = "^(\\*+.*)$"
+[pull]
+	rebase = true
