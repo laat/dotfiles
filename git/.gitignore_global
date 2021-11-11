@@ -30,3 +30,4 @@ Temporary Items
 .apdisk
 /.clj-kondo/
 /.lsp/
+/.dir-locals.el
