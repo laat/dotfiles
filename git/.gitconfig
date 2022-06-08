@@ -9,7 +9,7 @@
   branch = auto
   ui = true
 [alias]
-  main = "!git checkout $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')"
+  main = "!git checkout $(git remote show origin | sed -n '/HEAD branch/s/.*: //p')"
   co = checkout
   ci = commit
   st = status
