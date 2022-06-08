@@ -10,6 +10,7 @@
   ui = true
 [alias]
   main = "!git checkout $(git remote show origin | sed -n '/HEAD branch/s/.*: //p')"
+  m = main
   co = checkout
   ci = commit
   st = status
