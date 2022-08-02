@@ -4,7 +4,7 @@ autoload -U +X bashcompinit && bashcompinit
 autoload -U +X compinit && compinit
 
 if [ -d $HOME/.zshrc.d ]; then
-    for file in $HOME/.zshrc.d/*; do
+    for file in $HOME/.zshrc.d/*.zsh; do
         [[ -f "$file" ]] && . "$file"
     done
     unset file
