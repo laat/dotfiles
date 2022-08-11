@@ -30,6 +30,7 @@
   path = .gitconfig.local
 [push]
   default = simple
+  autoSetupRemote = true
 [core]
   autocrlf = input
   excludesfile = ~/.gitignore_global
@@ -45,8 +46,8 @@
 [github]
   user = laat
 [diff "orgmode"]
-      xfuncname = "^(\\*+.*)$"
+  xfuncname = "^(\\*+.*)$"
 [pull]
-	rebase = true
+  rebase = true
 [init]
-	defaultBranch = main
+  defaultBranch = main
