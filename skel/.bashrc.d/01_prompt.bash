@@ -14,7 +14,7 @@ function prompt_command {
     esac
 
     if [ "$(whoami)" = root ]; then
-        local user_color=$BRed
+        local user_color=$BIRed
     else
         local user_color=$BWhite
     fi
