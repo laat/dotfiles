@@ -17,5 +17,5 @@ if [ -d $HOME/.bashrc.d ]; then
 fi
 
 
-[[ -f $HOME/.shrc ]] && . $HOME/.shrc
-[[ -f $HOME/.bashrc.local ]] && . $HOME/.bashrc.local
+[[ -f $HOME/.shrc ]] && . "$HOME/.shrc"
+[[ -f $HOME/.bashrc.local ]] && . "$HOME/.bashrc.local"
