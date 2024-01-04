@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: apply
-# key: apply
-# --
-${1:methodName}.apply(${2:context}, [${3:arguments}])

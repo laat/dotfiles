@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: bdd.it.synchronous
-# key: its
-# --
-it('$1', function() {$0});

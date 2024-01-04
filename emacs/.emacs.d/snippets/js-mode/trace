@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: trace
-# key: trace
-# --
-function trace (message) { return function (x) { console.log(message, x); return x; }}; // eslint-disable-line

@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: es6.class
-# key: cla
-# --
-class $1 {
-$0
-}

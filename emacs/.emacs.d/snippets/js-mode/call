@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: call
-# key: call
-# --
- ${1:methodName}.call(${2:context}, ${3:arguments})

@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: assert.notEqual
-# key: asn
-# --
-assert.notEqual(${1:actual}, ${2:expected})

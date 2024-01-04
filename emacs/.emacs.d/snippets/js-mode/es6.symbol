@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: es6.symbol
-# key: sym
-# --
-const $1 = Symbol('$0')
