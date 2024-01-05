@@ -1,2 +1,2 @@
 #!/bin/sh
-alias p=pnpm
+alias p="corepack pnpm"
