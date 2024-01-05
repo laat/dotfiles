@@ -10,6 +10,7 @@ if [[ ! ${zsh_plugins}.zsh -nt ${zsh_plugins}.txt ]]; then
   (
     source "$ANTIDOTE_FOLDER/antidote.zsh"
     antidote bundle <${zsh_plugins}.txt >${zsh_plugins}.zsh
+    mkdir -p "~/.cache/oh-my-zsh"
   )
 fi
 source ${zsh_plugins}.zsh

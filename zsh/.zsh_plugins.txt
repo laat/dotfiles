@@ -3,6 +3,7 @@ zdharma-continuum/fast-syntax-highlighting kind:defer
 ohmyzsh/ohmyzsh path:lib
 ohmyzsh/ohmyzsh path:plugins/npm
 ohmyzsh/ohmyzsh path:plugins/sdk
+ohmyzsh/ohmyzsh path:plugins/thefuck
 ohmyzsh/ohmyzsh path:plugins/ag kind:fpath
 
 zsh-users/zsh-autosuggestions kind:defer
