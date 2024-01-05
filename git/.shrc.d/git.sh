@@ -1,3 +1,4 @@
+#!/bin/sh
 alias g='git'
 alias gc='git commit -v'
 alias gcz='git cz -v'
