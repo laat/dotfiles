@@ -9,3 +9,4 @@ if [ -d $HOME/.shrc.d ]; then
     done
     unset file
 fi
+[ -f $HOME/.shrc.local ] && . $HOME/.shrc.local
