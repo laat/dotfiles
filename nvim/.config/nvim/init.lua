@@ -276,12 +276,16 @@ require('lazy').setup({
       "sindrets/diffview.nvim",
       "nvim-telescope/telescope.nvim",
     },
-    config = true
+    config = function ()
+      require('neogit').setup()
+      vim.keymap.set('n', '<leader>gs', require('neogit').open, { desc = "Open [G]it [S]tatus"})
+    end
   },
+
   {
     'nvim-tree/nvim-tree.lua',
     dependencies = { 'nvim-tree/nvim-web-devicons' },
-    config =  function()
+    config = function()
       local function my_on_attach(bufnr)
         local api = require "nvim-tree.api"
 
@@ -612,10 +616,11 @@ require('mason-lspconfig').setup()
 local servers = {
   -- clangd = {},
   -- gopls = {},
-  -- pyright = {},
+  pyright = {},
   -- rust_analyzer = {},
-  -- tsserver = {},
-  -- html = { filetypes = { 'html', 'twig', 'hbs'} },
+  tsserver = {},
+  svelte = {},
+  html = { filetypes = { 'html', 'twig', 'hbs'} },
 
   lua_ls = {
     Lua = {
