@@ -278,14 +278,6 @@ require('lazy').setup({
     },
     config = function ()
       require('neogit').setup()
-
-      local group = vim.api.nvim_create_augroup('MyCustomNeogitEvents', { clear = true })
-      vim.api.nvim_create_autocmd('User', {
-        pattern = 'NeogitPushComplete',
-        group = group,
-        callback = require('neogit').close,
-      })
-
       vim.keymap.set('n', '<leader>gs', require('neogit').open, { desc = "Open [G]it [S]tatus"})
     end
   },
