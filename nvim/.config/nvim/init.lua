@@ -306,6 +306,16 @@ require('lazy').setup({
       { ",n", "<cmd>NvimTreeToggle<cr>", desc = "NvimTree" },
     }
   },
+  {
+    'nvimdev/dashboard-nvim',
+    event = 'VimEnter',
+    config = function()
+      require('dashboard').setup {
+        -- config
+      }
+    end,
+    dependencies = { {'nvim-tree/nvim-web-devicons'}}
+  },
 }, {})
 
 -- [[ Setting options ]]
@@ -718,6 +728,14 @@ vim.api.nvim_create_autocmd('BufReadPost', {
     end
   end,
 })
+
+-- Iterm2 magic
+vim.cmd [[
+vnoremap <M-A>c "+y
+nnoremap <M-A>s :up<CR>
+inoremap <M-A>s <C-o>:up<CR>
+nnoremap <M-A>a ggVG
+]]
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
