@@ -1,1 +1,1 @@
-alias doc="docker-compose"
+alias doc="docker compose"
