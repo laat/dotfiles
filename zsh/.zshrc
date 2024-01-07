@@ -1,5 +1,3 @@
-# files located here at work.. enforced by employer...
-[ -f /etc/shrc ] && . /etc/shrc
 autoload -U +X bashcompinit && bashcompinit
 autoload -U +X compinit && compinit
 

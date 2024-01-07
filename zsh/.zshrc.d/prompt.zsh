@@ -1,7 +1,6 @@
-#! /bin/zsh
 autoload -U colors && colors
-
 autoload -Uz vcs_info
+
 precmd() {
     vcs_info
 
@@ -9,7 +8,6 @@ precmd() {
     then
         _DM_NAME="";
     else
-        echo ""
         _DM_NAME="$DOCKER_MACHINE_NAME";
     fi
 }
