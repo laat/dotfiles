@@ -278,7 +278,7 @@ require('lazy').setup({
     },
     config = function ()
       require('neogit').setup()
-      vim.keymap.set('n', '<leader>gs', require('neogit').open, { desc = "Open [G]it [S]tatus"})
+      vim.keymap.set('n', '<leader>gs', require('neogit').open , { desc = "Open [G]it [S]tatus"})
     end
   },
 
@@ -731,6 +731,8 @@ vim.api.nvim_create_autocmd('BufReadPost', {
 
 -- Iterm2 magic
 vim.cmd [[
+vnoremap <M-A>v "+p<CR>
+inoremap <M-A>v <C-R>+
 vnoremap <M-A>c "+y
 nnoremap <M-A>s :up<CR>
 inoremap <M-A>s <C-o>:up<CR>
@@ -739,3 +741,4 @@ nnoremap <M-A>a ggVG
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+-- AvvvvAvAvv
