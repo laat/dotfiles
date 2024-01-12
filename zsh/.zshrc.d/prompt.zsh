@@ -50,7 +50,7 @@ RPROMPT='%{${_lineup}%}%F{008}[%D{%H:%M:%S}]%f%{${_linedown}%}'
 
 ## make clock tick
 
-TMOUT=1
-TRAPALRM() {
-    zle reset-prompt
-}
+# TMOUT=1
+# TRAPALRM() {
+#     zle reset-prompt
+# }

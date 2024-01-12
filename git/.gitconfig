@@ -1,56 +1,54 @@
 [user]
-  name = Sigurd Fosseng
-  email = sigurd@fosseng.net
+	name = Sigurd Fosseng
+	email = sigurd@fosseng.net
 [diff]
-  algorithm = histogram
+	algorithm = histogram
 [color]
-  diff = auto
-  status = auto
-  branch = auto
-  ui = true
+	diff = auto
+	status = auto
+	branch = auto
+	ui = true
 [alias]
-  main = "!git checkout $(git remote show origin | sed -n '/HEAD branch/s/.*: //p')"
-  m = main
-  co = checkout
-  ci = commit
-  st = status
-  br = branch
-  l = log --stat --abbrev-commit
-  ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate
-  ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
-  lol = log --graph --decorate --pretty=oneline --abbrev-commit --all
-  panic = !tar cvf ../git_panic.tar *
-  changelog = !git-changelog
-  ignore = "!gi() { curl -L -s https://www.gitignore.io/api/$@ | sed '/^# .*toptal/d' ;}; gi"
-  pr = "!f() { exec az repos pr \"$@\"; }; f"
-  repo = "!f() { exec az repos \"$@\"; }; f"
+	main = "!git checkout $(git remote show origin | sed -n '/HEAD branch/s/.*: //p')"
+	m = main
+	co = checkout
+	ci = commit
+	st = status
+	br = branch
+	l = log --stat --abbrev-commit
+	ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate
+	ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
+	lol = log --graph --decorate --pretty=oneline --abbrev-commit --all
+	panic = !tar cvf ../git_panic.tar *
+	changelog = !git-changelog
+	ignore = "!gi() { curl -L -s https://www.gitignore.io/api/$@ | sed '/^# .*toptal/d' ;}; gi"
 [include] # silent fail
-  path = .gitconfig.osx
-  path = .gitconfig.linux
-  path = .gitconfig.local
+	path = .gitconfig.osx
+	path = .gitconfig.linux
+	path = .gitconfig.local
 [push]
-  default = simple
-  autoSetupRemote = true
+	default = simple
+	autoSetupRemote = true
 [core]
-  autocrlf = input
-  excludesfile = ~/.gitignore_global
-  excludesfile = ~/.gitignore_local
+	autocrlf = input
+	excludesfile = ~/.gitignore_global
+	excludesfile = ~/.gitignore_local
 [filter "lfs"]
-  clean = git-lfs clean -- %f
-  smudge = git-lfs smudge -- %f
-  process = git-lfs filter-process
-  required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
 [magit]
-  hideCampaign = true
+	hideCampaign = true
 [diff "sopsdiffer"]
-  textconv = sops -d
+	textconv = sops -d
 [github]
-  user = laat
+	user = laat
 [diff "orgmode"]
-  xfuncname = "^(\\*+.*)$"
+	xfuncname = "^(\\*+.*)$"
 [pull]
-  rebase = true
+	rebase = true
 [init]
-  defaultBranch = main
+	defaultBranch = main
 [include]
-  path = ~/.gitconfig.local
+	path = ~/.gitconfig.local
