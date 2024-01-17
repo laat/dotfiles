@@ -28,3 +28,4 @@ Machine specific files (not managed by git):
 * `.zshrc.local` interactive zsh
 * `.xprofile.local` X11 profile
 * `.gitconfig.local` git
+sign this
