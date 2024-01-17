@@ -1,9 +1,11 @@
 #!/bin/sh
 alias g='git'
 alias gc='git commit -v'
+alias gcs='git commit -v -S'
 alias gcz='git cz -v'
-alias gca='git commit -v -a'
+alias gcas='git commit -v -a -S'
 alias gcam='git commit -a -m'
+alias gcams='git commit -a -m -S'
 alias gd='git diff'
 alias gf='git fetch'
 alias gst='git status'

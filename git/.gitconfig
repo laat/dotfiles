@@ -13,6 +13,7 @@
 	m = main
 	co = checkout
 	ci = commit
+	cis = commit -S
 	st = status
 	br = branch
 	l = log --stat --abbrev-commit
