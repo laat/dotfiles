@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Codespaces.
+# Codespaces install script
 
 sudo apt-get -q -y update
 sudo apt-get install -q -y --no-install-recommends stow
@@ -11,7 +11,10 @@ function stow() {
     2> >(grep -v 'BUG in find_stowed_path? Absolute/relative mismatch' 1>&2)
 }
 
-rm -f ~/.profile ~/.bashrc ~/.zprofile ~/.zshrc
+mv ~/.profile{,.bak}
+mv ~/.bashrc{,.bak}
+mv ~/.zprofile{,.bak}
+mv ~/.zshrc{,.bak}
 
 stow stow
 stow --stow skel
