@@ -33,9 +33,9 @@
 	default = simple
 	autoSetupRemote = true
 [core]
-	autocrlf = input
 	excludesfile = ~/.gitignore_global
 	excludesfile = ~/.gitignore_local
+	autocrlf = input
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
