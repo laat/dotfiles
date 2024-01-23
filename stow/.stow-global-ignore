@@ -1,4 +1,5 @@
 ### Dotfiles specific ignore list
+/readme.md
 /README.md
 /install.sh
 
