@@ -21,7 +21,7 @@ function prompt_command {
 
 
     if [ "$color_prompt" = yes ]; then
-        PS1="${user_color}\u${BWhite}@${White}\h:${BIBlue}\W/${Color_Off} ${Gray}[\t]${Color_Off}\n\$ "
+        PS1="${BIBlue}\W/${Color_Off} ${Gray}[\t]${Color_Off}\n\$ "
     else
         PS1="\u@\h:\W/\n\$ "
     fi
