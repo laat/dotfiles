@@ -32,3 +32,8 @@ Temporary Items
 /.clj-kondo/
 /.lsp/
 /.dir-locals.el
+
+### Claude Code ###
+# Only ignore local settings, keep commands/skills/prompts
+.claude/settings.local.json
+.playwright-mcp
