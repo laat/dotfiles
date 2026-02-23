@@ -1,2 +1,2 @@
 emulate sh -c '. ~/.profile'
-[ -f $HOME/.zprofile.local ] && . $HOME/.zprofile.local
+[[ -f ~/.zprofile.local ]] && . ~/.zprofile.local

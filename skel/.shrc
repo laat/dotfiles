@@ -1,12 +1,10 @@
 # Sources portable interactive shell rc-files
 # (ksh, zsh, ash, bash ..)
 
-if [ -d $HOME/.shrc.d ]; then
-    for file in $HOME/.shrc.d/*; do
-        if [ -f $file ]; then
-            . $file
-        fi
+if [ -d "$HOME/.shrc.d" ]; then
+    for file in "$HOME/.shrc.d"/*; do
+        [ -f "$file" ] && . "$file"
     done
     unset file
 fi
-[ -f $HOME/.shrc.local ] && . $HOME/.shrc.local
+[ -f "$HOME/.shrc.local" ] && . "$HOME/.shrc.local"

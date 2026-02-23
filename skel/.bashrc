@@ -5,14 +5,12 @@ case $- in
     *) return;;
 esac
 
-# source bashrc.d files
-if [ -d $HOME/.bashrc.d ]; then
-    for file in $HOME/.bashrc.d/*; do
+if [[ -d ~/.bashrc.d ]]; then
+    for file in ~/.bashrc.d/*.bash; do
         [[ -f "$file" ]] && . "$file"
     done
     unset file
 fi
 
-
-[[ -f $HOME/.shrc ]] && . "$HOME/.shrc"
-[[ -f $HOME/.bashrc.local ]] && . "$HOME/.bashrc.local"
+[[ -f ~/.shrc ]] && . ~/.shrc
+[[ -f ~/.bashrc.local ]] && . ~/.bashrc.local
