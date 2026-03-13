@@ -23,6 +23,8 @@
 	panic = !tar cvf ../git_panic.tar *
 	changelog = !git-changelog
 	ignore = "!gi() { curl -L -s https://www.gitignore.io/api/$@ | sed '/^# .*toptal/d' ;}; gi"
+	cai = !git-aia
+	ai = !git-ai
 [include] # silent fail
 	path = /etc/gitconfig
 	path = .gitconfig.osx

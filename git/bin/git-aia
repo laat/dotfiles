@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -e
+DIFF=$(git diff HEAD)
+[ -z "$DIFF" ] && { echo "No changes to commit." >&2; exit 1; }
+echo "Generating commit message..." >&2
+MSG=$(echo "$DIFF" | claude -p "Write a concise git commit message for this diff. Use conventional commits format (e.g. feat: ..., fix: ..., refactor: ...). Output only the commit message — no explanation, no markdown, no quotes.")
+git commit -a -v -e -m "$MSG"
