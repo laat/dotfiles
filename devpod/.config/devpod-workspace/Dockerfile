@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/javascript-node:22
+FROM mcr.microsoft.com/devcontainers/javascript-node:22-trixie
 
 ARG NODE_VERSION=24
 ARG PNPM_VERSION=10.33.0
