@@ -18,4 +18,7 @@ mv ~/.zshrc{,.bak}
 
 stow stow
 stow --stow skel
-stow --stow git pnpm npm codespaces zsh
+stow --stow git pnpm npm codespaces zsh pi
+
+# pi agent: install sandbox extension dependencies
+(cd "$HOME/.pi/agent/extensions/sandbox" && npm install)

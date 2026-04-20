@@ -33,7 +33,8 @@ Temporary Items
 /.lsp/
 /.dir-locals.el
 
-### Claude Code ###
-# Only ignore local settings, keep commands/skills/prompts
+# Claude Code
+CLAUDE.local.md
 .claude/settings.local.json
+.claude/worktrees/
 .playwright-mcp

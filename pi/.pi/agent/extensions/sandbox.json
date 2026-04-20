@@ -1,0 +1,59 @@
+{
+  "enabled": true,
+  "network": {
+    "allowedDomains": [
+      "*.nrk.no",
+      "github.com",
+      "api.github.com",
+      "*.githubusercontent.com",
+      "*.npmjs.org",
+      "registry.npmjs.org",
+      "registry.yarnpkg.com",
+      "pnpm.io",
+      "pypi.org",
+      "*.pypi.org"
+    ],
+    "deniedDomains": []
+  },
+  "filesystem": {
+    "allowRead": ["~/code", "~/.dotfiles", "/tmp"],
+    "denyRead": [
+      "~/.ssh",
+      "~/.aws",
+      "~/.gnupg",
+      "~/.pi",
+      "~/.config",
+      "~/.local",
+      "~/.docker",
+      "~/.kube",
+      "~/.npm",
+      "~/.netrc",
+      "~/.gitconfig",
+      "~/.git-credentials",
+      "~/.bash_history",
+      "~/.zsh_history",
+      "~/Downloads",
+      "~/Documents",
+      "~/Desktop",
+      "~/Pictures",
+      "~/Movies",
+      "~/Music",
+      "~/Library",
+      "**/*.key",
+      "**/*.pem",
+      "**/*credentials*",
+      "**/*secret*",
+      ".env",
+      ".env.*"
+    ],
+    "allowWrite": [".", "~/.dotfiles", "/tmp"],
+    "denyWrite": [
+      ".env",
+      ".env.*",
+      "*.key",
+      "*.pem",
+      "*credentials*",
+      "*secret*"
+    ]
+  }
+}
