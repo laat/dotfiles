@@ -1,0 +1,8 @@
+{
+  "name": "dev-workspace",
+  "dockerComposeFile": "compose.yaml",
+  "service": "dev",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "postCreateCommand": "devpod-setup.sh",
+  "remoteUser": "vscode"
+}

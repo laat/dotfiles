@@ -1,0 +1,20 @@
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ssh-data:/home/vscode/.ssh
+      - claude-data:/home/vscode/.claude
+      - zsh-history:/home/vscode/.zsh_history_dir
+    ports:
+      - "4200:4200"
+      - "4201:4201"
+      - "4202:4202"
+      - "4203:4203"
+    command: sleep infinity
+
+volumes:
+  ssh-data:
+  claude-data:
+  zsh-history:
