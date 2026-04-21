@@ -26,7 +26,8 @@
       "space s w": "pane::DeploySearch",
       "space s b": "buffer_search::Deploy",
       // +AI
-      "space a": "agent::ToggleFocus",
+      "space a a": "agent::ToggleFocus",
+      "space a t": "agent::AddSelectionToThread",
       // Go to file with `gf`
       "g f": "editor::OpenExcerpts",
       // +Comments
