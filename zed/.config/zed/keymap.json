@@ -1,0 +1,209 @@
+// Zed keymap
+//
+// For information on binding keys, see the Zed
+// documentation: https://zed.dev/docs/key-bindings
+//
+// To see the default key bindings run `zed: open default keymap`
+// from the command palette.
+[
+  {
+    "context": "Editor && (vim_mode == normal || vim_mode == visual) && !VimWaiting && !menu",
+    "bindings": {
+      // +Expand region (tree-sitter)
+      "+": "editor::SelectLargerSyntaxNode",
+      "-": "editor::SelectSmallerSyntaxNode",
+      // +Git
+      "space g h d": "editor::ToggleSelectedDiffHunks",
+      "space g s": "git_panel::ToggleFocus",
+      // +Toggles
+      "space t i": "editor::ToggleInlayHints",
+      "space u w": "editor::ToggleSoftWrap",
+      "space c z": "workspace::ToggleCenteredLayout",
+      // +Markdown
+      "space m p": "markdown::OpenPreview",
+      "space m P": "markdown::OpenPreviewToTheSide",
+      // +Search
+      "space s w": "pane::DeploySearch",
+      "space s b": "buffer_search::Deploy",
+      // +AI
+      "space a": "agent::ToggleFocus",
+      // Go to file with `gf`
+      "g f": "editor::OpenExcerpts",
+      // +Comments
+      "space c c": "vim::ToggleComments",
+    },
+  },
+  {
+    "context": "Editor && vim_mode == normal && !VimWaiting && !menu",
+    "bindings": {
+      // Pane navigation (C-w hjkl in Emacs)
+      "ctrl-h": "workspace::ActivatePaneLeft",
+      "ctrl-l": "workspace::ActivatePaneRight",
+      "ctrl-k": "workspace::ActivatePaneUp",
+      "ctrl-j": "workspace::ActivatePaneDown",
+      // +LSP (eglot equivalents)
+      "space c a": "editor::ToggleCodeActions",
+      "space .": "editor::ToggleCodeActions",
+      "space c r": "editor::Rename",
+      "g d": "editor::GoToDefinition",
+      "g D": "editor::GoToDefinitionSplit",
+      "g i": "editor::GoToImplementation",
+      "g I": "editor::GoToImplementationSplit",
+      "g t": "editor::GoToTypeDefinition",
+      "g T": "editor::GoToTypeDefinitionSplit",
+      "g r": "editor::FindAllReferences",
+      // +Diagnostics (flymake equivalents)
+      "] d": "editor::GoToDiagnostic",
+      "[ d": "editor::GoToPreviousDiagnostic",
+      "] e": "editor::GoToDiagnostic",
+      "[ e": "editor::GoToPreviousDiagnostic",
+      "space x x": "diagnostics::Deploy",
+      // +Symbol search (outline)
+      "s s": "outline::Toggle",
+      "s S": "project_symbols::Toggle",
+      // +Git hunks
+      "] h": "editor::GoToHunk",
+      "[ h": "editor::GoToPreviousHunk",
+      // +Buffers
+      "shift-h": "pane::ActivatePreviousItem",
+      "shift-l": "pane::ActivateNextItem",
+      "shift-q": "pane::CloseActiveItem",
+      "space b d": "pane::CloseActiveItem",
+      "space b o": "pane::CloseOtherItems",
+      // +Files
+      "ctrl-s": "workspace::Save",
+      "space space": "file_finder::Toggle",
+      "space f p": "projects::OpenRecent",
+      "space /": "pane::DeploySearch",
+      "space e": "pane::RevealInProjectPanel",
+      "space ,": "project_panel::ToggleFocus",
+      // +Terminal (SPC ' like eshell in Emacs)
+      "space '": "terminal_panel::ToggleFocus",
+      // +Dock
+      "space ø": "workspace::ToggleRightDock",
+    },
+  },
+  {
+    "context": "EmptyPane || SharedScreen",
+    "bindings": {
+      "space space": "file_finder::Toggle",
+      "space f p": "projects::OpenRecent",
+    },
+  },
+  {
+    "context": "Editor && vim_mode == visual && !VimWaiting && !menu",
+    "bindings": {
+      "g c": "editor::ToggleComments",
+    },
+  },
+  {
+    "context": "Editor && vim_mode == insert && !menu",
+    "bindings": {
+      "j j": "vim::NormalBefore",
+      "j k": "vim::NormalBefore",
+    },
+  },
+  {
+    "context": "Editor && vim_operator == c",
+    "bindings": {
+      "c": "vim::CurrentLine",
+      "r": "editor::Rename",
+      "a": "editor::ToggleCodeActions",
+    },
+  },
+  {
+    "context": "GitPanel",
+    "bindings": {
+      "tab": "git::Diff",
+      "c c": "git::Commit",
+      "b b": "git::CheckoutBranch",
+      "b c": "git::Branch",
+      "P u": "git::Push",
+      "F u": "git::Pull",
+      "escape": "workspace::ToggleLeftDock",
+      "s": "git::ToggleStaged",
+      "S": "git::StageAll",
+      "x": ["workspace::SendKeystrokes", "delete"],
+    },
+  },
+  {
+    "context": "GitPanel > Editor && VimControl",
+    "bindings": {
+      "ctrl-d": "workspace::ToggleLeftDock",
+    },
+  },
+  {
+    "context": "AgentPanel > Editor && VimControl",
+    "bindings": {
+      "ctrl-d": "workspace::ToggleRightDock",
+    },
+  },
+  {
+    "context": "ProjectPanel && not_editing",
+    "bindings": {
+      "a": "project_panel::NewFile",
+      "A": "project_panel::NewDirectory",
+      "r": "project_panel::Rename",
+      "d": "project_panel::Delete",
+      "x": "project_panel::Cut",
+      "c": "project_panel::Copy",
+      "p": "project_panel::Paste",
+      "q": "workspace::ToggleRightDock",
+      "space e": "workspace::ToggleRightDock",
+      "ctrl-h": "workspace::ActivatePaneLeft",
+      "ctrl-l": "workspace::ActivatePaneRight",
+      "ctrl-k": "workspace::ActivatePaneUp",
+      "ctrl-j": "workspace::ActivatePaneDown",
+    },
+  },
+  {
+    "context": "Dock",
+    "bindings": {
+      "ctrl-w h": "workspace::ActivatePaneLeft",
+      "ctrl-w l": "workspace::ActivatePaneRight",
+      "ctrl-w k": "workspace::ActivatePaneUp",
+      "ctrl-w j": "workspace::ActivatePaneDown",
+    },
+  },
+  {
+    "context": "Terminal",
+    "bindings": {
+      "ctrl-h": "workspace::ActivatePaneLeft",
+      "ctrl-l": "workspace::ActivatePaneRight",
+      "ctrl-k": "workspace::ActivatePaneUp",
+      "ctrl-j": "workspace::ActivatePaneDown",
+    },
+  },
+  {
+    "context": "EmptyPane || SharedScreen || vim_mode == normal",
+    "bindings": {
+      "space r t": [
+        "editor::SpawnNearestTask",
+        {
+          "reveal": "no_focus",
+        },
+      ],
+    },
+  },
+  // Sneak motion
+  {
+    "context": "vim_mode == normal || vim_mode == visual",
+    "bindings": {
+      "s": ["vim::PushSneak", {}],
+      "S": ["vim::PushSneakBackward", {}],
+    },
+  },
+  // Which key support
+  {
+    "context": "(VimControl && !menu)",
+    "bindings": {
+      "space": null,
+    },
+  },
+  {
+    "use_key_equivalents": true,
+    "bindings": {
+      "cmd-shift-c": null,
+    },
+  },
+]
