@@ -8,7 +8,7 @@ fi
 
 WORKSPACE_ID="${DEVPOD_WORKSPACE_ID:-dev-workspace}"
 DEVCONTAINER_SOURCE="${XDG_CONFIG_HOME:-$HOME/.config}/devpod-workspace"
-WORKSPACE_SOURCE="$HOME/code"
+WORKSPACE_SOURCE="$(pwd)"
 LOCAL_DEVCONTAINER="$WORKSPACE_SOURCE/.laat"
 DOTFILES_URL="${DEVPOD_DOTFILES_URL:-https://github.com/laat/dotfiles}"
 IDE="${DEVPOD_IDE:-none}"
