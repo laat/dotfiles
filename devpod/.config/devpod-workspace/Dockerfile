@@ -28,9 +28,7 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.asc] https://packages.
     && apt-get update && apt-get install -y --no-install-recommends google-cloud-cli \
     && rm -rf /var/lib/apt/lists/*
 
-USER vscode
 RUN bash -c "source /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} && nvm alias default ${NODE_VERSION}"
-USER root
 
 RUN npm install -g pnpm@${PNPM_VERSION} @anthropic-ai/claude-code
 

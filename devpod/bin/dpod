@@ -7,9 +7,16 @@ if [ -f /.dockerenv ] || [ -f /run/.containerenv ] || [ -n "$DEVCONTAINER" ]; th
 fi
 
 WORKSPACE_ID="${DEVPOD_WORKSPACE_ID:-dev-workspace}"
-DEVCONTAINER_PATH="${XDG_CONFIG_HOME:-$HOME/.config}/devpod-workspace/devcontainer.json"
+DEVCONTAINER_SOURCE="${XDG_CONFIG_HOME:-$HOME/.config}/devpod-workspace"
+WORKSPACE_SOURCE="$HOME/code"
+LOCAL_DEVCONTAINER="$WORKSPACE_SOURCE/.laat"
 DOTFILES_URL="${DEVPOD_DOTFILES_URL:-https://github.com/laat/dotfiles}"
 IDE="${DEVPOD_IDE:-none}"
+
+sync_devcontainer() {
+  mkdir -p "$LOCAL_DEVCONTAINER"
+  cp -aL "$DEVCONTAINER_SOURCE/." "$LOCAL_DEVCONTAINER/"
+}
 
 if [ -z "$DEVPOD_SERVICE_ACCOUNT" ]; then
   echo "Error: DEVPOD_SERVICE_ACCOUNT is not set" >&2
@@ -36,11 +43,12 @@ shift
 
 case "$COMMAND" in
   up)
+    sync_devcontainer
     if devpod list 2>/dev/null | grep -q "^$WORKSPACE_ID"; then
-      devpod up --devcontainer-path "$DEVCONTAINER_PATH" "$WORKSPACE_ID" "$@"
+      devpod up --devcontainer-path .laat/devcontainer.json "$WORKSPACE_ID" "$@"
     else
-      devpod up "$HOME/code" \
-        --devcontainer-path "$DEVCONTAINER_PATH" \
+      devpod up "$WORKSPACE_SOURCE" \
+        --devcontainer-path .laat/devcontainer.json \
         --dotfiles "$DOTFILES_URL" \
         --id "$WORKSPACE_ID" \
         --ide "$IDE" \
@@ -49,8 +57,9 @@ case "$COMMAND" in
     fi
     ;;
   recreate)
+    sync_devcontainer
     devpod up "$WORKSPACE_ID" \
-      --devcontainer-path "$DEVCONTAINER_PATH" \
+      --devcontainer-path .laat/devcontainer.json \
       --dotfiles "$DOTFILES_URL" \
       --provider-option "SERVICE_ACCOUNT=$DEVPOD_SERVICE_ACCOUNT" \
       --recreate "$@"
