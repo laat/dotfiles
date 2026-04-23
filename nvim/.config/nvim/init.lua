@@ -4,6 +4,11 @@ vim.g.maplocalleader = ','
 
 vim.g.have_nerd_font = true
 
+-- Compatibility shim for telescope + newer Neovim (ft_to_lang was removed)
+if not vim.treesitter.language.ft_to_lang then
+  vim.treesitter.language.ft_to_lang = function(ft) return ft end
+end
+
 -- [[ Setting options ]]
 vim.o.number = true
 vim.o.mouse = 'a'
