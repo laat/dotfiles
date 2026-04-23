@@ -20,7 +20,7 @@ window-decoration = true
 macos-titlebar-style = hidden
 macos-option-as-alt = left
 
-keybind = super+l=text:\x01
+keybind = super+g=text:\x01
 keybind = super+k=text:\x01t
 keybind = super+shift+enter=new_split:right
 keybind = super+shift+minus=new_split:down
