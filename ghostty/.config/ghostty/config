@@ -24,6 +24,16 @@ keybind = super+b=text:\x02
 keybind = super+p=text:\x02t
 keybind = super+t=text:\x02c
 keybind = super+shift+t=new_tab
+keybind = super+1=unbind
+keybind = super+2=unbind
+keybind = super+3=unbind
+keybind = super+4=unbind
+keybind = super+5=unbind
+keybind = super+6=unbind
+keybind = super+7=unbind
+keybind = super+8=unbind
+keybind = super+9=unbind
+keybind = super+0=unbind
 keybind = super+ctrl+1=text:\x1b1
 keybind = super+ctrl+2=text:\x1b2
 keybind = super+ctrl+3=text:\x1b3
