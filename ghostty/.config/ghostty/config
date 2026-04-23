@@ -1,10 +1,10 @@
-font-family = JetBrains Mono
+font-family = JetBrainsMono Nerd Font
 font-size = 14
 
-theme = Atom One Dark
+theme = Catppuccin Mocha
 
-background-opacity = 0.95
-unfocused-split-opacity = 0.9
+background-opacity = 1
+unfocused-split-opacity = 1
 
 window-padding-x = 4
 window-padding-y = 4

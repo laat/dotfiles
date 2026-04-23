@@ -1,0 +1,7 @@
+# https://github.com/joshmedeski/sesh
+#
+# Define sessions like:
+#
+[[session]]
+name = "dotfiles"
+path = "~/.dotfiles"

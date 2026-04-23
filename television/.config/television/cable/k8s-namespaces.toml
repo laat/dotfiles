@@ -1,0 +1,18 @@
+[metadata]
+name = "k8s-namespaces"
+description = "List and switch kubectl namespaces"
+requirements = ["kubectl"]
+
+[source]
+command = "kubectl get namespaces -o jsonpath='{range .items[*]}{.metadata.name}{\"\\n\"}{end}'"
+
+[preview]
+command = "kubectl get pods -n '{}' --no-headers 2>/dev/null || echo 'No pods'"
+
+[keybindings]
+enter = "actions:use"
+
+[actions.use]
+description = "Switch to the selected namespace"
+command = "kubectl config set-context --current --namespace='{}'"
+mode = "execute"
