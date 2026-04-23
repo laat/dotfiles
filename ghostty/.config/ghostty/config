@@ -24,6 +24,14 @@ keybind = super+b=text:\x02
 keybind = super+p=text:\x02t
 keybind = super+t=text:\x02c
 keybind = super+shift+t=new_tab
+keybind = super+1=text:\x021
+keybind = super+2=text:\x022
+keybind = super+3=text:\x023
+keybind = super+4=text:\x024
+keybind = super+shift+1=goto_tab:1
+keybind = super+shift+2=goto_tab:2
+keybind = super+shift+3=goto_tab:3
+keybind = super+shift+4=goto_tab:4
 keybind = super+h=text:\x02h
 keybind = super+j=text:\x02j
 keybind = super+l=text:\x02l
