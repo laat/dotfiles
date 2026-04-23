@@ -2,6 +2,8 @@
 #
 # Define sessions like:
 #
+import = ["~/.config/sesh/sesh.local.toml"]
+
 [[session]]
 name = "dotfiles"
 path = "~/.dotfiles"
