@@ -20,7 +20,7 @@ window-decoration = true
 macos-titlebar-style = hidden
 macos-option-as-alt = left
 
-keybind = super+o=text:\x02
+keybind = super+b=text:\x02
 keybind = super+k=text:\x02t
 keybind = super+h=text:\x02h
 keybind = super+j=text:\x02j
