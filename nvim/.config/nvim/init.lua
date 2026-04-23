@@ -81,6 +81,12 @@ vim.api.nvim_create_autocmd('BufReadPost', {
 vim.keymap.set('n', '<leader>cc', 'gcc', { remap = true, desc = 'Comment line' })
 vim.keymap.set('v', '<leader>c', 'gc', { remap = true, desc = 'Comment selection' })
 
+-- cmd+c/x/v clipboard
+vim.keymap.set({ 'n', 'v' }, '<D-c>', '"+y', { desc = 'Copy to clipboard' })
+vim.keymap.set({ 'n', 'v' }, '<D-x>', '"+d', { desc = 'Cut to clipboard' })
+vim.keymap.set({ 'n', 'v', 'i' }, '<D-v>', '"+p', { desc = 'Paste from clipboard' })
+vim.keymap.set('i', '<D-v>', '<C-r>+', { desc = 'Paste from clipboard (insert)' })
+
 -- Reload config
 vim.keymap.set('n', '<leader>R', function() vim.cmd('source $MYVIMRC') vim.notify('Config reloaded') end, { desc = '[R]eload config' })
 
