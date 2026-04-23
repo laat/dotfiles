@@ -20,10 +20,6 @@ window-decoration = true
 macos-titlebar-style = hidden
 macos-option-as-alt = left
 
-keybind = super+c=text:\x1b[99;9u
-keybind = super+x=text:\x1b[120;9u
-keybind = super+v=text:\x1b[118;9u
-keybind = super+z=text:\x1b[122;9u
 keybind = super+b=text:\x02
 keybind = super+p=text:\x02t
 keybind = super+t=text:\x02c
