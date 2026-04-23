@@ -1,0 +1,28 @@
+font-family = JetBrains Mono
+font-size = 14
+
+theme = Atom One Dark
+
+background-opacity = 0.95
+unfocused-split-opacity = 0.9
+
+window-padding-x = 4
+window-padding-y = 4
+
+cursor-style = block
+cursor-style-blink = false
+
+copy-on-select = clipboard
+mouse-hide-while-typing = true
+focus-follows-mouse = true
+
+window-decoration = true
+macos-titlebar-style = native
+macos-option-as-alt = true
+
+keybind = super+shift+enter=new_split:right
+keybind = super+shift+minus=new_split:down
+keybind = super+alt+h=goto_split:left
+keybind = super+alt+l=goto_split:right
+keybind = super+alt+k=goto_split:top
+keybind = super+alt+j=goto_split:bottom
