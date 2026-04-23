@@ -42,6 +42,19 @@
       "ctrl-l": "workspace::ActivatePaneRight",
       "ctrl-k": "workspace::ActivatePaneUp",
       "ctrl-j": "workspace::ActivatePaneDown",
+      // +Pane swap
+      "ctrl-shift-h": "workspace::SwapPaneLeft",
+      "ctrl-shift-l": "workspace::SwapPaneRight",
+      "ctrl-shift-k": "workspace::SwapPaneUp",
+      "ctrl-shift-j": "workspace::SwapPaneDown",
+      // +Pane move item
+      "space w h": ["workspace::MoveItemToPaneInDirection", { "direction": "left" }],
+      "space w l": ["workspace::MoveItemToPaneInDirection", { "direction": "right" }],
+      "space w k": ["workspace::MoveItemToPaneInDirection", { "direction": "up" }],
+      "space w j": ["workspace::MoveItemToPaneInDirection", { "direction": "down" }],
+      // +Pane split
+      "space w v": "pane::SplitRight",
+      "space w s": "pane::SplitDown",
       // +LSP (eglot equivalents)
       "space c a": "editor::ToggleCodeActions",
       "space .": "editor::ToggleCodeActions",
@@ -154,23 +167,6 @@
       "space e": "workspace::ToggleLeftDock",
       "ctrl-h": "workspace::ActivatePaneLeft",
       "ctrl-l": "workspace::ActivatePaneRight",
-      "ctrl-k": "workspace::ActivatePaneUp",
-      "ctrl-j": "workspace::ActivatePaneDown",
-    },
-  },
-  {
-    "context": "Dock",
-    "bindings": {
-      "ctrl-w h": "workspace::ActivatePaneLeft",
-      "ctrl-w l": "workspace::ActivatePaneRight",
-      "ctrl-w k": "workspace::ActivatePaneUp",
-      "ctrl-w j": "workspace::ActivatePaneDown",
-    },
-  },
-  {
-    "context": "Terminal",
-    "bindings": {
-      "ctrl-h": "workspace::ActivatePaneLeft",
       "ctrl-k": "workspace::ActivatePaneUp",
       "ctrl-j": "workspace::ActivatePaneDown",
     },
