@@ -4,10 +4,6 @@ vim.g.maplocalleader = ','
 
 vim.g.have_nerd_font = true
 
--- Compatibility shim for telescope + newer Neovim (ft_to_lang was removed)
-if not vim.treesitter.language.ft_to_lang then
-  vim.treesitter.language.ft_to_lang = function(ft) return ft end
-end
 
 -- [[ Setting options ]]
 vim.o.number = true
@@ -147,12 +143,12 @@ require('lazy').setup({
       { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
     },
     config = function()
-      -- Compatibility shim: ft_to_lang was removed in newer Neovim
-      if not vim.treesitter.language.ft_to_lang then
-        vim.treesitter.language.ft_to_lang = function(ft) return ft end
-      end
-
       require('telescope').setup {
+        defaults = {
+          preview = {
+            treesitter = false,
+          },
+        },
         extensions = {
           ['ui-select'] = { require('telescope.themes').get_dropdown() },
         },
