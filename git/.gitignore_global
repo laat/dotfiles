@@ -39,5 +39,8 @@ CLAUDE.local.md
 .claude/worktrees/
 .playwright-mcp
 
+# Zed
+.zed/
+
 # DevPod
 .laat/

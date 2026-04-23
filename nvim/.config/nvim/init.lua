@@ -25,6 +25,7 @@ vim.o.inccommand = 'split'
 vim.o.cursorline = true
 vim.o.scrolloff = 10
 vim.o.confirm = true
+vim.opt.directory = vim.fn.stdpath 'state' .. '/swap//'
 vim.o.termguicolors = true
 
 -- [[ Basic Keymaps ]]
@@ -69,6 +70,10 @@ vim.api.nvim_create_autocmd('BufReadPost', {
     end
   end,
 })
+
+-- Comment aliases
+vim.keymap.set('n', '<leader>cc', 'gcc', { remap = true, desc = 'Comment line' })
+vim.keymap.set('v', '<leader>c', 'gc', { remap = true, desc = 'Comment selection' })
 
 -- Abbreviations
 vim.cmd [[inoreabbrev ldis_ ಠ_ಠ]]
