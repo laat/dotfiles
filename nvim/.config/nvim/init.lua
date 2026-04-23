@@ -147,6 +147,11 @@ require('lazy').setup({
       { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
     },
     config = function()
+      -- Compatibility shim: ft_to_lang was removed in newer Neovim
+      if not vim.treesitter.language.ft_to_lang then
+        vim.treesitter.language.ft_to_lang = function(ft) return ft end
+      end
+
       require('telescope').setup {
         extensions = {
           ['ui-select'] = { require('telescope.themes').get_dropdown() },
