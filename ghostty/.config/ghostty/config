@@ -18,7 +18,7 @@ focus-follows-mouse = true
 
 window-decoration = true
 macos-titlebar-style = native
-macos-option-as-alt = true
+macos-option-as-alt = left
 
 keybind = super+shift+enter=new_split:right
 keybind = super+shift+minus=new_split:down
