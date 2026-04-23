@@ -23,7 +23,6 @@ macos-option-as-alt = left
 keybind = super+b=text:\x02
 keybind = super+p=text:\x02t
 keybind = super+t=text:\x02c
-keybind = super+shift+t=new_tab
 keybind = super+ctrl+1=text:\x1b1
 keybind = super+ctrl+2=text:\x1b2
 keybind = super+ctrl+3=text:\x1b3
