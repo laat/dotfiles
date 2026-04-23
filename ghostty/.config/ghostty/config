@@ -17,7 +17,7 @@ mouse-hide-while-typing = true
 focus-follows-mouse = true
 
 window-decoration = true
-macos-titlebar-style = native
+macos-titlebar-style = hidden
 macos-option-as-alt = left
 
 keybind = super+shift+enter=new_split:right

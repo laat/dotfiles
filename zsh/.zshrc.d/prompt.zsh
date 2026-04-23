@@ -44,7 +44,9 @@ _linedown=$'\e[1B'
 _newline=$'\n'
 #clean prompt with host
 if [ $UID -eq 0 ]; then NCOLOR="red"; else NCOLOR="white"; fi
-PROMPT='%{$fg[$NCOLOR]%}%B%n%b@$FG[145]%m%{$reset_color%}:%{$fg[blue]%}%B%c/%b%{$reset_color%} ${vcs_info_msg_0_} %{$fg[red]%}${_DM_NAME}%{$reset_color%}${_newline}%(!.#.$) '
+: ${PROMPT_USER:=%n}
+: ${PROMPT_HOST:=%m}
+PROMPT='%{$fg[$NCOLOR]%}%B${PROMPT_USER}%b@$FG[145]${PROMPT_HOST}%{$reset_color%}:%{$fg[blue]%}%B%c/%b%{$reset_color%} ${vcs_info_msg_0_} %{$fg[red]%}${_DM_NAME}%{$reset_color%}${_newline}%(!.#.$) '
 
 RPROMPT='%{${_lineup}%}%F{008}[%D{%H:%M:%S}]%f%{${_linedown}%}'
 
