@@ -80,6 +80,7 @@ stow -t "$HOME" --restow --no-folding --stow git pnpm npm codespaces zsh direnv 
 if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
   git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
 fi
+"$HOME/.tmux/plugins/tpm/bin/install_plugins"
 
 # pi agent: install sandbox extension dependencies
 if [ -d "$HOME/.pi/agent/extensions/sandbox" ]; then

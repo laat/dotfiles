@@ -8,7 +8,7 @@ Usage: cs-tmux <command> [args]
 Commands:
   list                 List codespaces for pickers
   preview <name>       Show codespace details
-  connect <name>       Switch to a local tmux session backed by the codespace
+  connect <name>       SSH to the codespace and attach/create remote tmux
   ssh <name> <session> SSH to the codespace and attach/create remote tmux
 EOF
 }
@@ -19,10 +19,6 @@ sanitize_tmux_name() {
 
 codespace_repo() {
   gh codespace view -c "$1" --json repository --template '{{.repository}}'
-}
-
-codespace_display_name() {
-  gh codespace view -c "$1" --json displayName --template '{{.displayName}}'
 }
 
 repo_basename() {
@@ -38,25 +34,12 @@ list_codespaces() {
 
 preview_codespace() {
   codespace="$1"
-  local_session="$(local_session_name "$codespace")"
+  remote_session="$(remote_session_name "$codespace")"
 
   gh codespace view -c "$codespace"
   printf '\n'
-  if tmux has-session -t "$local_session" 2>/dev/null; then
-    printf 'Local tmux session: %s (running)\n' "$local_session"
-  else
-    printf 'Local tmux session: %s (not running)\n' "$local_session"
-  fi
-  printf 'Enter: connect via local tmux + remote tmux\n'
-}
-
-local_session_name() {
-  codespace="$1"
-  repo="$(codespace_repo "$codespace")"
-  display_name="$(codespace_display_name "$codespace")"
-  repo_name="$(repo_basename "$repo")"
-
-  sanitize_tmux_name "cs-${repo_name}-${display_name}"
+  printf 'Remote tmux session: %s\n' "$remote_session"
+  printf 'Enter: SSH into Codespace and attach/create remote tmux\n'
 }
 
 remote_session_name() {
@@ -66,26 +49,9 @@ remote_session_name() {
 
 connect_codespace() {
   codespace="$1"
-  local_session="$(local_session_name "$codespace")"
   remote_session="$(remote_session_name "$codespace")"
-  script_path="$(command -v cs-tmux || printf '%s' "$0")"
 
-  if ! tmux has-session -t "$local_session" 2>/dev/null; then
-    tmux new-session -d -s "$local_session" "$script_path ssh $codespace $remote_session"
-    tmux set-option -t "$local_session" @codespace_name "$codespace" >/dev/null
-    tmux set-option -t "$local_session" @codespace_remote_session "$remote_session" >/dev/null
-  fi
-
-  if ! tmux has-session -t "$local_session" 2>/dev/null; then
-    echo "failed to create local tmux session: $local_session" >&2
-    exit 1
-  fi
-
-  if [ -n "${TMUX:-}" ]; then
-    tmux switch-client -t "$local_session"
-  else
-    tmux attach-session -t "$local_session"
-  fi
+  ssh_codespace "$codespace" "$remote_session"
 }
 
 ssh_codespace() {

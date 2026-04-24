@@ -8,10 +8,9 @@ function prompt_command {
 
     local Color_Off='\e[0m'       # Text Reset
 
-    case "$TERM" in
-        xterm-color) local color_prompt=yes;;
-        xterm-256color) local color_prompt=yes;;
-    esac
+    if [ "$(tput colors 2>/dev/null || printf 0)" -ge 8 ]; then
+        local color_prompt=yes
+    fi
 
     if [ "$(whoami)" = root ]; then
         local user_color=$BIRed
