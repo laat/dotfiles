@@ -1,2 +1,2 @@
-alias oc='opencode'
-alias ocr='opencode -c'
+alias oc='opencode --port 0'
+alias ocr='opencode --port 0 -c'
