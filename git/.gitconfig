@@ -3,6 +3,7 @@
 	email = sigurd@fosseng.net
 [diff]
 	algorithm = histogram
+	colorMoved = default
 [color]
 	diff = auto
 	status = auto
@@ -20,6 +21,8 @@
 	ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate
 	ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
 	lol = log --graph --decorate --pretty=oneline --abbrev-commit --all
+	d = diff
+	dc = diff --cached
 	panic = !tar cvf ../git_panic.tar *
 	changelog = !git-changelog
 	ignore = "!gi() { curl -L -s https://www.gitignore.io/api/$@ | sed '/^# .*toptal/d' ;}; gi"
@@ -50,6 +53,16 @@
 	user = laat
 [diff "orgmode"]
 	xfuncname = "^(\\*+.*)$"
+[merge]
+	conflictstyle = zdiff3
+[rerere]
+	enabled = true
+[fetch]
+	prune = true
+[log]
+	abbrevCommit = true
+[branch]
+	sort = -committerdate
 [pull]
 	rebase = true
 [init]
