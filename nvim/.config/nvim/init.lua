@@ -417,6 +417,7 @@ require('lazy').setup({
 
   { -- Neogit
     'NeogitOrg/neogit',
+    commit = '0cac75a5', -- pinned: 7a3daecb introduced scope+buf bug incompatible with nvim 0.12
     dependencies = {
       'nvim-lua/plenary.nvim',
       'sindrets/diffview.nvim',
