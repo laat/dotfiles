@@ -48,6 +48,15 @@ mkdir -p "$HOME/bin"
 if command -v fdfind &>/dev/null && ! command -v fd &>/dev/null; then
   ln -sf "$(command -v fdfind)" "$HOME/bin/fd"
 fi
+if [ -e "$HOME/.npmrc" ]; then
+  echo "warning: $HOME/.npmrc already exists, leaving it unchanged" >&2
+else
+  cat >"$HOME/.npmrc" <<'EOF'
+//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
+registry=https://registry.npmjs.org/
+always-auth=true
+EOF
+fi
 GOBIN="$HOME/bin" go install github.com/joshmedeski/sesh/v2@latest
 npm install --global --prefix "$HOME" @anthropic-ai/claude-code opencode-ai tree-sitter-cli
 
@@ -66,7 +75,7 @@ backup_if_present "$HOME/.gitignore_global"
 
 stow -t "$HOME" --restow --no-folding stow
 stow -t "$HOME" --restow --no-folding --stow skel
-stow -t "$HOME" --restow --no-folding --stow git pnpm npm codespaces zsh direnv nvim tmux zoxide claude opencode devpod pi
+stow -t "$HOME" --restow --no-folding --stow git pnpm npm codespaces zsh direnv nvim tmux television zoxide claude opencode devpod pi
 
 if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
   git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
