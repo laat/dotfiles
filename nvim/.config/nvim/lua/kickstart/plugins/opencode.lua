@@ -6,7 +6,15 @@ return {
   dependencies = { 'folke/snacks.nvim' },
   config = function()
     ---@type opencode.Opts
-    vim.g.opencode_opts = {}
+    vim.g.opencode_opts = {
+      server = {
+        start = false,
+        stop = false,
+        toggle = function()
+          vim.fn.system('tmux split-window -h "opencode --port 0"')
+        end,
+      },
+    }
 
     vim.o.autoread = true
 
