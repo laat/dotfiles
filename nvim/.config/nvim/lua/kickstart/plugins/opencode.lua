@@ -11,7 +11,7 @@ return {
         start = false,
         stop = false,
         toggle = function()
-          vim.fn.system('tmux split-window -h "opencode --port 0"')
+          vim.fn.system('tmux split-window -hb "opencode --port 0"')
         end,
       },
     }
