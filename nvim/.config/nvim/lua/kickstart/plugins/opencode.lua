@@ -11,7 +11,13 @@ return {
         start = false,
         stop = false,
         toggle = function()
-          vim.fn.system('tmux split-window -hb "opencode --port 0"')
+          local pane = vim.fn.system("tmux list-panes -F '#{pane_id} #{pane_current_command}' | grep -i opencode | awk '{print $1}' | head -1")
+          pane = pane:gsub('%s+', '')
+          if pane ~= '' then
+            vim.fn.system('tmux select-pane -t ' .. pane)
+          else
+            vim.fn.system('tmux split-window -hb "opencode --port 0"')
+          end
         end,
       },
     }
