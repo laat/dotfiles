@@ -59,7 +59,8 @@ ssh_codespace() {
   remote_session="$2"
 
   # Use a remote tmux session so work survives laptop sleep or tunnel drops.
-  exec gh codespace ssh -c "$codespace" -- -t tmux new-session -A -s "$remote_session"
+  # Override TERM: xterm-ghostty is not in the remote terminfo, use xterm-256color.
+  exec gh codespace ssh -c "$codespace" -- -t env TERM=xterm-256color tmux new-session -A -s "$remote_session"
 }
 
 command="${1:-}"
