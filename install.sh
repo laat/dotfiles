@@ -49,7 +49,7 @@ if command -v fdfind &>/dev/null && ! command -v fd &>/dev/null; then
   ln -sf "$(command -v fdfind)" "$HOME/bin/fd"
 fi
 GOBIN="$HOME/bin" go install github.com/joshmedeski/sesh/v2@latest
-npm install --global --prefix "$HOME" @anthropic-ai/claude-code opencode-ai
+npm install --global --prefix "$HOME" @anthropic-ai/claude-code opencode-ai tree-sitter-cli
 
 if command -v uv &>/dev/null; then
   uv tool install thefuck
