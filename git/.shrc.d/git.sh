@@ -9,7 +9,7 @@ alias gcam='git commit -a -m'
 alias gcams='git commit -a -m -S'
 alias gd='git diff'
 alias gf='git fetch'
-alias gst='git status'
+alias gst='git status -sb'
 
 alias gignore='git update-index --assume-unchanged'
 alias gignored='git ls-files -v | grep "^[[:lower:]]"'
