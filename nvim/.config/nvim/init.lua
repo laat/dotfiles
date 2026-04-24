@@ -45,10 +45,7 @@ vim.diagnostic.config {
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
-vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+-- Window navigation is handled by vim-tmux-navigator (cmd+hjkl)
 
 -- Remap for dealing with word wrap
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
@@ -103,6 +100,25 @@ rtp:prepend(lazypath)
 -- [[ Plugins ]]
 require('lazy').setup({
   { 'NMAC427/guess-indent.nvim', opts = {} },
+
+  { -- Tmux/vim pane navigation with cmd+hjkl
+    'christoomey/vim-tmux-navigator',
+    cmd = {
+      'TmuxNavigateLeft',
+      'TmuxNavigateDown',
+      'TmuxNavigateUp',
+      'TmuxNavigateRight',
+    },
+    keys = {
+      { '<M-h>', '<cmd>TmuxNavigateLeft<cr>',  desc = 'Navigate left' },
+      { '<M-j>', '<cmd>TmuxNavigateDown<cr>',  desc = 'Navigate down' },
+      { '<M-k>', '<cmd>TmuxNavigateUp<cr>',    desc = 'Navigate up' },
+      { '<M-l>', '<cmd>TmuxNavigateRight<cr>', desc = 'Navigate right' },
+    },
+    init = function()
+      vim.g.tmux_navigator_no_mappings = 1
+    end,
+  },
 
   { -- Git signs
     'lewis6991/gitsigns.nvim',

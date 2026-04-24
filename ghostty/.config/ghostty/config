@@ -33,8 +33,9 @@ keybind = super+ctrl+7=text:\x1b7
 keybind = super+ctrl+8=text:\x1b8
 keybind = super+ctrl+9=text:\x1b9
 keybind = super+ctrl+0=text:\x1b0
-keybind = super+h=text:\x02h
-keybind = super+j=text:\x02j
-keybind = super+l=text:\x02l
+keybind = super+h=text:\x1bh
+keybind = super+j=text:\x1bj
+keybind = super+k=text:\x1bk
+keybind = super+l=text:\x1bl
 keybind = super+shift+enter=new_split:right
 keybind = super+shift+minus=new_split:down
