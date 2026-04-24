@@ -48,6 +48,7 @@ if command -v fdfind &>/dev/null && ! command -v fd &>/dev/null; then
   ln -sf "$(command -v fdfind)" "$HOME/bin/fd"
 fi
 GOBIN="$HOME/bin" go install github.com/joshmedeski/sesh/v2@latest
+npm install --global --prefix "$HOME" @anthropic-ai/claude-code opencode-ai
 
 if command -v uv &>/dev/null; then
   uv tool install thefuck
@@ -64,7 +65,7 @@ backup_if_present "$HOME/.gitignore_global"
 
 stow -t "$HOME" --restow --no-folding stow
 stow -t "$HOME" --restow --no-folding --stow skel
-stow -t "$HOME" --restow --no-folding --stow git pnpm npm codespaces zsh direnv nvim tmux zoxide devpod pi
+stow -t "$HOME" --restow --no-folding --stow git pnpm npm codespaces zsh direnv nvim tmux zoxide claude opencode devpod pi
 
 if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
   git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
