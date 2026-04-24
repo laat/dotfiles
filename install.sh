@@ -21,6 +21,7 @@ sudo apt-get install -q -y --no-install-recommends \
   git \
   golang-go \
   make \
+  ncurses-term \
   neovim \
   nodejs \
   npm \
