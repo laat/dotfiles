@@ -30,7 +30,10 @@ export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
 # Trust and install tools from .mise.toml
 DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
 "$HOME/.local/bin/mise" trust "$DOTFILES_DIR/.mise.toml"
-MISE_CONFIG_FILE="$DOTFILES_DIR/.mise.toml" "$HOME/.local/bin/mise" install --yes
+# Pass GITHUB_TOKEN if available so mise uses authenticated API requests
+GITHUB_TOKEN="${GITHUB_TOKEN:-}" \
+  MISE_CONFIG_FILE="$DOTFILES_DIR/.mise.toml" \
+  "$HOME/.local/bin/mise" install --yes
 
 
 # WezTerm AppImage (x86_64 only — for native wezterm ssh multiplexing)
