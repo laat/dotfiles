@@ -62,9 +62,9 @@ backup_if_present "$HOME/.zshrc"
 backup_if_present "$HOME/.gitconfig"
 backup_if_present "$HOME/.gitignore_global"
 
-stow -t "$HOME" --restow --no-folding stow
-stow -t "$HOME" --restow --no-folding --stow skel
-stow -t "$HOME" --restow --no-folding --stow git pnpm npm codespaces zsh direnv nvim television zoxide claude opencode devpod pi
+stow -d "$DOTFILES_DIR" -t "$HOME" --restow --no-folding stow
+stow -d "$DOTFILES_DIR" -t "$HOME" --restow --no-folding --stow skel
+stow -d "$DOTFILES_DIR" -t "$HOME" --restow --no-folding --stow git pnpm npm codespaces zsh direnv nvim television zoxide claude opencode devpod pi
 
 # pi agent: install sandbox extension dependencies
 if [ -d "$HOME/.pi/agent/extensions/sandbox" ]; then
