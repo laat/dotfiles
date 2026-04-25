@@ -26,12 +26,11 @@ sudo apt-get install -q -y --no-install-recommends \
 # mise: install and activate
 curl -fsSL https://mise.run | sh
 export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
-export MISE_TRUST_CONFIG=1
-eval "$("$HOME/.local/bin/mise" activate bash)"
 
-# Install all tools declared in .mise.toml (node, go, neovim, fzf, fd, rg, zoxide, ...)
+# Trust and install tools from .mise.toml
 DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
-MISE_CONFIG_FILE="$DOTFILES_DIR/.mise.toml" mise install --yes
+"$HOME/.local/bin/mise" trust "$DOTFILES_DIR/.mise.toml"
+MISE_CONFIG_FILE="$DOTFILES_DIR/.mise.toml" "$HOME/.local/bin/mise" install --yes
 
 
 # WezTerm AppImage (x86_64 only — for native wezterm ssh multiplexing)
@@ -63,9 +62,13 @@ backup_if_present "$HOME/.zshrc"
 backup_if_present "$HOME/.gitconfig"
 backup_if_present "$HOME/.gitignore_global"
 
-stow -d "$DOTFILES_DIR" -t "$HOME" --restow --no-folding stow
-stow -d "$DOTFILES_DIR" -t "$HOME" --restow --no-folding --stow skel
-stow -d "$DOTFILES_DIR" -t "$HOME" --restow --no-folding --stow git pnpm npm codespaces zsh direnv nvim television zoxide claude opencode devpod pi
+stow_dotfiles() {
+  stow -d "$DOTFILES_DIR" -t "$HOME" --restow --no-folding "$@" 2>&1 \
+    | grep -v 'BUG in find_stowed_path' >&2 || true
+}
+stow_dotfiles stow
+stow_dotfiles --stow skel
+stow_dotfiles --stow git pnpm npm codespaces zsh direnv nvim television zoxide claude opencode devpod pi
 
 # pi agent: install sandbox extension dependencies
 if [ -d "$HOME/.pi/agent/extensions/sandbox" ]; then
