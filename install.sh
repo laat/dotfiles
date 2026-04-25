@@ -27,17 +27,18 @@ sudo apt-get install -q -y --no-install-recommends \
 # mise: install and activate
 curl -fsSL https://mise.run | sh
 export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
+export MISE_TRUST_CONFIG=1
 eval "$("$HOME/.local/bin/mise" activate bash)"
 
 # Install all tools declared in .mise.toml (node, go, neovim, fzf, fd, rg, zoxide, ...)
 DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
-MISE_TRUST_CONFIG=1 MISE_CONFIG_FILE="$DOTFILES_DIR/.mise.toml" mise install --yes
+MISE_CONFIG_FILE="$DOTFILES_DIR/.mise.toml" mise install --yes
 
 # sesh — not in mise registry, install via go
-GOBIN="$HOME/bin" mise exec go -- go install github.com/joshmedeski/sesh/v2@latest
+mkdir -p "$HOME/bin"
+GOBIN="$HOME/bin" MISE_CONFIG_FILE="$DOTFILES_DIR/.mise.toml" mise exec go -- go install github.com/joshmedeski/sesh/v2@latest
 
 # WezTerm AppImage (x86_64 only — for native wezterm ssh multiplexing)
-mkdir -p "$HOME/bin"
 if [ "$(uname -m)" = "x86_64" ]; then
   curl -fsSL "https://github.com/wez/wezterm/releases/download/20240203-110809-5046fc22/WezTerm-20240203-110809-5046fc22-Ubuntu20.04.AppImage" \
     -o "$HOME/bin/wezterm"
