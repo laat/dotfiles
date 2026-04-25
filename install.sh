@@ -48,6 +48,18 @@ mkdir -p "$HOME/bin"
 if command -v fdfind &>/dev/null && ! command -v fd &>/dev/null; then
   ln -sf "$(command -v fdfind)" "$HOME/bin/fd"
 fi
+
+# WezTerm (for native remote multiplexing via wezterm ssh)
+case "$(uname -m)" in
+  aarch64 | arm64) wezterm_arch="aarch64" ;;
+  x86_64 | amd64)  wezterm_arch="x86_64" ;;
+  *) echo "warning: unsupported arch for WezTerm, skipping" >&2; wezterm_arch="" ;;
+esac
+if [ -n "$wezterm_arch" ]; then
+  wezterm_url="https://github.com/wez/wezterm/releases/download/20240203-110809-5046fc22/WezTerm-20240203-110809-5046fc22-${wezterm_arch}.AppImage"
+  curl -fsSL "$wezterm_url" -o "$HOME/bin/wezterm"
+  chmod +x "$HOME/bin/wezterm"
+fi
 if [ -e "$HOME/.npmrc" ]; then
   echo "warning: $HOME/.npmrc already exists, leaving it unchanged" >&2
 else
