@@ -20,7 +20,6 @@ sudo apt-get install -q -y --no-install-recommends \
   make \
   ncurses-term \
   stow \
-  tmux \
   unzip \
   xz-utils
 
@@ -34,9 +33,6 @@ eval "$("$HOME/.local/bin/mise" activate bash)"
 DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
 MISE_CONFIG_FILE="$DOTFILES_DIR/.mise.toml" mise install --yes
 
-# sesh — not in mise registry, install via go
-mkdir -p "$HOME/bin"
-GOBIN="$HOME/bin" MISE_CONFIG_FILE="$DOTFILES_DIR/.mise.toml" mise exec go -- go install github.com/joshmedeski/sesh/v2@latest
 
 # WezTerm AppImage (x86_64 only — for native wezterm ssh multiplexing)
 if [ "$(uname -m)" = "x86_64" ]; then
@@ -68,12 +64,7 @@ backup_if_present "$HOME/.gitignore_global"
 
 stow -t "$HOME" --restow --no-folding stow
 stow -t "$HOME" --restow --no-folding --stow skel
-stow -t "$HOME" --restow --no-folding --stow git pnpm npm codespaces zsh direnv nvim tmux television zoxide claude opencode devpod pi
-
-if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
-  git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
-fi
-"$HOME/.tmux/plugins/tpm/bin/install_plugins"
+stow -t "$HOME" --restow --no-folding --stow git pnpm npm codespaces zsh direnv nvim television zoxide claude opencode devpod pi
 
 # pi agent: install sandbox extension dependencies
 if [ -d "$HOME/.pi/agent/extensions/sandbox" ]; then
