@@ -35,6 +35,7 @@ MISE_CONFIG_FILE="$DOTFILES_DIR/.mise.toml" mise install --yes
 
 
 # WezTerm AppImage (x86_64 only — for native wezterm ssh multiplexing)
+mkdir -p "$HOME/bin"
 if [ "$(uname -m)" = "x86_64" ]; then
   curl -fsSL "https://github.com/wez/wezterm/releases/download/20240203-110809-5046fc22/WezTerm-20240203-110809-5046fc22-Ubuntu20.04.AppImage" \
     -o "$HOME/bin/wezterm"
