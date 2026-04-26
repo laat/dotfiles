@@ -1,20 +1,20 @@
 [metadata]
 name = "gh-codespaces"
-description = "Connect to GitHub Codespaces through local and remote tmux"
-requirements = ["gh", "tmux", "cs-tmux"]
+description = "Connect to GitHub Codespaces with gh"
+requirements = ["gh"]
 
 [source]
-command = "cs-tmux list"
+command = "gh codespace list --limit \"${GH_CODESPACES_LIMIT:-50}\" --json name,displayName,repository,state,lastUsedAt,machineName --template '{{range .}}{{.name}}{{\"\\t\"}}{{.repository}}{{\"\\t\"}}{{.state}}{{\"\\t\"}}{{.displayName}}{{\"\\t\"}}{{.machineName}}{{\"\\t\"}}{{.lastUsedAt}}{{\"\\n\"}}{{end}}'"
 display = "{split:\t:1}  {split:\t:2}  {split:\t:3}"
 output = "{split:\t:0}"
 
 [preview]
-command = "cs-tmux preview '{split:\t:0}'"
+command = "gh codespace view -c '{split:\t:0}'"
 
 [keybindings]
 enter = "actions:connect"
 
 [actions.connect]
-description = "Connect to codespace in tmux"
-command = "cs-tmux connect '{split:\t:0}'"
+description = "SSH to codespace"
+command = "gh codespace ssh -c '{split:\t:0}'"
 mode = "execute"
