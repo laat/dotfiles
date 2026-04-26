@@ -45,7 +45,7 @@ vim.diagnostic.config {
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
--- Window navigation is handled by vim-tmux-navigator (cmd+hjkl)
+-- Window navigation is handled by smart-splits.nvim (alt+hjkl)
 
 -- Remap for dealing with word wrap
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
@@ -74,6 +74,13 @@ vim.api.nvim_create_autocmd('BufReadPost', {
   end,
 })
 
+-- Norwegian keyboard: map ø to : (ø is on the colon key)
+vim.keymap.set({ 'n', 'x', 'o' }, 'ø', ':', { desc = 'Command mode (Norwegian keyboard)' })
+
+-- Cmd+S to save (WezTerm sends <Esc>s as \x1bs)
+vim.keymap.set({ 'n', 'v' }, '\x1bs', '<cmd>w<CR>', { desc = 'Save file (Cmd+S)' })
+vim.keymap.set('i', '\x1bs', '<Esc><cmd>w<CR>', { desc = 'Save file (Cmd+S)' })
+
 -- Comment aliases
 vim.keymap.set('n', '<leader>cc', 'gcc', { remap = true, desc = 'Comment line' })
 vim.keymap.set('v', '<leader>c', 'gc', { remap = true, desc = 'Comment selection' })
@@ -101,23 +108,20 @@ rtp:prepend(lazypath)
 require('lazy').setup({
   { 'NMAC427/guess-indent.nvim', opts = {} },
 
-  { -- Tmux/vim pane navigation with cmd+hjkl
-    'christoomey/vim-tmux-navigator',
-    cmd = {
-      'TmuxNavigateLeft',
-      'TmuxNavigateDown',
-      'TmuxNavigateUp',
-      'TmuxNavigateRight',
-    },
+  { -- Pane navigation with WezTerm integration
+    'mrjones2014/smart-splits.nvim',
+    lazy = false,
     keys = {
-      { '<M-h>', '<cmd>TmuxNavigateLeft<cr>',  desc = 'Navigate left' },
-      { '<M-j>', '<cmd>TmuxNavigateDown<cr>',  desc = 'Navigate down' },
-      { '<M-k>', '<cmd>TmuxNavigateUp<cr>',    desc = 'Navigate up' },
-      { '<M-l>', '<cmd>TmuxNavigateRight<cr>', desc = 'Navigate right' },
+      { '<M-h>', function() require('smart-splits').move_cursor_left()  end, desc = 'Navigate left' },
+      { '<M-j>', function() require('smart-splits').move_cursor_down()  end, desc = 'Navigate down' },
+      { '<M-k>', function() require('smart-splits').move_cursor_up()    end, desc = 'Navigate up' },
+      { '<M-l>', function() require('smart-splits').move_cursor_right() end, desc = 'Navigate right' },
+      { '<M-H>', function() require('smart-splits').resize_left()       end, desc = 'Resize left' },
+      { '<M-J>', function() require('smart-splits').resize_down()       end, desc = 'Resize down' },
+      { '<M-K>', function() require('smart-splits').resize_up()         end, desc = 'Resize up' },
+      { '<M-L>', function() require('smart-splits').resize_right()      end, desc = 'Resize right' },
     },
-    init = function()
-      vim.g.tmux_navigator_no_mappings = 1
-    end,
+    opts = {},
   },
 
   { -- Git signs
