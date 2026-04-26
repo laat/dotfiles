@@ -2,12 +2,30 @@
 
 ## Installation
 ```sh
-stow --restow --no-folding stow
-stow --restow --no-folding --stow skel
-
-# then applications
-stow --restow --no-folding --stow git emacs vim
+./install.sh
 ```
+
+`install.sh` bootstraps system dependencies for GitHub devspaces/Codespaces,
+installs mise-managed tools, and applies the default dotfiles packages.
+
+For an existing machine with dependencies already installed, use the dotfiles
+CLI directly:
+
+```sh
+dotfiles apply
+```
+
+Useful commands:
+
+```sh
+dotfiles dry-run         # show what would be stowed
+dotfiles packages        # list default packages
+dotfiles packages --all  # list all package roots
+dotfiles apply nvim zsh  # restow selected packages
+dotfiles doctor          # check basic setup
+```
+
+All package application goes through GNU Stow with `--no-folding`.
 
 ## Skeleton (`skel`)
 
