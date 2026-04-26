@@ -8,3 +8,13 @@ import = ["~/.config/sesh/sesh.local.toml"]
 name = "dotfiles"
 path = "~/.dotfiles"
 startup_command = "tmux split-window -h -c '#{pane_current_path}' 'nvim' ; opencode --port 0 -c"
+
+[[session]]
+name = "nvimconf"
+path = "~/.config/nvim"
+startup_command = "nvim ~/.config/nvim/init.lua"
+
+[[session]]
+name = "tmuxconf"
+path = "~/.dotfiles"
+startup_command = "nvim ~/.tmux.conf"
