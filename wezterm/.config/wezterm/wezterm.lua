@@ -10,8 +10,9 @@ config.font_size = 14.0
 config.color_scheme = 'Catppuccin Mocha'
 
 -- Window
-config.window_decorations = 'RESIZE'
+config.window_decorations = 'RESIZE|INTEGRATED_BUTTONS'
 config.window_close_confirmation = 'NeverPrompt'
+config.window_padding = { left = 4, right = 4, top = 4, bottom = 4 }
 
 -- Cursor
 config.default_cursor_style = 'BlinkingBlock'
@@ -45,38 +46,6 @@ config.set_environment_variables = {
   PATH = '/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:' .. (os.getenv('PATH') or ''),
 }
 
--- ---------------------------------------------------------------------------
--- Tab bar: tabline.wez plugin
--- ---------------------------------------------------------------------------
-local cmdpicker = wezterm.plugin.require 'https://github.com/abidibo/wezterm-cmdpicker'
-local tabline = wezterm.plugin.require 'https://github.com/michaelbrusegard/tabline.wez'
-tabline.setup {
-  options = {
-    theme = 'Catppuccin Mocha',
-    section_separators = { left = '', right = '' },
-    component_separators = { left = '', right = '' },
-    tab_separators = { left = '', right = '' },
-  },
-  sections = {
-    tabline_a = { 'mode' },
-    tabline_b = { 'workspace' },
-    tabline_c = { ' ' },
-    tab_active = {
-      'index',
-      { 'parent', padding = 0 },
-      '/',
-      { 'cwd', padding = { left = 0, right = 1 } },
-      { 'zoomed', padding = 0 },
-    },
-    tab_inactive = { 'index', { 'process', padding = { left = 0, right = 1 } } },
-    tabline_x = {},
-    tabline_y = { { 'datetime', style = '%H:%M' } },
-    tabline_z = {},
-  },
-}
-tabline.apply_to_config(config)
--- Set after apply_to_config so it isn't overwritten by the plugin
-config.window_padding = { left = 4, right = 4, top = 4, bottom = 4 }
 
 -- ---------------------------------------------------------------------------
 -- Keys
@@ -148,6 +117,7 @@ config.keys = {
 }
 
 -- Call last, after all keybindings are defined
+local cmdpicker = wezterm.plugin.require 'https://github.com/abidibo/wezterm-cmdpicker'
 cmdpicker.apply_to_config(config, {
   title = 'Command Palette',
 })
