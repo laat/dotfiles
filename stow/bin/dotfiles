@@ -1,0 +1,174 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DEFAULT_PACKAGES=(
+  git
+  pnpm
+  npm
+  codespaces
+  zsh
+  direnv
+  nvim
+  television
+  zoxide
+  claude
+  codex
+  opencode
+  devpod
+  pi
+)
+
+BASE_PACKAGES=(stow skel)
+
+resolve_dotfiles_dir() {
+  if [ -n "${DOTFILES_DIR:-}" ]; then
+    cd "$DOTFILES_DIR"
+    pwd
+    return
+  fi
+
+  local source dir target
+  source="${BASH_SOURCE[0]}"
+
+  while [ -L "$source" ]; do
+    dir="$(cd -P "$(dirname "$source")" && pwd)"
+    target="$(readlink "$source")"
+    case "$target" in
+      /*) source="$target" ;;
+      *) source="$dir/$target" ;;
+    esac
+  done
+
+  dir="$(cd -P "$(dirname "$source")" && pwd)"
+  cd "$dir/../.."
+  pwd
+}
+
+DOTFILES_DIR="$(resolve_dotfiles_dir)"
+TARGET_DIR="${DOTFILES_TARGET:-$HOME}"
+
+usage() {
+  cat <<EOF
+Usage: dotfiles <command> [packages...]
+
+Commands:
+  apply [packages...]     Restow default packages, or the named packages
+  dry-run [packages...]   Show what apply would do
+  unstow <packages...>    Remove named packages
+  packages [--all]        List default packages, or all package directories
+  status                  Show git status for the dotfiles repo
+  doctor                  Check basic dotfiles setup
+  repo                    Print the dotfiles repo path
+  help                    Show this help
+
+Environment:
+  DOTFILES_DIR            Override the dotfiles repo path
+  DOTFILES_TARGET         Override the stow target, defaults to \$HOME
+EOF
+}
+
+die() {
+  echo "dotfiles: $*" >&2
+  exit 1
+}
+
+stow_package() {
+  local mode="$1"
+  shift
+
+  [ "$#" -gt 0 ] || die "no packages specified"
+
+  stow -d "$DOTFILES_DIR" -t "$TARGET_DIR" --no-folding "$mode" "$@"
+}
+
+default_packages() {
+  printf '%s\n' "${BASE_PACKAGES[@]}" "${DEFAULT_PACKAGES[@]}"
+}
+
+all_packages() {
+  find "$DOTFILES_DIR" -mindepth 1 -maxdepth 1 -type d ! -name '.*' -exec basename {} \; | sort
+}
+
+selected_packages() {
+  if [ "$#" -eq 0 ]; then
+    default_packages
+  elif [ "${1:-}" = "--all" ]; then
+    all_packages
+  else
+    printf '%s\n' "$@"
+  fi
+}
+
+apply_packages() {
+  packages=($(selected_packages "$@"))
+  stow_package --restow "${packages[@]}"
+}
+
+dry_run_packages() {
+  packages=($(selected_packages "$@"))
+  stow -d "$DOTFILES_DIR" -t "$TARGET_DIR" --no-folding --restow --simulate --verbose=2 "${packages[@]}"
+}
+
+list_packages() {
+  case "${1:-}" in
+    --all)
+      all_packages
+      ;;
+    "")
+      default_packages
+      ;;
+    *)
+      die "unknown packages option: $1"
+      ;;
+  esac
+}
+
+doctor() {
+  command -v stow >/dev/null 2>&1 || die "stow is not installed"
+  [ -d "$DOTFILES_DIR/.git" ] || die "$DOTFILES_DIR is not a git repository"
+  [ -d "$TARGET_DIR" ] || die "$TARGET_DIR does not exist"
+
+  echo "repo: $DOTFILES_DIR"
+  echo "target: $TARGET_DIR"
+  echo "stow: $(command -v stow)"
+
+  case ":$PATH:" in
+    *":$HOME/bin:"*) echo "path: $HOME/bin is in PATH" ;;
+    *) echo "path: warning: $HOME/bin is not in PATH" ;;
+  esac
+}
+
+command="${1:-help}"
+[ "$#" -eq 0 ] || shift
+
+case "$command" in
+  apply)
+    apply_packages "$@"
+    ;;
+  dry-run|dryrun|plan)
+    dry_run_packages "$@"
+    ;;
+  unstow|delete|remove)
+    [ "$#" -gt 0 ] || die "unstow requires at least one package"
+    stow_package --delete "$@"
+    ;;
+  packages|list)
+    list_packages "$@"
+    ;;
+  status)
+    git -C "$DOTFILES_DIR" status --short
+    ;;
+  doctor)
+    doctor
+    ;;
+  repo)
+    echo "$DOTFILES_DIR"
+    ;;
+  help|-h|--help)
+    usage
+    ;;
+  *)
+    usage >&2
+    die "unknown command: $command"
+    ;;
+esac

@@ -65,13 +65,7 @@ backup_if_present "$HOME/.zshrc"
 backup_if_present "$HOME/.gitconfig"
 backup_if_present "$HOME/.gitignore_global"
 
-stow_dotfiles() {
-  stow -d "$DOTFILES_DIR" -t "$HOME" --restow --no-folding "$@" 2>&1 \
-    | grep -v 'BUG in find_stowed_path' >&2 || true
-}
-stow_dotfiles stow
-stow_dotfiles --stow skel
-stow_dotfiles --stow git pnpm npm codespaces zsh direnv nvim television zoxide claude codex opencode devpod pi
+"$DOTFILES_DIR/stow/bin/dotfiles" apply
 
 # pi agent: install sandbox extension dependencies
 if [ -d "$HOME/.pi/agent/extensions/sandbox" ]; then
