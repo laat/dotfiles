@@ -3,6 +3,7 @@ set -euo pipefail
 
 DEFAULT_PACKAGES=(
   git
+  mise
   pnpm
   npm
   codespaces
