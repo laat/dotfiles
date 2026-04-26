@@ -41,5 +41,6 @@ keybind = super+shift+h=text:\x1bH
 keybind = super+shift+j=text:\x1bJ
 keybind = super+shift+k=text:\x1bK
 keybind = super+shift+l=text:\x1bL
+keybind = super+d=text:\x02|
 keybind = super+shift+enter=new_split:right
 keybind = super+shift+minus=new_split:down
