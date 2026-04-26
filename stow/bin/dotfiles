@@ -15,7 +15,6 @@ DEFAULT_PACKAGES=(
   claude
   codex
   opencode
-  devpod
   pi
 )
 
