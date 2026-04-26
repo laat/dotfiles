@@ -71,7 +71,7 @@ stow_dotfiles() {
 }
 stow_dotfiles stow
 stow_dotfiles --stow skel
-stow_dotfiles --stow git pnpm npm codespaces zsh direnv nvim television zoxide claude opencode devpod pi
+stow_dotfiles --stow git pnpm npm codespaces zsh direnv nvim television zoxide claude codex opencode devpod pi
 
 # pi agent: install sandbox extension dependencies
 if [ -d "$HOME/.pi/agent/extensions/sandbox" ]; then
