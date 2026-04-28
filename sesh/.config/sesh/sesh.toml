@@ -7,7 +7,7 @@ import = ["~/.config/sesh/sesh.local.toml"]
 [[session]]
 name = "dotfiles"
 path = "~/.dotfiles"
-startup_command = "tmux split-window -h -c '#{pane_current_path}' 'nvim' ; opencode --port 0 -c"
+startup_command = "tmux split-window -h -c '#{pane_current_path}' 'nvim' ; codex"
 
 [[session]]
 name = "nvimconf"
