@@ -39,7 +39,7 @@ return {
     { '<leader>ss', function() Snacks.picker.pickers() end, desc = '[S]earch [S]elect Picker' },
     { '<leader>sw', function() Snacks.picker.grep_word({ hidden = true }) end, desc = '[S]earch current [W]ord', mode = { 'n', 'v' } },
     { '<leader>sg', function() Snacks.picker.grep({ hidden = true }) end, desc = '[S]earch by [G]rep' },
-    { '<leader>sd', function() Snacks.picker.diagnostics() end, desc = '[S]earch [D]iagnostics' },
+    { '<leader>si', function() Snacks.picker.diagnostics() end, desc = '[S]earch D[i]agnostics' },
     { '<leader>sr', function() Snacks.picker.resume() end, desc = '[S]earch [R]esume' },
     { '<leader>s.', function() Snacks.picker.recent() end, desc = '[S]earch Recent Files' },
     { '<leader>sc', function() Snacks.picker.commands() end, desc = '[S]earch [C]ommands' },
