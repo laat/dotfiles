@@ -27,12 +27,13 @@ sudo apt-get install -q -y --no-install-recommends \
 curl -fsSL https://mise.run | sh
 export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
 
-# Trust and install tools from .mise.toml
+# Trust and install tools from the stowed global mise config
 DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
-"$HOME/.local/bin/mise" trust "$DOTFILES_DIR/.mise.toml"
+MISE_CONFIG="$DOTFILES_DIR/mise/.config/mise/config.toml"
+"$HOME/.local/bin/mise" trust "$MISE_CONFIG"
 # Pass GITHUB_TOKEN if available so mise uses authenticated API requests
 GITHUB_TOKEN="${GITHUB_TOKEN:-}" \
-  MISE_CONFIG_FILE="$DOTFILES_DIR/.mise.toml" \
+  MISE_CONFIG_FILE="$MISE_CONFIG" \
   "$HOME/.local/bin/mise" install --yes
 
 
@@ -64,6 +65,7 @@ backup_if_present "$HOME/.zprofile"
 backup_if_present "$HOME/.zshrc"
 backup_if_present "$HOME/.gitconfig"
 backup_if_present "$HOME/.gitignore_global"
+backup_if_present "$HOME/.config/mise/config.toml"
 
 "$DOTFILES_DIR/stow/bin/dotfiles" apply
 
