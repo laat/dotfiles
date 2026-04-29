@@ -34,6 +34,9 @@ MISE_CONFIG="$DOTFILES_DIR/mise/.config/mise/config.toml"
 # Pass GITHUB_TOKEN if available so mise uses authenticated API requests
 GITHUB_TOKEN="${GITHUB_TOKEN:-}" \
   MISE_CONFIG_FILE="$MISE_CONFIG" \
+  "$HOME/.local/bin/mise" install --yes rust
+GITHUB_TOKEN="${GITHUB_TOKEN:-}" \
+  MISE_CONFIG_FILE="$MISE_CONFIG" \
   "$HOME/.local/bin/mise" install --yes
 
 
