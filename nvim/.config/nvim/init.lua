@@ -402,14 +402,7 @@ require('lazy').setup({
     end,
   },
 
-  -- Optional kickstart plugins
-  require 'kickstart.plugins.gitsigns',
-  require 'kickstart.plugins.indent_line',
-  require 'kickstart.plugins.snacks',
-  require 'kickstart.plugins.opencode',
-
-  -- Custom plugins (auto-imports lua/custom/plugins/*.lua)
-  { import = 'custom.plugins' },
+  { import = 'plugins' },
 }, { ---@diagnostic disable-line: missing-fields
   ui = {
     icons = vim.g.have_nerd_font and {} or {
