@@ -9,7 +9,6 @@ vim.g.have_nerd_font = true
 vim.o.number = true
 vim.o.mouse = 'a'
 vim.o.showmode = false
-vim.o.hlsearch = false
 vim.schedule(function() vim.o.clipboard = 'unnamedplus' end)
 vim.o.breakindent = true
 vim.o.undofile = true
@@ -118,38 +117,6 @@ rtp:prepend(lazypath)
 require('lazy').setup({
   { 'NMAC427/guess-indent.nvim', opts = {} },
 
-  { -- Pane navigation with WezTerm integration
-    'mrjones2014/smart-splits.nvim',
-    lazy = false,
-    keys = {
-      { '<M-h>', function() require('smart-splits').move_cursor_left()  end, desc = 'Navigate left' },
-      { '<M-j>', function() require('smart-splits').move_cursor_down()  end, desc = 'Navigate down' },
-      { '<M-k>', function() require('smart-splits').move_cursor_up()    end, desc = 'Navigate up' },
-      { '<M-l>', function() require('smart-splits').move_cursor_right() end, desc = 'Navigate right' },
-      { '<M-H>', function() require('smart-splits').resize_left()       end, desc = 'Resize left' },
-      { '<M-J>', function() require('smart-splits').resize_down()       end, desc = 'Resize down' },
-      { '<M-K>', function() require('smart-splits').resize_up()         end, desc = 'Resize up' },
-      { '<M-L>', function() require('smart-splits').resize_right()      end, desc = 'Resize right' },
-    },
-    opts = {},
-  },
-
-  { -- Git signs
-    'lewis6991/gitsigns.nvim',
-    ---@module 'gitsigns'
-    ---@type Gitsigns.Config
-    ---@diagnostic disable-next-line: missing-fields
-    opts = {
-      signs = {
-        add = { text = '+' }, ---@diagnostic disable-line: missing-fields
-        change = { text = '~' }, ---@diagnostic disable-line: missing-fields
-        delete = { text = '_' }, ---@diagnostic disable-line: missing-fields
-        topdelete = { text = '‾' }, ---@diagnostic disable-line: missing-fields
-        changedelete = { text = '~' }, ---@diagnostic disable-line: missing-fields
-      },
-    },
-  },
-
   { -- Which-key
     'folke/which-key.nvim',
     event = 'VimEnter',
@@ -225,7 +192,6 @@ require('lazy').setup({
         ts_ls = {},
         svelte = {},
         html = { filetypes = { 'html', 'twig', 'hbs' } },
-        stylua = {},
         lua_ls = {
           on_init = function(client)
             client.server_capabilities.documentFormattingProvider = false
@@ -252,6 +218,12 @@ require('lazy').setup({
       }
 
       local ensure_installed = vim.tbl_keys(servers or {})
+      vim.list_extend(ensure_installed, {
+        'stylua',
+        'prettier',
+        'ruff',
+        'shfmt',
+      })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
       for name, server in pairs(servers) do
@@ -277,15 +249,24 @@ require('lazy').setup({
     ---@type conform.setupOpts
     opts = {
       notify_on_error = false,
-      format_on_save = function(bufnr)
-        local enabled_filetypes = {}
-        if enabled_filetypes[vim.bo[bufnr].filetype] then
-          return { timeout_ms = 500 }
-        end
-        return nil
-      end,
-      default_format_opts = { lsp_format = 'fallback' },
-      formatters_by_ft = {},
+      format_on_save = { timeout_ms = 500, lsp_format = 'fallback' },
+      formatters_by_ft = {
+        lua = { 'stylua' },
+        python = { 'ruff_format' },
+        javascript = { 'prettier' },
+        javascriptreact = { 'prettier' },
+        typescript = { 'prettier' },
+        typescriptreact = { 'prettier' },
+        svelte = { 'prettier' },
+        html = { 'prettier' },
+        css = { 'prettier' },
+        json = { 'prettier' },
+        jsonc = { 'prettier' },
+        yaml = { 'prettier' },
+        markdown = { 'prettier' },
+        sh = { 'shfmt' },
+        bash = { 'shfmt' },
+      },
     },
   },
 
@@ -317,28 +298,6 @@ require('lazy').setup({
       snippets = { preset = 'luasnip' },
       fuzzy = { implementation = 'lua' },
       signature = { enabled = true },
-    },
-  },
-
-  { -- Colorscheme
-    'catppuccin/nvim',
-    name = 'catppuccin',
-    priority = 1000,
-    opts = { flavour = 'mocha' },
-    config = function(_, opts)
-      require('catppuccin').setup(opts)
-      vim.cmd.colorscheme 'catppuccin'
-    end,
-  },
-
-  { -- Per-cwd session persistence
-    'folke/persistence.nvim',
-    event = 'BufReadPre',
-    opts = {},
-    keys = {
-      { '<leader>qs', function() require('persistence').load() end, desc = 'Restore session for cwd' },
-      { '<leader>ql', function() require('persistence').load({ last = true }) end, desc = 'Restore last session' },
-      { '<leader>qd', function() require('persistence').stop() end, desc = 'Stop persisting session' },
     },
   },
 
@@ -443,24 +402,14 @@ require('lazy').setup({
     end,
   },
 
-  { -- Neogit
-    'NeogitOrg/neogit',
-    commit = '0cac75a5', -- pinned: 7a3daecb introduced scope+buf bug incompatible with nvim 0.12
-    dependencies = {
-      'nvim-lua/plenary.nvim',
-      'sindrets/diffview.nvim',
-    },
-    config = function()
-      require('neogit').setup()
-      vim.keymap.set('n', '<leader>gs', require('neogit').open, { desc = 'Open [G]it [S]tatus' })
-    end,
-  },
-
   -- Optional kickstart plugins
   require 'kickstart.plugins.gitsigns',
   require 'kickstart.plugins.indent_line',
   require 'kickstart.plugins.snacks',
   require 'kickstart.plugins.opencode',
+
+  -- Custom plugins (auto-imports lua/custom/plugins/*.lua)
+  { import = 'custom.plugins' },
 }, { ---@diagnostic disable-line: missing-fields
   ui = {
     icons = vim.g.have_nerd_font and {} or {
