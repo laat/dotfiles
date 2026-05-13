@@ -289,7 +289,7 @@ require('lazy').setup({
     ---@type blink.cmp.Config
     opts = {
       keymap = {
-        preset = 'default',
+        preset = 'super-tab',
         ['<C-@>'] = { 'show', 'show_documentation', 'hide_documentation' },
       },
       appearance = { nerd_font_variant = 'mono' },

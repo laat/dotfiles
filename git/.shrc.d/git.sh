@@ -9,6 +9,7 @@ alias gcam='git commit -a -m'
 alias gcams='git commit -a -m -S'
 alias gd='git diff'
 alias gf='git fetch'
+alias gm='git main'
 alias gst='git status -sb'
 
 alias gignore='git update-index --assume-unchanged'
