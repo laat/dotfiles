@@ -74,6 +74,16 @@ vim.api.nvim_create_autocmd('BufReadPost', {
   end,
 })
 
+vim.api.nvim_create_autocmd('VimEnter', {
+  desc = 'Restore session for cwd when nvim is launched with no args',
+  nested = true,
+  callback = function()
+    if vim.fn.argc() == 0 and vim.bo.filetype == '' then
+      require('persistence').load()
+    end
+  end,
+})
+
 -- Norwegian keyboard: map ø to : (ø is on the colon key)
 vim.keymap.set({ 'n', 'x', 'o' }, 'ø', ':', { desc = 'Command mode (Norwegian keyboard)' })
 
@@ -297,7 +307,10 @@ require('lazy').setup({
     ---@module 'blink.cmp'
     ---@type blink.cmp.Config
     opts = {
-      keymap = { preset = 'default' },
+      keymap = {
+        preset = 'default',
+        ['<C-@>'] = { 'show', 'show_documentation', 'hide_documentation' },
+      },
       appearance = { nerd_font_variant = 'mono' },
       completion = { documentation = { auto_show = false, auto_show_delay_ms = 500 } },
       sources = { default = { 'lsp', 'path', 'snippets' } },
@@ -316,6 +329,17 @@ require('lazy').setup({
       require('catppuccin').setup(opts)
       vim.cmd.colorscheme 'catppuccin'
     end,
+  },
+
+  { -- Per-cwd session persistence
+    'folke/persistence.nvim',
+    event = 'BufReadPre',
+    opts = {},
+    keys = {
+      { '<leader>qs', function() require('persistence').load() end, desc = 'Restore session for cwd' },
+      { '<leader>ql', function() require('persistence').load({ last = true }) end, desc = 'Restore last session' },
+      { '<leader>qd', function() require('persistence').stop() end, desc = 'Stop persisting session' },
+    },
   },
 
   {
