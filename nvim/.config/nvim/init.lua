@@ -94,6 +94,10 @@ vim.keymap.set('i', '\x1bs', '<Esc><cmd>w<CR>', { desc = 'Save file (Cmd+S)' })
 vim.keymap.set('n', '<leader>cc', 'gcc', { remap = true, desc = 'Comment line' })
 vim.keymap.set('v', '<leader>c', 'gc', { remap = true, desc = 'Comment selection' })
 
+-- Move visual selection up/down (Super+j/k via Ghostty -> <M-j>/<M-k>)
+vim.keymap.set('x', '<M-j>', ":m '>+1<CR>gv=gv", { silent = true, desc = 'Move selection down' })
+vim.keymap.set('x', '<M-k>', ":m '<-2<CR>gv=gv", { silent = true, desc = 'Move selection up' })
+
 
 
 -- Reload config

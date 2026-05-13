@@ -43,7 +43,15 @@ return {
     { '<leader>sr', function() Snacks.picker.resume() end, desc = '[S]earch [R]esume' },
     { '<leader>s.', function() Snacks.picker.recent() end, desc = '[S]earch Recent Files' },
     { '<leader>sc', function() Snacks.picker.commands() end, desc = '[S]earch [C]ommands' },
-    { '<leader><leader>', function() Snacks.picker.buffers() end, desc = '[ ] Find existing buffers' },
+    { '<leader><leader>', function()
+      Snacks.picker.buffers({
+        finder = function(opts, ctx)
+          local items = require('snacks.picker.source.buffers').buffers(opts, ctx)
+          if #items >= 2 then items[1], items[2] = items[2], items[1] end
+          return items
+        end,
+      })
+    end, desc = '[ ] Find existing buffers' },
     { '<leader>gf', function() Snacks.picker.git_files() end, desc = 'Search [G]it [F]iles' },
     { '<leader>/', function() Snacks.picker.lines() end, desc = '[/] Fuzzily search in current buffer' },
     { '<leader>s/', function() Snacks.picker.grep({ search_dirs = vim.tbl_map(function(b) return vim.api.nvim_buf_get_name(b) end, vim.api.nvim_list_bufs()) }) end, desc = '[S]earch [/] in Open Files' },
