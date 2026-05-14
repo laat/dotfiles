@@ -2,6 +2,7 @@
 ---@type LazySpec
 return {
   'nickjvandyke/opencode.nvim',
+  enabled = false,
   version = '*',
   dependencies = { 'folke/snacks.nvim' },
   config = function()
@@ -50,9 +51,5 @@ return {
 
     vim.keymap.set('n', '<S-C-u>', function() require('opencode').command('session.half.page.up') end, { desc = 'Scroll opencode up' })
     vim.keymap.set('n', '<S-C-d>', function() require('opencode').command('session.half.page.down') end, { desc = 'Scroll opencode down' })
-
-    -- Restore increment/decrement since C-a/C-x are taken
-    vim.keymap.set('n', '+', '<C-a>', { desc = 'Increment under cursor', noremap = true })
-    vim.keymap.set('n', '-', '<C-x>', { desc = 'Decrement under cursor', noremap = true })
   end,
 }

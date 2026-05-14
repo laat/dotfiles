@@ -61,16 +61,7 @@ return {
     vim.keymap.set('n', '<leader>a', function() ts_swap.swap_next('@parameter.inner') end, { desc = 'Swap next parameter' })
     vim.keymap.set('n', '<leader>A', function() ts_swap.swap_previous('@parameter.inner') end, { desc = 'Swap prev parameter' })
 
-    -- Incremental selection
-    local incsel = require('incremental_selection')
-
-    vim.keymap.set({ 'n', 'x' }, '+', function()
-      if vim.fn.mode() == 'n' then incsel.reset() end
-      incsel.select_node(incsel.expand())
-    end, { desc = 'Incremental selection' })
-
-    vim.keymap.set('x', '-', function()
-      incsel.select_node(incsel.shrink())
-    end, { desc = 'Decremental selection' })
+    vim.keymap.set({ 'n', 'x' }, '+', function() require('vim.treesitter._select').select_parent(vim.v.count1) end, { desc = 'Select parent node' })
+    vim.keymap.set('x', '-', function() require('vim.treesitter._select').select_child(vim.v.count1) end, { desc = 'Select child node' })
   end,
 }
