@@ -98,6 +98,9 @@ vim.keymap.set('v', '<leader>c', 'gc', { remap = true, desc = 'Comment selection
 vim.keymap.set('x', '<M-j>', ":m '>+1<CR>gv=gv", { silent = true, desc = 'Move selection down' })
 vim.keymap.set('x', '<M-k>', ":m '<-2<CR>gv=gv", { silent = true, desc = 'Move selection up' })
 
+vim.keymap.set('x', '<Tab>', '>gv', { desc = 'Indent selection' })
+vim.keymap.set('x', '<S-Tab>', '<gv', { desc = 'Dedent selection' })
+
 
 
 -- Reload config
