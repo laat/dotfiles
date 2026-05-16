@@ -4,4 +4,21 @@ DIFF=$(git diff --cached)
 [ -z "$DIFF" ] && { echo "Nothing staged to commit." >&2; exit 1; }
 echo "Generating commit message..." >&2
 MSG=$(echo "$DIFF" | claude -p "Write a concise git commit message for this diff. Use conventional commits format (e.g. feat: ..., fix: ..., refactor: ...). Output only the commit message — no explanation, no markdown, no quotes.")
-git commit -v -e -m "$MSG"
+
+# Wrap the editor so :q (no write) aborts the commit. Git pre-fills the
+# message from -m, so without this it would commit even on an unsaved quit.
+WRAPPER=$(mktemp)
+trap 'rm -f "$WRAPPER"' EXIT
+cat >"$WRAPPER" <<'EOF'
+#!/usr/bin/env bash
+f=$1
+touch -t 200001010000 "$f"
+before=$(stat -f %m "$f" 2>/dev/null || stat -c %Y "$f")
+${GIT_AI_EDITOR:-vi} "$f"
+after=$(stat -f %m "$f" 2>/dev/null || stat -c %Y "$f")
+[ "$before" = "$after" ] && { echo "Aborted: commit message unchanged." >&2; exit 1; }
+exit 0
+EOF
+chmod +x "$WRAPPER"
+export GIT_AI_EDITOR="${VISUAL:-${EDITOR:-vi}}"
+GIT_EDITOR="$WRAPPER" git commit -v -e -m "$MSG"
