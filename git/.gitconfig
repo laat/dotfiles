@@ -10,7 +10,16 @@
 	branch = auto
 	ui = true
 [alias]
-	main = "!git checkout $(git remote show origin | sed -n '/HEAD branch/s/.*: //p')"
+	# Resolves the default branch from the cached refs/remotes/origin/HEAD (no
+	# network). Note: `git fetch` does not refresh that ref, so if the remote's
+	# default branch is renamed, run `git remote set-head origin -a` once.
+	main = "!f() { \
+		b=$(git symbolic-ref refs/remotes/origin/HEAD --short 2>/dev/null) \
+		|| b=$(git remote set-head origin -a >/dev/null 2>&1 && git symbolic-ref refs/remotes/origin/HEAD --short 2>/dev/null) \
+		|| b=$(git remote show origin | sed -n '/HEAD branch/s/.*: //p'); \
+		[ -n \"$b\" ] || { echo 'git main: could not determine default branch' >&2; exit 1; }; \
+		git checkout \"${b#origin/}\"; \
+	}; f"
 	m = main
 	co = checkout
 	ci = commit
