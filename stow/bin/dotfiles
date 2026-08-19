@@ -16,6 +16,7 @@ DEFAULT_PACKAGES=(
   codex
   opencode
   pi
+  skills
 )
 
 BASE_PACKAGES=(stow skel)

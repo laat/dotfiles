@@ -12,6 +12,8 @@ This repo is organised as stow packages, one per topic (`git/`, `nvim/`, `zsh/`,
 
 When adding a new alias or function, locate the matching package first and edit its `.shrc.d/*.sh`. Only create a new file there if none exists for the topic.
 
+Agent skills (`SKILL.md`) go in the `skills/` package: canonical copy in `skills/.agents/skills/<name>/`, plus a relative symlink `skills/.claude/skills/<name> -> ../../.agents/skills/<name>` so Claude Code sees it too. See `skills/README.md`.
+
 ## Stow
 
 All stow commands must use `--no-folding` to avoid replacing real directories with symlinks.
