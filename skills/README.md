@@ -17,6 +17,7 @@ and Claude Code loads the skill once.
 
 | Skill    | Source |
 |----------|--------|
+| `renovate-pin-actions` | own; user-invoked only (`/renovate-pin-actions`) |
 | `unslop` | [cursor/plugins](https://github.com/cursor/plugins/blob/main/pstack/skills/unslop/SKILL.md) (MIT; vendored unmodified) |
 
 `~/.agents/skills/` is also where the `npx skills` CLI installs third-party
