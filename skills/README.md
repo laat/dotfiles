@@ -20,6 +20,7 @@ and Claude Code loads the skill once.
 | `renovate-pin-actions` | own; user-invoked only (`/renovate-pin-actions`) |
 | `renovate-cleanup` | own; runs `renovate-pin-actions`, then sets minimumReleaseAge, rangeStrategy pin, Friday lockFileMaintenance |
 | `zizmor` | own; user-invoked only (`/zizmor`); audit GitHub Actions, fix findings, open a PR |
+| `fetchmd` | own; last-resort verbatim URL fetcher, wraps `~/.local/bin/fetchmd`; try WebFetch first |
 | `unslop` | [cursor/plugins](https://github.com/cursor/plugins/blob/main/pstack/skills/unslop/SKILL.md) (MIT; vendored unmodified) |
 | `technical-writing` | [cursor/plugins](https://github.com/cursor/plugins/blob/main/pstack/skills/technical-writing/SKILL.md) (MIT; vendored unmodified; user-invoked only) |
 
