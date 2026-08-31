@@ -24,6 +24,9 @@ and Claude Code loads the skill once.
 | `unslop` | [cursor/plugins](https://github.com/cursor/plugins/blob/main/pstack/skills/unslop/SKILL.md) (MIT; vendored unmodified) |
 | `technical-writing` | [cursor/plugins](https://github.com/cursor/plugins/blob/main/pstack/skills/technical-writing/SKILL.md) (MIT; vendored unmodified; user-invoked only) |
 
+The `fetchmd` skill's CLI ships in this package too, as `.local/bin/fetchmd`
+(a uv script; stowed to `~/.local/bin/fetchmd`).
+
 `~/.agents/skills/` is also where the `npx skills` CLI installs third-party
 skills, tracked in `~/.agents/.skill-lock.json`. Those coexist with the stowed
 ones; only the skills in this package are managed by git.

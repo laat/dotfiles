@@ -1,0 +1,114 @@
+#!/usr/bin/env -S uv run --script --quiet
+# /// script
+# requires-python = ">=3.11"
+# dependencies = ["trafilatura>=2.0", "httpx>=0.27", "markdownify>=0.13"]
+# ///
+"""fetchmd — fetch URL(s) and print markdown. Ignores robots.txt, sends a browser UA.
+
+Usage:
+  fetchmd URL [URL ...]          main-content markdown with front matter (trafilatura)
+  fetchmd --full URL             whole page converted to markdown (no content guessing)
+  fetchmd --raw URL              raw HTML
+  fetchmd --no-meta URL          skip the YAML front matter
+  fetchmd --ua "..." URL         custom User-Agent
+  fetchmd -o out.md URL          write to file (multiple URLs → separated by '---')
+
+Falls back to --full automatically if main-content extraction finds nothing.
+"""
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+
+import httpx
+import trafilatura
+from markdownify import markdownify
+
+DEFAULT_UA = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+)
+
+
+def fetch(url: str, ua: str, timeout: float) -> tuple[str, str]:
+    headers = {
+        "User-Agent": ua,
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "nb-NO,nb;q=0.9,en;q=0.8",
+    }
+    with httpx.Client(follow_redirects=True, timeout=timeout, headers=headers) as c:
+        r = c.get(url)
+        r.raise_for_status()
+        return r.text, r.headers.get("content-type", "")
+
+
+def full_markdown(html: str) -> str:
+    # drop non-content noise but keep everything else
+    html = re.sub(r"<(script|style|noscript|svg|template)[^>]*>.*?</\1>", "", html, flags=re.S | re.I)
+    md = markdownify(html, heading_style="ATX")
+    md = re.sub(r"\n{3,}", "\n\n", md)
+    return md.strip()
+
+
+def main() -> int:
+    p = argparse.ArgumentParser(prog="fetchmd", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("urls", nargs="+")
+    p.add_argument("--full", action="store_true", help="convert whole page, skip main-content extraction")
+    p.add_argument("--raw", action="store_true", help="print raw HTML")
+    p.add_argument("--no-meta", action="store_true", help="omit YAML front matter")
+    p.add_argument("--ua", default=DEFAULT_UA)
+    p.add_argument("--timeout", type=float, default=30.0)
+    p.add_argument("-o", "--output")
+    a = p.parse_args()
+
+    outputs: list[str] = []
+    rc = 0
+    for url in a.urls:
+        try:
+            html, ctype = fetch(url, a.ua, a.timeout)
+        except Exception as e:  # noqa: BLE001
+            print(f"fetchmd: {url}: {e}", file=sys.stderr)
+            rc = 1
+            continue
+
+        if a.raw or ("text/html" not in ctype and "xml" not in ctype and "<html" not in html[:2000].lower()):
+            outputs.append(html)
+            continue
+
+        md: str | None = None
+        if not a.full:
+            md = trafilatura.extract(
+                html,
+                url=url,
+                output_format="markdown",
+                with_metadata=not a.no_meta,
+                include_links=True,
+                include_images=True,
+                include_tables=True,
+                include_formatting=True,
+                favor_recall=True,
+            )
+            if not md or len(md.strip()) < 200:
+                print(f"fetchmd: {url}: main-content extraction found little/nothing, falling back to --full", file=sys.stderr)
+                md = None
+        if md is None:
+            md = full_markdown(html)
+            if not a.no_meta:
+                m = re.search(r"<title[^>]*>(.*?)</title>", html, flags=re.S | re.I)
+                title = re.sub(r"\s+", " ", m.group(1)).strip() if m else ""
+                md = f"---\ntitle: {title!r}\nurl: {url}\n---\n{md}"
+        outputs.append(md)
+
+    text = "\n\n---\n\n".join(outputs) + "\n"
+    if a.output:
+        with open(a.output, "w", encoding="utf-8") as f:
+            f.write(text)
+        print(f"fetchmd: wrote {a.output}", file=sys.stderr)
+    else:
+        sys.stdout.write(text)
+    return rc
+
+
+if __name__ == "__main__":
+    sys.exit(main())
