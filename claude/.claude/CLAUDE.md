@@ -1,0 +1,2 @@
+- My GitHub username is `laat`.
+- Reply in English, even when I write in Norwegian.
