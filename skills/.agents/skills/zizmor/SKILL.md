@@ -63,7 +63,8 @@ accepted risk.
    - *artipacked:* `persist-credentials: false` on `actions/checkout`,
      unless a later step in that job pushes or uses the git credential.
    - *unpinned-uses:* pin to a full digest with an exact version comment.
-     The `renovate-pin-actions` skill is the thorough version of this.
+     The pinning procedure in the `renovate-cleanup` skill is the thorough
+     version of this.
    - *cache-poisoning / dangerous-triggers (`pull_request_target`):* no
      mechanical fix. Understand the workflow's trust boundary first; if the
      fix isn't obviously right, leave it and flag it in the PR instead.
