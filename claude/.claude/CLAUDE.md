@@ -1,3 +1,4 @@
 - My GitHub username is `laat`.
 - Reply in English, even when I write in Norwegian.
 - Please remove all mannered prose.
+- My npm token is short-lived. Before running `npm install` or `pnpm install`, run `npm whoami` to verify I am logged in. If not, ask me to run `! npm login` before continuing.
