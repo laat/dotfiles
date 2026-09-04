@@ -1,0 +1,4 @@
+# Work profile: NRK LiteLLM proxy. Activate with `codex-profile work`.
+model = "gpt-5.5"
+model_provider = "litellm"
+model_reasoning_effort = "high"

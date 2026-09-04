@@ -1,0 +1,5 @@
+# Personal profile: ChatGPT login. Activate with `codex-profile max`.
+# Run `codex login` once to store the ChatGPT credentials.
+model = "gpt-5.6-sol"
+model_provider = "openai"
+model_reasoning_effort = "high"
