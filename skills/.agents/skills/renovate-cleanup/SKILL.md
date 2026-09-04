@@ -185,6 +185,25 @@ minimumReleaseAgeExclude:
 If pnpm's `minimumReleaseAge` is only configured in `.npmrc`, put the exclude
 in `pnpm-workspace.yaml` anyway; that is where pnpm documents it.
 
+### No release age for the internal terraform registry
+
+If any `.tf` file has a module `source` on `terraform-registry.nrk.cloud`
+(`grep -rn 'terraform-registry.nrk.cloud' --include='*.tf' .`), append this
+rule to `packageRules` (skip if an equivalent rule exists):
+
+```json
+{
+  "description": "The internal terraform registry publishes no release timestamps, so the cooldown can never pass",
+  "matchDatasources": ["terraform-module"],
+  "matchPackageNames": ["terraform-registry.nrk.cloud/**"],
+  "minimumReleaseAge": null
+}
+```
+
+Without it, `minimumReleaseAge` silently blocks every update from that
+registry: Renovate has no timestamp to compare against, so the age check never
+passes.
+
 ### Fastify major group
 
 If the repo uses fastify (any `package.json` lists `fastify`, `fastify-plugin`,
@@ -245,7 +264,7 @@ Report:
 - whether each optional rule was added: peerDependencies widen, docker
   digest pinning, terraform required_version disabled (plus any
   already-pinned `required_version` to restore), @nrk/ exemption (Renovate
-  and pnpm), fastify major group
+  and pnpm), internal terraform registry exemption, fastify major group
 - which package groups were folded into the non-major group
 - whether `timezone` is set
 - the pin-actions result: refs fixed, anything flagged
