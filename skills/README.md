@@ -19,6 +19,8 @@ and Claude Code loads the skill once.
 |----------|--------|
 | `renovate-cleanup` | own; user-invoked only (`/renovate-cleanup`); pins GitHub Actions digests, then sets minimumReleaseAge, rangeStrategy pin, Friday lockFileMaintenance |
 | `zizmor` | own; user-invoked only (`/zizmor`); audit GitHub Actions, fix findings, open a PR |
+| `skill-me` | own; user-invoked only (`/skill-me`); how to add or update a skill in this package: SKILL.md, symlink, README row, restow |
+| `typescript7` | own; user-invoked only (`/typescript7`); TS 6 → 7 migration: alias `typescript` to @typescript/typescript6, install TS 7 as @typescript/native, fix tsc-watch |
 | `fetchmd` | own; last-resort verbatim URL fetcher, wraps `~/.local/bin/fetchmd`; try WebFetch first |
 | `unslop` | [cursor/plugins](https://github.com/cursor/plugins/blob/main/pstack/skills/unslop/SKILL.md) (MIT; vendored unmodified) |
 | `technical-writing` | [cursor/plugins](https://github.com/cursor/plugins/blob/main/pstack/skills/technical-writing/SKILL.md) (MIT; vendored unmodified; user-invoked only) |
