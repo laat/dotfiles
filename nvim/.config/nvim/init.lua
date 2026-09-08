@@ -27,6 +27,7 @@ vim.o.scrolloff = 10
 vim.o.confirm = true
 vim.opt.directory = vim.fn.stdpath 'state' .. '/swap//'
 vim.o.termguicolors = true
+vim.o.autoread = true
 
 -- [[ Basic Keymaps ]]
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
@@ -51,9 +52,40 @@ vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = tr
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
 
 -- [[ Autocommands ]]
+-- [[ External edits (agents editing files in another pane) ]]
+local function checktime()
+  if vim.fn.getcmdwintype() == '' then vim.cmd 'checktime' end
+end
+
+vim.api.nvim_create_autocmd({ 'BufEnter', 'CursorHold', 'CursorHoldI' }, {
+  desc = 'Reload files changed on disk',
+  callback = checktime,
+})
+
+-- Poll while idle; CursorHold only fires after cursor movement
+vim.uv.new_timer():start(2000, 2000, vim.schedule_wrap(checktime))
+
+-- Track the on-disk mtime we last synced with, so we never save over an external edit
+vim.api.nvim_create_autocmd({ 'BufReadPost', 'BufWritePost' }, {
+  desc = 'Record file mtime',
+  callback = function(args) vim.b[args.buf].disk_mtime = vim.fn.getftime(vim.api.nvim_buf_get_name(args.buf)) end,
+})
+
 vim.api.nvim_create_autocmd('FocusLost', {
-  desc = 'Save all buffers on focus loss',
-  callback = function() vim.cmd 'silent! wall' end,
+  desc = 'Save modified buffers on focus loss, unless the file changed on disk',
+  callback = function()
+    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+      local name = vim.api.nvim_buf_get_name(buf)
+      if vim.bo[buf].modified and vim.bo[buf].buftype == '' and name ~= '' then
+        local on_disk = vim.fn.getftime(name)
+        if vim.b[buf].disk_mtime == nil or on_disk == vim.b[buf].disk_mtime then
+          vim.api.nvim_buf_call(buf, function() vim.cmd 'silent! write' end)
+        else
+          vim.notify('Not saved: ' .. vim.fn.fnamemodify(name, ':~:.') .. ' changed on disk', vim.log.levels.WARN)
+        end
+      end
+    end
+  end,
 })
 
 vim.api.nvim_create_autocmd('TextYankPost', {
