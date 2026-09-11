@@ -1,6 +1,6 @@
 #! /bin/zsh
-# Auto-launch sesh picker in new Ghostty windows (outside tmux)
-if [[ -n "$GHOSTTY_BIN_DIR" ]] && [[ -z "$TMUX" ]] && command -v sesh &>/dev/null; then
+# Auto-launch sesh picker in new Ghostty windows (outside tmux and herdr)
+if [[ -n "$GHOSTTY_BIN_DIR" ]] && [[ -z "$TMUX" ]] && [[ -z "$HERDR_PANE_ID" ]] && command -v sesh &>/dev/null; then
   selected="$(
     sesh list --icons | fzf \
       --no-sort --ansi --border-label ' sesh ' --prompt '⚡  ' \

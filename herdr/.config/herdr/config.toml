@@ -1,0 +1,59 @@
+# herdr — agent runtime, used instead of tmux inside ghostty.
+# See `herdr --default-config` for every option.
+
+onboarding = false
+
+[theme]
+name = "catppuccin"
+
+[terminal]
+new_cwd = "follow"
+
+[session]
+resume_agents_on_restore = true
+
+[keys]
+prefix = "ctrl+b"
+
+# ghostty sends these (see ghostty/.config/ghostty/config):
+#   cmd+hjkl        -> alt+hjkl          focus pane
+#   cmd+shift+hjkl  -> alt+shift+hjkl    resize pane
+#   cmd+ctrl+hjkl   -> prefix+HJKL       swap pane
+#   cmd+1..9        -> alt+1..9          switch tab
+#   cmd+p           -> alt+p             workspace picker
+#   cmd+d           -> prefix+|          split right
+#   cmd+shift+d     -> prefix+-          split down
+#   cmd+t           -> prefix+c          new tab
+focus_pane_left = "alt+h"
+focus_pane_down = "alt+j"
+focus_pane_up = "alt+k"
+focus_pane_right = "alt+l"
+
+resize_pane_left = "alt+shift+h"
+resize_pane_down = "alt+shift+j"
+resize_pane_up = "alt+shift+k"
+resize_pane_right = "alt+shift+l"
+
+swap_pane_left = "prefix+shift+h"
+swap_pane_down = "prefix+shift+j"
+swap_pane_up = "prefix+shift+k"
+swap_pane_right = "prefix+shift+l"
+
+switch_tab = "alt+1..9"
+workspace_picker = "alt+p"
+split_vertical = "prefix+|"
+split_horizontal = "prefix+minus"
+
+[ui]
+tab_bar_position = "top"
+sidebar_width = 35
+copy_on_select = true
+prompt_new_tab_name = false
+window_title = "{workspace}"
+
+[ui.toast]
+# ghostty raises these as macOS notifications
+delivery = "terminal"
+
+[advanced]
+scrollback_limit_bytes = 10000000
