@@ -44,6 +44,14 @@ workspace_picker = "alt+p"
 split_vertical = "prefix+|"
 split_horizontal = "prefix+minus"
 
+# Project picker: fzf over open workspaces and zoxide dirs, like prefix+t in tmux.
+[[keys.command]]
+key = "prefix+t"
+type = "popup"
+command = "herdr-zoxide"
+width = "70%"
+height = "50%"
+
 [ui]
 tab_bar_position = "top"
 sidebar_width = 35

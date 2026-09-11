@@ -1,0 +1,44 @@
+#!/bin/sh
+# Project picker for herdr: fzf over open workspaces and zoxide directories.
+# Focuses the workspace when the directory already has one, else creates it.
+# Bound to prefix+t in herdr/.config/herdr/config.toml.
+set -eu
+
+snapshot=$(herdr api snapshot)
+
+# One cwd per open workspace, taken from its first pane.
+open_dirs=$(printf '%s' "$snapshot" | jq -r '
+  [.result.snapshot.panes[] | {workspace_id, cwd}]
+  | group_by(.workspace_id)[] | .[0].cwd
+')
+
+tab=$(printf '\t')
+entries=$(
+  {
+    printf '%s\n' "$open_dirs" | sed "/^\$/d; s|^|🪟 ${tab}|"
+    zoxide query -l | sed "/^\$/d; s|^|📁 ${tab}|"
+  } | awk -F"${tab}" '!seen[$2]++'
+)
+
+selected=$(
+  printf '%s\n' "$entries" | sed "s|${HOME}|~|" | fzf \
+    --no-sort --ansi --border-label ' herdr ' --prompt '⚡  ' \
+    --bind 'tab:down,btab:up'
+) || exit 0
+[ -n "$selected" ] || exit 0
+
+dir=$(printf '%s' "$selected" | cut -f2)
+case "$dir" in
+  "~"*) dir="${HOME}${dir#\~}" ;;
+esac
+[ -d "$dir" ] || exit 0
+
+workspace=$(printf '%s' "$snapshot" | jq -r --arg cwd "$dir" '
+  [.result.snapshot.panes[] | select(.cwd == $cwd)] | .[0].workspace_id // empty
+')
+
+if [ -n "$workspace" ]; then
+  herdr workspace focus "$workspace" >/dev/null
+else
+  herdr workspace create --cwd "$dir" --label "$(basename "$dir")" --focus >/dev/null
+fi
