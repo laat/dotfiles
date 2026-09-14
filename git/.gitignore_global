@@ -47,3 +47,6 @@ CLAUDE.local.md
 
 # Firecrawl
 .firecrawl/
+
+# Git worktrees
+.worktrees/
