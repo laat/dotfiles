@@ -1,0 +1,10 @@
+#!/bin/sh
+# workmux add from a freshly fetched origin/HEAD. workmux itself never
+# fetches, so base_branch: origin/HEAD alone would branch from a stale ref.
+set -e
+if git remote get-url origin >/dev/null 2>&1; then
+  git fetch -q origin
+  # Old clones may lack origin/HEAD; set it from the remote once.
+  git symbolic-ref -q refs/remotes/origin/HEAD >/dev/null || git remote set-head origin -a
+fi
+exec workmux add "$@"

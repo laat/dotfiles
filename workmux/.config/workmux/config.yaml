@@ -12,8 +12,10 @@ worktree_naming: basename
 mode: session
 window_prefix: "{project}/"
 
-# Branch from the main branch rather than whatever happens to be checked out.
-base_branch: auto
+# Branch from the remote's default branch rather than whatever happens to be
+# checked out. origin/HEAD resolves to origin/main or origin/master per repo.
+# workmux never fetches; wm-add (bound to prefix+T, used by wmw) does.
+base_branch: origin/HEAD
 
 hook_shell: ["/opt/homebrew/bin/bash", "-c"]
 
