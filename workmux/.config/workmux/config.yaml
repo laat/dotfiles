@@ -1,0 +1,32 @@
+# workmux — git worktrees + tmux sessions as one unit.
+# Per-repo overrides go in <repo>/.workmux.yaml
+# Full reference: `workmux config reference`
+
+# Worktrees live outside each repo root so prettier and other tooling don't
+# walk into them, but stay under ~/code because all work happens there.
+worktree_dir: ~/code/.worktrees/{project}
+worktree_naming: basename
+
+# One tmux session per worktree, so worktrees show up in the sesh picker
+# bound to cmd+p (M-p -> ~/.local/bin/tmux-sesh-picker).
+mode: session
+window_prefix: "{project}/"
+
+# Branch from the main branch rather than whatever happens to be checked out.
+base_branch: auto
+
+hook_shell: ["/opt/homebrew/bin/bash", "-c"]
+
+agent: claude
+
+panes:
+  - command: "<agent>"
+    focus: true
+  - split: horizontal
+    size: 15
+
+sidebar:
+  position: left
+  width: 35
+  layout: tiles
+  dim_stale: true
