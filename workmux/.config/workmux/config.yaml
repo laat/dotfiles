@@ -19,11 +19,9 @@ hook_shell: ["/opt/homebrew/bin/bash", "-c"]
 
 agent: claude
 
+# Single pane with the agent. workmux's default adds a shell split below.
 panes:
   - command: "<agent>"
-    focus: true
-  - split: horizontal
-    size: 15
 
 sidebar:
   position: left
