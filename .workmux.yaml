@@ -1,0 +1,4 @@
+# The repo dir is .dotfiles; tmux reads the leading dot in a window target as
+# the window.pane separator, so `{project}/` from the global config breaks
+# window mode here. Override the prefix to a dotless name.
+window_prefix: "dotfiles/"
