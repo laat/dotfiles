@@ -30,3 +30,4 @@ sidebar:
   width: 35
   layout: tiles
   dim_stale: true
+nerdfont: true
