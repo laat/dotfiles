@@ -18,3 +18,8 @@ startup_command = "nvim ~/.config/nvim/init.lua"
 name = "tmuxconf"
 path = "~/.dotfiles"
 startup_command = "nvim ~/.tmux.conf"
+
+[[session]]
+name = "dashboard"
+path = "~/code"
+startup_command = "workmux dashboard"
