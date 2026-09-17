@@ -24,6 +24,7 @@ and Claude Code loads the skill once.
 | `fetchmd` | own; last-resort verbatim URL fetcher, wraps `~/.local/bin/fetchmd`; try WebFetch first |
 | `unslop` | [cursor/plugins](https://github.com/cursor/plugins/blob/main/pstack/skills/unslop/SKILL.md) (MIT; vendored unmodified) |
 | `technical-writing` | [cursor/plugins](https://github.com/cursor/plugins/blob/main/pstack/skills/technical-writing/SKILL.md) (MIT; vendored unmodified; user-invoked only) |
+| `workmux` | [raine/workmux](https://github.com/raine/workmux/blob/main/skills/workmux/SKILL.md) (MIT; vendored unmodified from v0.1.263; user-invoked only) |
 
 The `fetchmd` skill's CLI ships in this package too, as `.local/bin/fetchmd`
 (a uv script; stowed to `~/.local/bin/fetchmd`).
