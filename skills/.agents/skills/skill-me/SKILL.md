@@ -71,7 +71,9 @@ and are tracked in `~/.agents/.skill-lock.json`, not in git. Leave them alone.
    ```
 
    For a vendored skill, name the source and licence instead of `own`, and
-   say whether it is modified.
+   say whether it is modified. Copy the upstream `LICENSE` into
+   `.agents/skills/<name>/` next to `SKILL.md`; MIT and similar licences
+   require the notice to ship with every copy, a README row is not enough.
 5. If the skill wraps a CLI, put the script in `.local/bin/` and mention it
    below the table, as `fetchmd` does.
 6. Restow only the skills package and verify the links:
