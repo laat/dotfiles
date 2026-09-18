@@ -18,11 +18,17 @@ codex() {
   command codex "$@"
 }
 
+# Profiles are ~/.codex/<name>.config.toml. `max` ships here; others can come
+# from any other stow package.
 codex-profile() {
-  case "$1" in
-    work) echo work > ~/.codex/.active-profile && echo "Switched to work (LiteLLM)" ;;
-    max)  echo max > ~/.codex/.active-profile && echo "Switched to max (personal)" ;;
-    "")   echo "Active: $(cat ~/.codex/.active-profile 2>/dev/null || echo none)" ;;
-    *)    echo "Usage: codex-profile [work|max]" ;;
-  esac
+  local name="$1"
+  if [ -z "$name" ]; then
+    echo "Active: $(cat ~/.codex/.active-profile 2>/dev/null || echo none)"
+    echo "Available: $(ls ~/.codex/*.config.toml 2>/dev/null | xargs -n1 basename | sed 's/\.config\.toml$//' | tr '\n' ' ')"
+  elif [ -f "$HOME/.codex/$name.config.toml" ]; then
+    echo "$name" > ~/.codex/.active-profile && echo "Switched to $name"
+  else
+    echo "codex-profile: no ~/.codex/$name.config.toml" >&2
+    return 1
+  fi
 }
