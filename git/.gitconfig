@@ -49,6 +49,10 @@
 [core]
 	autocrlf = input
 	excludesfile = ~/.gitignore_global
+	# Reuse one SSH connection per host for an hour. The handshake to GitHub is
+	# ~1.3s of every fetch/pull/push; with a warm master a fetch is ~0.5s. Keeps
+	# wm-add (cmd+shift+t) snappy since it fetches before workmux add.
+	sshCommand = ssh -o ControlMaster=auto -o ControlPath=~/.ssh/cm-%C -o ControlPersist=1h
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
