@@ -70,8 +70,8 @@ and are tracked in `~/.agents/.skill-lock.json`, not in git. Leave them alone.
    | `<name>` | own; user-invoked only (`/<name>`); <one-line summary> |
    ```
 
-   Own skills are CC0: copy `LICENSE` from any existing own skill folder
-   into `.agents/skills/<name>/`.
+   Own skills are CC0: copy `LICENSE` and `README.md` from any existing own
+   skill folder into `.agents/skills/<name>/`.
 
    For a vendored skill, name the source and licence instead of `own`, and
    say whether it is modified. Copy the upstream `LICENSE` into
