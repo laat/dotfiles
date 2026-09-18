@@ -19,11 +19,6 @@ name = "tmuxconf"
 path = "~/.dotfiles"
 startup_command = "nvim ~/.tmux.conf"
 
-[[session]]
-name = "dashboard"
-path = "~/code"
-startup_command = "workmux dashboard"
-
 # Any repo under ~/code (top level only; worktrees are created by workmux,
 # which starts claude itself) opens with claude running.
 [[wildcard]]

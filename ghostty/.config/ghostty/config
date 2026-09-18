@@ -22,6 +22,7 @@ macos-option-as-alt = left
 
 keybind = super+b=text:\x02
 keybind = super+p=text:\x1bp
+keybind = super+shift+p=text:\x02\x13
 keybind = super+t=text:\x02c
 keybind = super+shift+t=text:\x02T
 keybind = super+shift+w=text:\x02W
