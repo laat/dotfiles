@@ -1,6 +1,6 @@
 ---
 name: plattform
-description: Load NRK platform knowledge from ~/plattform/skills (aks-plattform-* and rke-plattform-* clusters, plattform.azurecr.io, Icinga, vault-config, Akamai, Gorgon) for working without admin rights. Use before deploying to, debugging, or exposing anything on the platform clusters, or when a platform doc claim needs verifying.
+description: Load internal platform knowledge from ~/plattform/skills, a private folder of SKILL.md files kept out of context until asked for. Use before deploying to, debugging, or exposing anything on the internal platform clusters, or when a platform doc claim needs verifying.
 disable-model-invocation: true
 ---
 
@@ -19,15 +19,13 @@ If `~/plattform/skills` does not exist on this machine, say so and stop.
 2. If arguments were given (`$ARGUMENTS`), read
    `~/plattform/skills/<name>/SKILL.md` for each name, then stop.
 3. Otherwise pick the skills that match the task and read those. Several
-   usually apply together: `ingress-tls-dns` with `cluster-reach`,
-   `registry` with `golden-path-aftercare`. When a platform claim needs
-   verification, read `source-map` first.
+   usually apply together; the README says which. When a platform claim
+   needs verification, start with the skill that maps claims to sources.
 4. Each skill carries a verified date and verify commands. Platform
    behaviour changes without announcement; run the verify commands before
    relying on a claim.
 
 ## Related
 
-`plattform-pr` (house rules for commits and PRs in nrkno/plattform-* and
-nrkno/iac-* repos) is a separate, always-on skill and is not part of this
-folder.
+House rules for commits and PRs in the platform repos are a separate,
+always-on skill and are not part of this folder.
