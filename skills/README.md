@@ -22,14 +22,15 @@ and Claude Code loads the skill once.
 | `plattform` | own; user-invoked only (`/plattform [name...]`); loads NRK platform knowledge from `~/plattform/skills`, an index plus the SKILL.md files that apply; kept out of context otherwise |
 | `skill-me` | own; user-invoked only (`/skill-me`); how to add or update a skill in this package: SKILL.md, symlink, README row, restow |
 | `typescript7` | own; user-invoked only (`/typescript7`); TS 6 → 7 migration: alias `typescript` to @typescript/typescript6, install TS 7 as @typescript/native, fix tsc-watch |
-| `fetchmd` | own; last-resort verbatim URL fetcher, wraps `~/.local/bin/fetchmd`; try WebFetch first |
+| `fetchmd` | own; last-resort verbatim URL fetcher, wraps the `fetchmd` uv script in its folder; try WebFetch first |
 | `unslop` | [cursor/plugins](https://github.com/cursor/plugins/blob/main/pstack/skills/unslop/SKILL.md) (MIT, see `LICENSE` beside it; vendored unmodified) |
 | `technical-writing` | [cursor/plugins](https://github.com/cursor/plugins/blob/main/pstack/skills/technical-writing/SKILL.md) (MIT, see `LICENSE` beside it; vendored unmodified; user-invoked only) |
 | `workmux` | [raine/workmux](https://github.com/raine/workmux/blob/main/skills/workmux/SKILL.md) (MIT, see `LICENSE` beside it; vendored unmodified from v0.1.263; user-invoked only) |
 | `babysit` | own; user-invoked only (`/babysit <pr>`); watches a PR's checks, comments and review threads until clean, fixes and pushes, replies before resolving. |
 
-The `fetchmd` skill's CLI ships in this package too, as `.local/bin/fetchmd`
-(a uv script; stowed to `~/.local/bin/fetchmd`).
+Skills marked `own` are dedicated to the public domain under CC0 1.0; each
+folder has the `LICENSE`. Vendored skills keep their upstream licence beside
+them.
 
 `~/.agents/skills/` is also where the `npx skills` CLI installs third-party
 skills, tracked in `~/.agents/.skill-lock.json`. Those coexist with the stowed

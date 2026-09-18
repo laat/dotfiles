@@ -17,11 +17,11 @@ In a prompt, `@~/.dotfiles/skills/` refers to this folder.
   README.md                          # table of skills, one row each
   .agents/skills/<name>/SKILL.md     # canonical copy (Codex, OpenCode, pi)
   .claude/skills/<name>              # relative symlink -> ../../.agents/skills/<name>
-  .local/bin/<tool>                  # CLI a skill wraps, if any (stowed to ~/.local/bin)
+  .agents/skills/<name>/<tool>       # script a skill wraps, if any; not on PATH
 ```
 
 Stow links these into `~/.agents/skills/<name>/SKILL.md`,
-`~/.claude/skills/<name>` and `~/.local/bin/<tool>`. Claude Code reads only
+`~/.claude/skills/<name>`. Claude Code reads only
 `~/.claude/skills/`, the others read `~/.agents/skills/`, hence the symlink.
 
 Third-party skills installed with `npx skills` also land in `~/.agents/skills/`
@@ -70,12 +70,16 @@ and are tracked in `~/.agents/.skill-lock.json`, not in git. Leave them alone.
    | `<name>` | own; user-invoked only (`/<name>`); <one-line summary> |
    ```
 
+   Own skills are CC0: copy `LICENSE` from any existing own skill folder
+   into `.agents/skills/<name>/`.
+
    For a vendored skill, name the source and licence instead of `own`, and
    say whether it is modified. Copy the upstream `LICENSE` into
    `.agents/skills/<name>/` next to `SKILL.md`; MIT and similar licences
    require the notice to ship with every copy, a README row is not enough.
-5. If the skill wraps a CLI, put the script in `.local/bin/` and mention it
-   below the table, as `fetchmd` does.
+5. If the skill wraps a script, keep it in the skill folder and have
+   SKILL.md call it by full path, `~/.agents/skills/<name>/<tool>`, as
+   `fetchmd` does. Nothing is added to PATH.
 6. Restow only the skills package and verify the links:
 
    ```sh

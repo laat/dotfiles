@@ -1,20 +1,22 @@
 ---
 name: fetchmd
-description: Last-resort URL fetcher via the local `fetchmd` CLI (~/.local/bin/fetchmd). Always try WebFetch first. Invoke this only when normal fetching has actually failed in this conversation (the page returned 403 or blocked WebFetch, the summary lost text needed verbatim, or firecrawl's main-content heuristic dropped the article on nrk.no and similar sites), or when the user asks for fetchmd by name. Not for search, crawling, or JS-only SPAs.
+description: Last-resort URL fetcher via the `fetchmd` script that ships in this skill folder (`~/.agents/skills/fetchmd/fetchmd`). Always try WebFetch first. Invoke this only when normal fetching has actually failed in this conversation (the page returned 403 or blocked WebFetch, the summary lost text needed verbatim, or firecrawl's main-content heuristic dropped the article on nrk.no and similar sites), or when the user asks for fetchmd by name. Not for search, crawling, or JS-only SPAs.
 ---
 
 # fetchmd
 
 Local URL → markdown fetcher. Plain HTTP GET with a browser User-Agent, main-content
 extraction via trafilatura, YAML front matter with title/author/date. Ignores robots.txt.
-Runs via `uv run --script` (deps cached on first run).
+Runs via `uv run --script` (deps cached on first run). The script is not on
+PATH; call it by its full path:
 
 ```sh
-fetchmd URL [URL ...]      # main content as markdown + front matter
-fetchmd --full URL         # whole page → markdown (use if extraction dropped something)
-fetchmd --raw URL          # raw HTML
-fetchmd --no-meta URL      # no front matter
-fetchmd -o out.md URL      # write to file
+fetchmd=~/.agents/skills/fetchmd/fetchmd
+$fetchmd URL [URL ...]      # main content as markdown + front matter
+$fetchmd --full URL         # whole page → markdown (use if extraction dropped something)
+$fetchmd --raw URL          # raw HTML
+$fetchmd --no-meta URL      # no front matter
+$fetchmd -o out.md URL      # write to file
 ```
 
 Notes:
