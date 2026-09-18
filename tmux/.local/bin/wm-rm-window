@@ -8,13 +8,18 @@
 #
 # The worktree comes from the panes' paths, not the window name. workmux
 # names its windows project/handle, but a window opened or renamed by hand
-# is called claude or zsh, and "workmux rm claude" fails. The sidebar pane
-# sits in the main repo, so each pane is tried until one is inside a linked
-# worktree.
+# is called claude or zsh, and "workmux rm claude" fails. Each pane is
+# tried until one is inside a linked worktree. The workmux sidebar pane is
+# skipped first: its cwd is wherever the window was created from, which
+# can be another worktree, and it is the active pane, so trying it first
+# removed a sibling worktree instead. It is only used when nothing else
+# in the window resolves.
 set -eu
 
-resolve() {
-  tmux list-panes -t "$1" -F '#{pane_current_path}' | while IFS= read -r dir; do
+resolve_panes() {
+  tmux list-panes -t "$1" -F '#{pane_current_command} #{pane_current_path}' |
+  while IFS=' ' read -r cmd dir; do
+    [ "$2" = with-sidebar ] || [ "$cmd" != workmux ] || continue
     [ -d "$dir" ] || continue
     gitdir=$(git -C "$dir" rev-parse --path-format=absolute --git-dir 2>/dev/null) || continue
     common=$(git -C "$dir" rev-parse --path-format=absolute --git-common-dir)
@@ -23,6 +28,12 @@ resolve() {
     git -C "$dir" rev-parse --show-toplevel
     break
   done
+}
+
+resolve() {
+  found=$(resolve_panes "$1" without-sidebar)
+  [ -n "$found" ] || found=$(resolve_panes "$1" with-sidebar)
+  printf '%s\n' "$found"
 }
 
 case ${1-} in
