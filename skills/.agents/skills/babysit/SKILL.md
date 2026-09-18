@@ -1,19 +1,31 @@
 ---
 name: babysit
-description: Supervise one pull request until it is ready to merge. Waits on CI, works through review threads and comments, fixes and pushes, then checks everything again. Use when the user asks to babysit, shepherd, watch or keep an eye on a PR until it is green and reviewed.
+description: Supervise one or more pull requests until they are ready to merge. Waits on CI, works through review threads and comments, fixes and pushes, then checks everything again. Merges only when asked. Use when the user asks to babysit, shepherd, watch or keep an eye on a PR until it is green and reviewed.
 disable-model-invocation: true
 ---
 
 # Babysit a pull request
 
-Target: `$ARGUMENTS`. It is a PR number, a PR URL or a branch name. If empty, use the PR for the checked-out branch.
+Arguments: `$ARGUMENTS`.
 
-Resolve it once to the base repository and number, then use `$owner`, `$repo` and `$pr` everywhere below. Review threads live on the base repository, so do not use the head repository fields or `gh repo view`, which reads whatever checkout the current directory is in.
+## Pick the targets
+
+The arguments may hold PR references, instructions, or both. A PR reference is a number, a PR URL or a branch name. Anything else is an instruction, such as "merge when done". Never pass instruction text to `gh pr view`.
+
+Targets, in order of preference:
+
+1. The PR references in the arguments.
+2. If there are none, the PRs opened or discussed earlier in this conversation.
+3. If there are none, the PR for the checked-out branch.
+
+Resolve each target once to its base repository and number, then use `$owner`, `$repo` and `$pr` everywhere below. Review threads live on the base repository, so do not use the head repository fields or `gh repo view`, which reads whatever checkout the current directory is in.
 
 ```bash
-read -r owner repo pr < <(gh pr view "$ARGUMENTS" --json url \
+read -r owner repo pr < <(gh pr view "<reference>" --json url \
   -q '.url | capture("github.com/(?<o>[^/]+)/(?<r>[^/]+)/pull/(?<n>[0-9]+)") | [.o, .r, .n] | @tsv')
 ```
+
+With several targets, run the rounds below per PR. The PRs are independent, so run the watchers for all of them in the same tool-call block. Fixes are per PR: do not batch a change across repositories without reading each one.
 
 Work in rounds. Each round: read status, wait for checks, read the conversation and the review threads, fix what is real, push, then start the next round from the top. A round that finds problems is never the last one.
 
@@ -41,6 +53,8 @@ Block on the watcher instead of sleeping in a loop. Give the command a ten-minut
 ```bash
 gh pr checks "$pr" -R "$owner/$repo" --watch --fail-fast
 ```
+
+The watcher returning is a hint, not a verdict. Later-stage jobs such as deploys and e2e runs are added to the check rollup only when their upstream job finishes, so the watcher can exit 0 between polls while work is still pending. After it returns, read the PR again. If any check is still `PENDING`, `QUEUED` or `IN_PROGRESS`, run the watcher again. Only a status read with nothing pending counts as checks finished.
 
 ## Read comments and review summaries
 
@@ -115,6 +129,20 @@ Rules:
 - Threads opened by bots: resolve them yourself.
 - Threads opened by humans: leave them to the reviewer unless the user has explicitly said you may resolve them.
 
+## Merge
+
+Only when the user asked for it, in the arguments or earlier in the conversation. Otherwise stop at Done and leave merging to them.
+
+Merge once Done holds for that PR, per PR, without waiting for the others. Squash by default and delete the branch. If the repository rejects squash, fall back to a merge commit. Then confirm the result instead of trusting the exit code.
+
+```bash
+gh pr merge "$pr" -R "$owner/$repo" --squash --delete-branch \
+  || gh pr merge "$pr" -R "$owner/$repo" --merge --delete-branch
+gh pr view "$pr" -R "$owner/$repo" --json state,mergeCommit -q '"\(.state) \(.mergeCommit.oid)"'
+```
+
+Do not merge a PR that still has an unresolved human thread, even if the user said to merge. Report it instead.
+
 ## Final report
 
 Before writing it, re-run the status, comment and thread queries and run `git status`. Report facts only:
@@ -124,3 +152,6 @@ Before writing it, re-run the status, comment and thread queries and run `git st
 - number of unresolved threads
 - tests or builds you ran
 - uncommitted local files you left alone
+- if merged: the merge commit SHA and whether the branch was deleted
+
+With several PRs, use one table row per PR: repo, number, head, checks summary, unresolved threads, merge commit. Name every failed or pending check. Passing checks may be summarised as a count.
