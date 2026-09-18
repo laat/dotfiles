@@ -49,10 +49,21 @@
 [core]
 	autocrlf = input
 	excludesfile = ~/.gitignore_global
-	# Reuse one SSH connection per host for an hour. The handshake to GitHub is
-	# ~1.3s of every fetch/pull/push; with a warm master a fetch is ~0.5s. Keeps
-	# wm-add (cmd+shift+t) snappy since it fetches before workmux add.
-	sshCommand = ssh -o ControlMaster=auto -o ControlPath=~/.ssh/cm-%C -o ControlPersist=1h
+[url "https://github.com/"]
+	# GitHub over HTTPS instead of SSH, whatever the remote URL says. An SSH
+	# fetch/pull/push paid ~1.9s of handshake; ControlMaster brought that to
+	# ~0.7s but its master leaks the stderr pipe when the remote command fails
+	# (fetching a branch that does not exist, which gh-stack does for every new
+	# branch), so anything that captures git's output hangs for good. HTTPS is
+	# ~0.9s per operation with no master to wedge. Keeps wm-add (cmd+shift+t)
+	# snappy since it fetches before workmux add. Commit signing uses the
+	# 1Password SSH key and is unaffected; that is not transport.
+	insteadOf = git@github.com:
+	insteadOf = ssh://git@github.com/
+[credential "https://github.com"]
+	# After osxkeychain (from /opt/homebrew/etc/gitconfig): gh's keyring token
+	# when the keychain has nothing, so an expired PAT never prompts.
+	helper = !gh auth git-credential
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
