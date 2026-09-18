@@ -23,7 +23,7 @@ zstyle ':vcs_info:*' unstagedstr "%F{red}⚑%f"
 zstyle ':vcs_info:*' formats "(%{$fg_bold[yellow]%}%b%c%u%{$reset_color%})"
 zstyle ':vcs_info:*' actionformats "(%{$fg_bold[yellow]%}%b%c%u|%a%{$reset_color%})"
 
-zstyle ':vcs_info:git*+set-message:*' hooks git-untracked
+zstyle ':vcs_info:git*+set-message:*' hooks git-untracked git-worktree
 
 ### git: Show marker (T) if there are untracked files in repository
 # Make sure you have added staged to your 'formats':  %c
@@ -35,6 +35,18 @@ function +vi-git-untracked(){
         # files in $PWD, use:
         #[[ -n $(git ls-files --others --exclude-standard) ]] ; then
         hook_com[unstaged]='%F{red}✗%f'
+    fi
+}
+
+### git: Show a tree icon (nerd font) before the branch in a linked worktree,
+# such as the ones workmux makes. In the main worktree the git dir and the
+# common dir are the same directory.
+function +vi-git-worktree(){
+    local gitdir common
+    gitdir=$(git rev-parse --path-format=absolute --git-dir 2>/dev/null) || return
+    common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)
+    if [[ "$gitdir" != "$common" ]]; then
+        hook_com[branch]=" ${hook_com[branch]}"
     fi
 }
 

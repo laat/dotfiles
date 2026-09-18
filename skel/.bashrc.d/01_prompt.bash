@@ -5,6 +5,7 @@ function prompt_command {
     local BWhite='\e[1;37m'       # Bold White
     local BIRed='\e[1;91m'        # Bold Intensive Red
     local BIBlue='\e[1;94m'       # Bold Intensive Blue
+    local BYellow='\e[1;33m'      # Bold Yellow
 
     local Color_Off='\e[0m'       # Text Reset
 
@@ -19,10 +20,19 @@ function prompt_command {
     fi
 
 
+    # Tree icon (nerd font) in a linked git worktree, such as the ones workmux
+    # makes. In the main worktree the git dir and the common dir are the same.
+    local worktree="" gitdir common
+    if gitdir=$(git rev-parse --path-format=absolute --git-dir 2>/dev/null) \
+        && common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null) \
+        && [ "$gitdir" != "$common" ]; then
+        worktree=" "
+    fi
+
     if [ "$color_prompt" = yes ]; then
-        PS1="${BIBlue}\W/${Color_Off} ${Gray}[\t]${Color_Off}\n\$ "
+        PS1="${BIBlue}\W/${Color_Off}${BYellow}${worktree}${Color_Off} ${Gray}[\t]${Color_Off}\n\$ "
     else
-        PS1="\u@\h:\W/\n\$ "
+        PS1="\u@\h:\W/${worktree}\n\$ "
     fi
 }
 
