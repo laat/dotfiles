@@ -21,6 +21,10 @@ hook_shell: ["/opt/homebrew/bin/bash", "-c"]
 
 agent: claude
 
+files:
+  copy:
+    - "**/.envrc.cache.enc"
+
 # Single pane with the agent. workmux's default adds a shell split below.
 panes:
   - command: "<agent>"
