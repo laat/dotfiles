@@ -27,9 +27,8 @@ dotfiles doctor          # check basic setup
 
 All package application goes through GNU Stow with `--no-folding`.
 
-The same CLI drives a second repo: set `DOTFILES_DIR` to its path and list its
-default packages in a `.packages` file at its root, one per line. That repo
-can ship a wrapper such as `bin/dotfiles-nrk` that does exactly this.
+The CLI also works against another repo: set `DOTFILES_DIR` to its path and
+list its default packages in a `.packages` file at its root, one per line.
 
 ## Skeleton (`skel`)
 
