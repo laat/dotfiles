@@ -35,12 +35,13 @@ Then inside tmux:
 | `C-a -` | Split vertical |
 | `C-a c` | New window |
 | `C-a T` | New workmux worktree (`wm-add`) |
-| `C-a W` | Remove current workmux worktree |
+| `C-a W` | Remove current workmux worktree (`wm-rm-window`) |
 
 ## workmux
 
 - `.config/workmux/config.yaml` — global config; per-repo overrides in `.workmux.yaml`
 - `.local/bin/wm-add` — `workmux add` after a fetch, so branches start at fresh `origin/HEAD`
+- `.local/bin/wm-rm-window` — `workmux rm` for the worktree behind a tmux window, found from its panes' paths
 - `.local/bin/tmux-close-lone-sidebar` — closes a sidebar left alone in its window
 - `.shrc.d/00_workmux.sh` — `wm`, `wmd` aliases
 - `.zshrc.d/20_workmux.zsh` — zsh completions

@@ -1,0 +1,57 @@
+#!/bin/sh
+# Remove the workmux worktree behind a tmux window, with its window and
+# branch. Bound to cmd+shift+w in ~/.tmux.conf.
+#
+#   wm-rm-window <window_id> <client_name>   resolve, confirm, then remove
+#   wm-rm-window --resolve <window_id>       print the worktree path only
+#   wm-rm-window --remove <worktree_path>    what the confirm prompt runs
+#
+# The worktree comes from the panes' paths, not the window name. workmux
+# names its windows project/handle, but a window opened or renamed by hand
+# is called claude or zsh, and "workmux rm claude" fails. The sidebar pane
+# sits in the main repo, so each pane is tried until one is inside a linked
+# worktree.
+set -eu
+
+resolve() {
+  tmux list-panes -t "$1" -F '#{pane_current_path}' | while IFS= read -r dir; do
+    [ -d "$dir" ] || continue
+    gitdir=$(git -C "$dir" rev-parse --path-format=absolute --git-dir 2>/dev/null) || continue
+    common=$(git -C "$dir" rev-parse --path-format=absolute --git-common-dir)
+    # In the main worktree both point at the same .git directory.
+    [ "$gitdir" != "$common" ] || continue
+    git -C "$dir" rev-parse --show-toplevel
+    break
+  done
+}
+
+case ${1-} in
+  --resolve)
+    resolve "$2"
+    ;;
+  --remove)
+    worktree=$2
+    main=$(git -C "$worktree" worktree list --porcelain | sed -n '1s/^worktree //p')
+    cd "$main"
+    # workmux asks again on stdin when the branch has unmerged commits, but
+    # run-shell has no stdin and the prompt aborts on EOF. Pipe in `y`: the
+    # tmux confirm was the one confirmation. run-shell also drops stderr, so
+    # merge it into stdout or a failure shows only "returned 1".
+    # workmux still refuses if there are uncommitted changes; use `wm rm -f`.
+    yes | workmux rm "$(basename "$worktree")" 2>&1
+    ;;
+  *)
+    window=$1
+    client=$2
+    worktree=$(resolve "$window")
+    if [ -z "$worktree" ]; then
+      tmux display-message -c "$client" "no workmux worktree in this window"
+      exit 0
+    fi
+    # run-shell has no TMUX_PANE, and without it workmux neither finds the
+    # session nor switches windows afterwards, so carry the binding's over.
+    tmux confirm-before -t "$client" \
+      -p "remove worktree $(basename "$worktree") (drops unmerged commits)? (y/n)" \
+      "run-shell \"TMUX_PANE='${TMUX_PANE-}' wm-rm-window --remove '$worktree'\""
+    ;;
+esac
