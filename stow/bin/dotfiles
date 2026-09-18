@@ -65,6 +65,9 @@ Commands:
 Environment:
   DOTFILES_DIR            Override the dotfiles repo path
   DOTFILES_TARGET         Override the stow target, defaults to \$HOME
+
+A repo may list its default packages, one per line, in \$DOTFILES_DIR/.packages.
+Without that file the built-in list for ~/.dotfiles is used.
 EOF
 }
 
@@ -83,7 +86,11 @@ stow_package() {
 }
 
 default_packages() {
-  printf '%s\n' "${BASE_PACKAGES[@]}" "${DEFAULT_PACKAGES[@]}"
+  if [ -f "$DOTFILES_DIR/.packages" ]; then
+    grep -Ev '^[[:space:]]*(#|$)' "$DOTFILES_DIR/.packages"
+  else
+    printf '%s\n' "${BASE_PACKAGES[@]}" "${DEFAULT_PACKAGES[@]}"
+  fi
 }
 
 all_packages() {

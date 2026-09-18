@@ -27,6 +27,10 @@ dotfiles doctor          # check basic setup
 
 All package application goes through GNU Stow with `--no-folding`.
 
+The same CLI drives a second repo: set `DOTFILES_DIR` to its path and list its
+default packages in a `.packages` file at its root, one per line. That repo
+can ship a wrapper such as `bin/dotfiles-nrk` that does exactly this.
+
 ## Skeleton (`skel`)
 
 The `skel` package provides the base shell framework. Each shell sources a `.d` directory for modular config, so other stow packages can drop files in without editing the core rc files.
