@@ -8,6 +8,13 @@ disable-model-invocation: true
 
 Target: `$ARGUMENTS`. It is a PR number, a PR URL or a branch name. If empty, use the PR for the checked-out branch.
 
+Resolve it once to the base repository and number, then use `$owner`, `$repo` and `$pr` everywhere below. Review threads live on the base repository, so do not use the head repository fields or `gh repo view`, which reads whatever checkout the current directory is in.
+
+```bash
+read -r owner repo pr < <(gh pr view "$ARGUMENTS" --json url \
+  -q '.url | capture("github.com/(?<o>[^/]+)/(?<r>[^/]+)/pull/(?<n>[0-9]+)") | [.o, .r, .n] | @tsv')
+```
+
 Work in rounds. Each round: read status, wait for checks, read the conversation and the review threads, fix what is real, push, then start the next round from the top. A round that finds problems is never the last one.
 
 ## Done means
@@ -22,7 +29,7 @@ All four hold at the same time:
 ## Read the PR
 
 ```bash
-gh pr view <pr> --json number,url,state,isDraft,headRefName,baseRefName,headRefOid,mergeable,mergeStateStatus,reviewDecision,statusCheckRollup
+gh pr view "$pr" -R "$owner/$repo" --json number,url,state,isDraft,headRefName,baseRefName,headRefOid,mergeable,mergeStateStatus,reviewDecision,statusCheckRollup
 ```
 
 If `isDraft` is true, stop and tell the user. `mergeable` and `mergeStateStatus` are computed lazily after each push and read `UNKNOWN` in the meantime. That means "not computed yet", not a verdict. Wait a moment and read again.
@@ -32,13 +39,13 @@ If `isDraft` is true, stop and tell the user. `mergeable` and `mergeStateStatus`
 Block on the watcher instead of sleeping in a loop. Give the command a ten-minute timeout. If it times out while checks are still running, run it again.
 
 ```bash
-gh pr checks <pr> --watch --fail-fast
+gh pr checks "$pr" -R "$owner/$repo" --watch --fail-fast
 ```
 
 ## Read comments and review summaries
 
 ```bash
-gh pr view <pr> --json comments,reviews --jq '
+gh pr view "$pr" -R "$owner/$repo" --json comments,reviews --jq '
   (.comments[] | {at: .createdAt, who: .author.login, state: "COMMENT", body}),
   (.reviews[]  | {at: .submittedAt, who: .author.login, state, body})
   | "\(.at) \(.who) [\(.state)]\n\(.body)\n"'
@@ -46,14 +53,12 @@ gh pr view <pr> --json comments,reviews --jq '
 
 ## Read inline review threads
 
-`gh pr view` does not expose these. Query the `reviewThreads` connection over GraphQL and page through it. `<pr>` must be the bare number here. Output is one unresolved thread per line: thread id, outdated flag, file:line, last author, last comment url, first 120 characters of the last comment.
+`gh pr view` does not expose these. Query the `reviewThreads` connection over GraphQL and page through it. Output is one unresolved thread per line: thread id, outdated flag, file:line, last author, last comment url, first 120 characters of the last comment.
 
 ```bash
-owner=$(gh repo view --json owner -q .owner.login)
-repo=$(gh repo view --json name -q .name)
 cursor=null
 while :; do
-  page=$(gh api graphql -F owner="$owner" -F repo="$repo" -F pr=<pr> -F cursor="$cursor" -f query='
+  page=$(gh api graphql -F owner="$owner" -F repo="$repo" -F pr="$pr" -F cursor="$cursor" -f query='
     query($owner: String!, $repo: String!, $pr: Int!, $cursor: String) {
       repository(owner: $owner, name: $repo) {
         pullRequest(number: $pr) {
@@ -92,7 +97,7 @@ done
 Reply on every thread you addressed. The comment id is the digits after `discussion_r` in the last comment's url.
 
 ```bash
-gh api -X POST /repos/<owner>/<repo>/pulls/<pr>/comments/<comment-id>/replies \
+gh api -X POST "/repos/$owner/$repo/pulls/$pr/comments/<comment-id>/replies" \
   -f body='Addressed in <sha>: <one-line summary of the change>'
 ```
 
