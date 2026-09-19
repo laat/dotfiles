@@ -6,7 +6,7 @@ return {
   build = ':TSUpdate',
   branch = 'main',
   dependencies = {
-    'nvim-treesitter/nvim-treesitter-textobjects',
+    { 'nvim-treesitter/nvim-treesitter-textobjects', branch = 'main' },
   },
   config = function()
     local parsers = { 'bash', 'c', 'css', 'diff', 'go', 'html', 'javascript', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'python', 'query', 'rust', 'svelte', 'tsx', 'typescript', 'vim', 'vimdoc' }
