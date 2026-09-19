@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Claude Code status line.
 # stdin: the status line JSON payload (see https://code.claude.com/docs/en/statusline)
-# Shows: model · dir · git branch (+ uncommitted changes) · context · 5h/7d limits · Fable weekly limit left.
+# Shows: model initial + version (Opus 5 -> O 5) · dir · git branch (+ uncommitted changes) · context · 5h/7d limits · Fable weekly limit left.
 #
 # The Fable window is not part of the stdin payload, so it is read from the same
 # endpoint /usage uses (/api/oauth/usage) and cached; the fetch runs in the
@@ -32,6 +32,7 @@ IFS=$'\t' read -r model cwd ctx_pct five_pct seven_pct has_limits < <(
 )
 # "-" marks an absent field (tab-separated reads collapse empty fields).
 for v in cwd ctx_pct five_pct seven_pct; do [ "${!v}" = "-" ] && printf -v "$v" ''; done
+model=${model#Claude }; ver=${model#* }; [ "$ver" = "$model" ] && ver=""; model=${model:0:1}${ver:+ $ver}  # "Opus 5" -> "O 5", "Fable 5.1" -> "F 5.1"
 
 # --- git (mirrors zsh/.zshrc.d/prompt.zsh: (branch✗⚑), ✗ staged, ⚑ unstaged,
 # ✗ replaces ⚑ when there are untracked files, tree icon in a linked worktree) --
