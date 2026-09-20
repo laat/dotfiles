@@ -1,7 +1,6 @@
 ---
 name: babysit
-description: Supervise one or more pull requests until they are ready to merge. Waits on CI, works through review threads and comments, fixes and pushes, then checks everything again. Merges only when asked. Use when the user asks to babysit, shepherd, watch or keep an eye on a PR until it is green and reviewed.
-disable-model-invocation: true
+description: Supervise one or more pull requests until they are ready to merge. Waits on CI, works through review threads and comments, fixes and pushes, replies on and resolves every thread it handled, then checks everything again. Merges only when asked. Use whenever the user says babysit, shepherd, watch or keep an eye on a PR, also as a plain word mid-conversation and not only as /babysit.
 ---
 
 # Babysit a pull request
@@ -36,7 +35,10 @@ All four hold at the same time:
 - Every check passed or is skipped on purpose.
 - The review decision does not block merging (no `CHANGES_REQUESTED`).
 - No comment or review summary still asks for something.
+- Every thread you acted on carries your reply saying what changed and in which commit.
 - Zero unresolved review threads.
+
+Pushing a fix is not the end of a thread. A thread without a reply is still open work, even when the code is already correct.
 
 ## Read the PR
 
