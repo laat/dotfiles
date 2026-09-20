@@ -17,7 +17,8 @@ restricted.
 worktrees started with `wms` use the `cc-safe` agent. A file or socket that
 exists but returns `Operation not permitted` is a sandbox denial, not a
 permissions bug in the project. The bare, unsandboxed binaries are
-`claude-unsafe`, `codex-unsafe` and `opencode-unsafe`.
+`claude-unsafe`, `codex-unsafe` and `opencode-unsafe`, or the short forms
+`ccu`, `cou` and `ocu`.
 
 ## Where things are on this machine
 

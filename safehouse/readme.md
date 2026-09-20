@@ -34,7 +34,8 @@ dotfiles apply safehouse
   that file and cannot see `~/.npmrc`. Re-run to rotate
 - `.shrc.d/99_safehouse.sh` — `claude`, `cc`, `codex`, `co`, `opencode`, `oc`
   become the sandboxed wrappers, with claude and codex skipping their own
-  permission prompts; `<agent>-unsafe` runs the bare binary with prompts
+  permission prompts; `<agent>-unsafe` (short: `ccu`, `cou`, `ocu`) runs the
+  bare binary with prompts
 - `roadmap.md` — planned hardening: read-only npm token, read-only cloud identity
 - `.agents/skills/safehouse/` — agent-invoked skill: what safehouse is, where
   its files and docs are, how to read a denial. `.claude/skills/safehouse` is
