@@ -21,7 +21,8 @@ dotfiles apply safehouse
   (`~/.dotfiles` read-only for the stow symlinks, `~/.local/bin` read-only so
   hooks find `workmux`, `~/code` and `~/git` read-write because one session
   opens PRs in several repos, workmux state dirs, the statusline's usage
-  cache, tmux socket, `TMUX`/`TMUX_PANE`)
+  cache, tmux socket, `TMUX`/`TMUX_PANE`, safehouse's `1password` feature so
+  `op-ssh-sign` can sign commits)
 - `.local/bin/{claude,codex,opencode}-safe` — symlinks to it, agent from the name
 - `.config/safehouse/agents.sb` — appended policy: tmux socket allow, `.env` deny
 - `.config/safehouse/npm.sb` — hides `~/.npmrc`; applied only when the read-only

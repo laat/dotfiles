@@ -18,6 +18,10 @@
 #   pnpm use its read-only token via npm_config_userconfig and the real
 #   ~/.npmrc is hidden (npm.sb). Without it, safehouse's default applies and
 #   the agent sees ~/.npmrc.
+# - safehouse's 1password feature: ~/.gitconfig signs commits with op-ssh-sign
+#   over the 1Password agent socket, which the default policy denies, so every
+#   commit failed with "1Password: Could not connect to socket". ~/.ssh stays
+#   hidden; the grant is the socket, the app bundle and ~/.config/1Password.
 #
 #   safehouse-agent <agent> [args...]
 #   <agent>-safe [args...]         symlink to this script, agent from the name
@@ -54,6 +58,7 @@ if [ -f "$conf/npmrc" ]; then
 fi
 
 exec safehouse \
+  --enable=1password \
   --add-dirs-ro="$ro" \
   --add-dirs="$rw" \
   --append-profile="$conf/agents.sb" \

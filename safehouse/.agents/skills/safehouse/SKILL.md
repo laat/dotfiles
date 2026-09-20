@@ -52,6 +52,10 @@ The wrapper adds, on top of safehouse's defaults:
   a tool that needs its own cache dir there needs a grant like this.
 - `npm_config_userconfig` pointing at the read-only token file, when it
   exists. `npm publish` fails by design; `npm login` is a host-only step.
+- safehouse's `1password` feature: the 1Password agent socket, the app bundle
+  and `~/.config/1Password`, so `op-ssh-sign` from `~/.gitconfig` can sign
+  commits. Without it every commit fails with "1Password: Could not connect
+  to socket". `~/.ssh` stays hidden.
 
 Policy files loaded with `--append-profile` are write-denied as the last rule,
 so `agents.sb` cannot be edited from a sandboxed session. Use `claude-unsafe`
