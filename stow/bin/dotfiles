@@ -16,7 +16,6 @@ DEFAULT_PACKAGES=(
   claude
   codex
   opencode
-  pi
   skills
 )
 

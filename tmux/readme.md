@@ -8,8 +8,19 @@ keybindings, hooks and helper scripts, so they ship as one package.
 
 ```sh
 brew install tmux sesh fzf
-cargo install workmux
 ```
+
+workmux ships as a prebuilt binary on its
+[releases page](https://github.com/raine/workmux/releases); there is no brew
+formula. Pick the tarball for the platform (`darwin-arm64`, `darwin-amd64`,
+`linux-amd64`, `linux-arm64`) and unpack it into `~/.local/bin`:
+
+```sh
+curl -fsSL https://github.com/raine/workmux/releases/latest/download/workmux-darwin-arm64.tar.gz \
+  | tar -xz -C ~/.local/bin workmux
+```
+
+Rerun the same command to upgrade.
 
 ## Setup
 

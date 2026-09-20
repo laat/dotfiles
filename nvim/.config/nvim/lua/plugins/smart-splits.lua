@@ -1,4 +1,4 @@
--- Pane navigation with WezTerm integration
+-- Pane navigation with tmux integration
 return {
   'mrjones2014/smart-splits.nvim',
   lazy = false,

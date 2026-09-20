@@ -1,6 +1,6 @@
 ---
 name: skill-me
-description: Create or update an agent skill in the dotfiles skills package (~/.dotfiles/skills), so it is shared by Claude Code, Codex, OpenCode and pi. Covers the canonical file location, the Claude Code symlink, frontmatter, the README row, restowing and verifying. Use when asked to "make this a skill", "save this as /name", or to add or edit a skill in the dotfiles.
+description: Create or update an agent skill in the dotfiles skills package (~/.dotfiles/skills), so it is shared by Claude Code, Codex and OpenCode. Covers the canonical file location, the Claude Code symlink, frontmatter, the README row, restowing and verifying. Use when asked to "make this a skill", "save this as /name", or to add or edit a skill in the dotfiles.
 disable-model-invocation: true
 ---
 
@@ -15,7 +15,7 @@ In a prompt, `@~/.dotfiles/skills/` refers to this folder.
 ```
 ~/.dotfiles/skills/
   README.md                          # table of skills, one row each
-  .agents/skills/<name>/SKILL.md     # canonical copy (Codex, OpenCode, pi)
+  .agents/skills/<name>/SKILL.md     # canonical copy (Codex, OpenCode)
   .claude/skills/<name>              # relative symlink -> ../../.agents/skills/<name>
   .agents/skills/<name>/<tool>       # script a skill wraps, if any; not on PATH
 ```

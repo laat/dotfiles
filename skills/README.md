@@ -1,9 +1,9 @@
 # skills
 
-Agent skills shared across Claude Code, Codex, OpenCode and pi.
+Agent skills shared across Claude Code, Codex and OpenCode.
 
-The canonical copy lives in `.agents/skills/<name>/SKILL.md`, which Codex,
-OpenCode and pi all read from `~/.agents/skills/`. Claude Code only reads
+The canonical copy lives in `.agents/skills/<name>/SKILL.md`, which Codex and
+OpenCode read from `~/.agents/skills/`. Claude Code only reads
 `~/.claude/skills/`, so each skill also gets a relative symlink there:
 
 ```sh

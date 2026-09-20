@@ -40,17 +40,6 @@ GITHUB_TOKEN="${GITHUB_TOKEN:-}" \
   MISE_CONFIG_FILE="$MISE_CONFIG" \
   "$HOME/.local/bin/mise" install --yes
 
-
-# WezTerm AppImage (x86_64 only — for native wezterm ssh multiplexing)
-mkdir -p "$HOME/bin"
-if [ "$(uname -m)" = "x86_64" ]; then
-  curl -fsSL "https://github.com/wez/wezterm/releases/download/20240203-110809-5046fc22/WezTerm-20240203-110809-5046fc22-Ubuntu20.04.AppImage" \
-    -o "$HOME/bin/wezterm"
-  chmod +x "$HOME/bin/wezterm"
-else
-  echo "warning: WezTerm AppImage only available for x86_64, skipping" >&2
-fi
-
 # npm auth config (for private registry tools)
 if [ -e "$HOME/.npmrc" ]; then
   echo "warning: $HOME/.npmrc already exists, leaving it unchanged" >&2
@@ -72,8 +61,3 @@ backup_if_present "$HOME/.gitignore_global"
 backup_if_present "$HOME/.config/mise/config.toml"
 
 "$DOTFILES_DIR/stow/bin/dotfiles" apply
-
-# pi agent: install sandbox extension dependencies
-if [ -d "$HOME/.pi/agent/extensions/sandbox" ]; then
-  (cd "$HOME/.pi/agent/extensions/sandbox" && mise exec node -- npm install)
-fi

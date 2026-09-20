@@ -118,7 +118,7 @@ vim.api.nvim_create_autocmd('VimEnter', {
 -- Norwegian keyboard: map ø to : (ø is on the colon key)
 vim.keymap.set({ 'n', 'x', 'o' }, 'ø', ':', { desc = 'Command mode (Norwegian keyboard)' })
 
--- Cmd+S to save (WezTerm sends <Esc>s as \x1bs)
+-- Cmd+S to save, for terminals that send it as <Esc>s (\x1bs)
 vim.keymap.set({ 'n', 'v' }, '\x1bs', '<cmd>w<CR>', { desc = 'Save file (Cmd+S)' })
 vim.keymap.set('i', '\x1bs', '<Esc><cmd>w<CR>', { desc = 'Save file (Cmd+S)' })
 
