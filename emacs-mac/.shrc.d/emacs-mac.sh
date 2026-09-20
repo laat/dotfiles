@@ -1,3 +1,3 @@
 #!/bin/sh
-alias emacs='open -a /Applications/Emacs $1'
-alias e='open -a /Applications/Emacs $1'
+alias emacs='open -a /opt/homebrew/opt/emacs-mac@29/Emacs.app'
+alias e='open -a /opt/homebrew/opt/emacs-mac@29/Emacs.app'
