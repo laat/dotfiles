@@ -17,6 +17,7 @@ sudo apt-get install -q -y --no-install-recommends \
   ca-certificates \
   curl \
   git \
+  git-lfs \
   make \
   ncurses-term \
   stow \
