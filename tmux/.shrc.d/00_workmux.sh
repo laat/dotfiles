@@ -4,3 +4,5 @@ alias wmd='workmux dashboard'
 alias wma='wm-add'
 # Worktree as a window in the current tmux session instead of its own session.
 alias wmw='wm-add --mode window'
+# Worktree whose agent runs sandboxed (cc-safe in config.yaml, safehouse package).
+alias wms='wm-add -a cc-safe'

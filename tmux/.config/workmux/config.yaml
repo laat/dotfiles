@@ -21,6 +21,17 @@ hook_shell: ["/opt/homebrew/bin/bash", "-c"]
 
 agent: claude
 
+# Sandboxed agent (safehouse package): claude under sandbox-exec via
+# ~/.local/bin/claude-safe, which is why it may skip permission prompts.
+# Use with `wm-add -a cc-safe` (wms) or `agent: cc-safe` in a repo's
+# .workmux.yaml. agents is global-only; a project file cannot define them.
+agents:
+  cc-safe:
+    type: claude
+    command: claude-safe
+    args:
+      - --dangerously-skip-permissions
+
 files:
   copy:
     - "**/.envrc.cache.enc"

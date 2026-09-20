@@ -43,5 +43,6 @@ Then inside tmux:
 - `.local/bin/wm-add` — `workmux add` after a fetch, so branches start at fresh `origin/HEAD`
 - `.local/bin/wm-rm-window` — `workmux rm` for the worktree behind a tmux window, found from its panes' paths
 - `.local/bin/tmux-close-lone-sidebar` — closes a sidebar left alone in its window
-- `.shrc.d/00_workmux.sh` — `wm`, `wmd` aliases
+- `.shrc.d/00_workmux.sh` — `wm`, `wmd`, `wma`, `wmw`, `wms` aliases
+- `cc-safe` agent in `config.yaml` — claude under sandbox-exec, see `safehouse/readme.md`
 - `.zshrc.d/20_workmux.zsh` — zsh completions

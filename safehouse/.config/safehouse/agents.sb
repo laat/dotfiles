@@ -1,0 +1,10 @@
+;; Appended to safehouse's generated policy by safehouse-agent. Later rules win.
+
+;; workmux status hooks inside the agent talk to tmux over its socket.
+(allow network-outbound
+    (remote unix-socket (path-regex #"^/private/tmp/tmux-[0-9]+/default$")))
+
+;; Secrets stay out of the sandbox even though the worktree is readable.
+;; Matches .env and .env.<anything>, not .envrc or .envrc.cache.enc.
+(deny file-read*
+    (regex #"/\.env(\.[^/]*)?$"))

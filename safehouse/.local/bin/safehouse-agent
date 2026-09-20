@@ -1,0 +1,33 @@
+#!/bin/sh
+# Run a coding agent under agent-safehouse (sandbox-exec) with the grants this
+# machine needs on top of safehouse's defaults:
+#
+# - ~/.dotfiles read-only: ~/.gitconfig, ~/.config/workmux/config.yaml and the
+#   rest of the stowed config are symlinks into it, and sandbox-exec resolves
+#   symlinks before checking the policy, so git fails without it.
+# - workmux state and cache dirs, the tmux socket (agents.sb) and the TMUX and
+#   TMUX_PANE variables: the workmux hooks in ~/.claude/settings.json call
+#   `workmux set-window-status` from inside the agent, and without these they
+#   fail silently and the sidebar, dashboard and `workmux wait` never update.
+#
+#   safehouse-agent <agent> [args...]
+#   <agent>-safe [args...]         symlink to this script, agent from the name
+#
+# The agent's safehouse profile (keychain, ~/.claude, ...) is picked from the
+# command's basename, so the agent must be the bare command name.
+set -eu
+
+case $(basename "$0") in
+  *-safe) agent=${0##*/}; agent=${agent%-safe} ;;
+  *) agent=$1; shift ;;
+esac
+
+dotfiles=${DOTFILES_DIR:-$HOME/.dotfiles}
+mkdir -p "$HOME/.local/state/workmux" "$HOME/.cache/workmux"
+
+exec safehouse \
+  --add-dirs-ro="$dotfiles" \
+  --add-dirs="$HOME/.local/state/workmux:$HOME/.cache/workmux" \
+  --append-profile="$HOME/.config/safehouse/agents.sb" \
+  --env-pass=TMUX,TMUX_PANE \
+  -- "$agent" "$@"

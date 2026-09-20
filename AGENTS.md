@@ -12,7 +12,7 @@ This repo is organised as stow packages, one per topic (`git/`, `nvim/`, `zsh/`,
 
 When adding a new alias or function, locate the matching package first and edit its `.shrc.d/*.sh`. Only create a new file there if none exists for the topic.
 
-Agent skills (`SKILL.md`) go in the `skills/` package: canonical copy in `skills/.agents/skills/<name>/`, plus a relative symlink `skills/.claude/skills/<name> -> ../../.agents/skills/<name>` so Claude Code sees it too. See `skills/README.md`.
+Agent skills (`SKILL.md`) go with their tool: a skill about a tool that has a package lives in that package (e.g. `safehouse/.agents/skills/safehouse/`); only skills without a package go in `skills/`. Either way the layout is the same: canonical copy in `<package>/.agents/skills/<name>/`, plus a relative symlink `<package>/.claude/skills/<name> -> ../../.agents/skills/<name>` so Claude Code sees it too. See `skills/README.md`.
 
 ## Stow
 
