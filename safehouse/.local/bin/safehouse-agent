@@ -5,10 +5,19 @@
 # - ~/.dotfiles read-only: ~/.gitconfig, ~/.config/workmux/config.yaml and the
 #   rest of the stowed config are symlinks into it, and sandbox-exec resolves
 #   symlinks before checking the policy, so git fails without it.
+# - ~/code and ~/git read-write: one session often opens PRs in several
+#   repos. Everything else under $HOME stays hidden.
+# - ~/.local/bin read-only: safehouse only lets the sandbox list it and grants
+#   single binaries per agent profile, so `command -v workmux` fails and every
+#   hook in ~/.claude/settings.json dies with "workmux: command not found".
 # - workmux state and cache dirs, the tmux socket (agents.sb) and the TMUX and
-#   TMUX_PANE variables: the workmux hooks in ~/.claude/settings.json call
-#   `workmux set-window-status` from inside the agent, and without these they
-#   fail silently and the sidebar, dashboard and `workmux wait` never update.
+#   TMUX_PANE variables: those hooks call `workmux set-window-status` from
+#   inside the agent, and without these they fail silently and the sidebar,
+#   dashboard and `workmux wait` never update.
+# - When ~/.config/safehouse/npmrc exists (setup/npm-readonly-token), npm and
+#   pnpm use its read-only token via npm_config_userconfig and the real
+#   ~/.npmrc is hidden (npm.sb). Without it, safehouse's default applies and
+#   the agent sees ~/.npmrc.
 #
 #   safehouse-agent <agent> [args...]
 #   <agent>-safe [args...]         symlink to this script, agent from the name
@@ -22,12 +31,31 @@ case $(basename "$0") in
   *) agent=$1; shift ;;
 esac
 
-dotfiles=${DOTFILES_DIR:-$HOME/.dotfiles}
-mkdir -p "$HOME/.local/state/workmux" "$HOME/.cache/workmux"
+conf=$HOME/.config/safehouse
+ro="${DOTFILES_DIR:-$HOME/.dotfiles}:$HOME/.local/bin"
+env_pass=TMUX,TMUX_PANE
+
+# ~/.cache/claude-statusline: ~/.claude/statusline.sh caches the Fable usage
+# window there; safehouse only allows listing ~/.cache.
+mkdir -p "$HOME/.local/state/workmux" "$HOME/.cache/workmux" "$HOME/.cache/claude-statusline"
+rw="$HOME/.local/state/workmux:$HOME/.cache/workmux:$HOME/.cache/claude-statusline"
+# Only dirs that exist on this machine; safehouse warns about missing ones.
+for d in "$HOME/code" "$HOME/git"; do
+  [ -d "$d" ] && rw="$rw:$d"
+done
+
+# Optional flags go in front of the agent command.
+set -- -- "$agent" "$@"
+if [ -f "$conf/npmrc" ]; then
+  ro="$ro:$conf/npmrc"
+  export npm_config_userconfig="$conf/npmrc"
+  env_pass="$env_pass,npm_config_userconfig"
+  set -- --append-profile="$conf/npm.sb" "$@"
+fi
 
 exec safehouse \
-  --add-dirs-ro="$dotfiles" \
-  --add-dirs="$HOME/.local/state/workmux:$HOME/.cache/workmux" \
-  --append-profile="$HOME/.config/safehouse/agents.sb" \
-  --env-pass=TMUX,TMUX_PANE \
-  -- "$agent" "$@"
+  --add-dirs-ro="$ro" \
+  --add-dirs="$rw" \
+  --append-profile="$conf/agents.sb" \
+  --env-pass="$env_pass" \
+  "$@"

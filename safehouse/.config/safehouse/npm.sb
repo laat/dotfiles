@@ -1,0 +1,6 @@
+;; Appended by safehouse-agent only when ~/.config/safehouse/npmrc exists
+;; (created by setup/npm-readonly-token). npm and pnpm inside the sandbox are
+;; pointed at that read-only token via npm_config_userconfig, so the
+;; publish-capable ~/.npmrc has no reason to be visible. Later rules win.
+(deny file-read*
+    (home-literal "/.npmrc"))

@@ -4,25 +4,13 @@ Hardening that goes beyond hiding paths. Today the sandbox hides secrets it
 knows about; these items replace the credentials it can see with read-only
 ones, so a misbehaving agent can look but not publish, deploy or delete.
 
-## 1. Read-only npm token
+## 1. Read-only npm token (done)
 
-**Now:** safehouse's Node profile grants `~/.npmrc`, and that file holds the
-short-lived publish-capable token for `registry.npmjs.org` and a token for
-`npm.pkg.github.com`. `npm whoami` works inside the sandbox, so `npm publish`
-would too.
-
-**Target:** the sandbox only ever sees read-only tokens.
-
-- Create an npm granular access token with read-only permission, scoped to
-  the packages and orgs the agent installs from, and a GitHub token with
-  `read:packages` only.
-- Put them in `~/.config/safehouse/npmrc` (mode 600, not in the repo).
-- In `safehouse-agent`, source an env file with `--env=FILE` that sets
-  `NPM_CONFIG_USERCONFIG=$HOME/.config/safehouse/npmrc`. npm and pnpm both
-  honour it.
-- Deny the real file in `agents.sb`:
-  `(deny file-read* (home-literal "/.npmrc"))`.
-- Keep `npm login` a host-only step; the sandboxed agent never needs it.
+`setup/npm-readonly-token` creates a read-only granular token in
+`~/.config/safehouse/npmrc`; `safehouse-agent` passes it as
+`npm_config_userconfig` and `npm.sb` hides `~/.npmrc`. Left: GitHub Packages
+is a pasted classic PAT, since fine-grained PATs cannot be created from the
+CLI, and there is no reminder before the token expires.
 
 ## 2. Read-only cloud identity
 

@@ -29,6 +29,7 @@ Everything is stowed from `~/.dotfiles/safehouse/` (package readme there).
 | `~/.local/bin/safehouse-agent` | wrapper adding this machine's grants (see below) |
 | `~/.local/bin/{claude,codex,opencode}-safe` | symlinks to it, agent picked from the name |
 | `~/.config/safehouse/agents.sb` | appended policy: tmux socket allow, `.env` deny |
+| `~/.config/safehouse/npmrc` | read-only npm token; when present npm and pnpm use it and `~/.npmrc` is hidden (`npm.sb`). Made by `~/.dotfiles/safehouse/setup/npm-readonly-token`, host only |
 | `~/.shrc.d/99_safehouse.sh` | the aliases, loaded last so they override `00_claude.sh` etc. |
 | `~/.config/workmux/config.yaml` | `agents.cc-safe`, workmux's sandboxed claude |
 | `<repo>/.safehouse` | optional per-repo policy, only loaded with `--trust-workdir-config` |
@@ -38,9 +39,19 @@ The wrapper adds, on top of safehouse's defaults:
 
 - `~/.dotfiles` read-only, because `~/.gitconfig` and most of `~/.config` are
   stow symlinks into it and sandbox-exec checks the resolved path.
+- `~/code` and `~/git` read-write, so a session can change and open PRs in
+  several repos. The rest of `$HOME` stays hidden.
+- `~/.local/bin` read-only. safehouse only lets the sandbox list it and grants
+  single binaries per agent, so without this `command -v workmux` fails and
+  every hook in `~/.claude/settings.json` reports "workmux: command not found".
 - `~/.local/state/workmux` and `~/.cache/workmux` read-write, the tmux socket,
-  and `TMUX`/`TMUX_PANE` passed through, so the workmux status hooks in
-  `~/.claude/settings.json` work from inside.
+  and `TMUX`/`TMUX_PANE` passed through, so those workmux status hooks work
+  from inside.
+- `~/.cache/claude-statusline` read-write, where `~/.claude/statusline.sh`
+  caches the Fable usage window. safehouse allows only listing `~/.cache`, so
+  a tool that needs its own cache dir there needs a grant like this.
+- `npm_config_userconfig` pointing at the read-only token file, when it
+  exists. `npm publish` fails by design; `npm login` is a host-only step.
 
 Policy files loaded with `--append-profile` are write-denied as the last rule,
 so `agents.sb` cannot be edited from a sandboxed session. Use `claude-unsafe`

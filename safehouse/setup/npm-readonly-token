@@ -1,0 +1,87 @@
+#!/bin/sh
+# Create a read-only npm token for sandboxed agents and write it to
+# ~/.config/safehouse/npmrc. safehouse-agent picks that file up on the next
+# start: it points npm and pnpm at it with npm_config_userconfig and hides
+# the publish-capable ~/.npmrc from the sandbox (npm.sb).
+#
+# Run on the host, logged in to npm (`npm whoami`), never inside the sandbox.
+# Safe to re-run: the previous token from the file is revoked afterwards.
+#
+#   safehouse/setup/npm-readonly-token
+#
+#   EXPIRES=<days>        token lifetime, default 365
+#   SCOPES=<a,b>          private scopes the token may read, default nrk.
+#                         Public packages need no token, and the registry
+#                         refuses a token with no scope, package or org.
+#
+# Not stowed (see .stow-local-ignore).
+set -eu
+
+out=$HOME/.config/safehouse/npmrc
+expires=${EXPIRES:-365}
+scopes=${SCOPES:-nrk}
+name="safehouse-readonly-$(hostname -s)"
+
+set --
+for s in $(printf '%s' "$scopes" | tr ',' ' '); do
+  set -- "$@" --scopes "$s"
+done
+
+user=$(npm whoami 2>/dev/null) || {
+  echo "not logged in to npm; run \`npm login\` first" >&2
+  exit 1
+}
+
+old=""
+[ -f "$out" ] && old=$(grep -o -E 'registry\.npmjs\.org/:_authToken=npm_[A-Za-z0-9]+' "$out" | sed 's/.*=//' || true)
+
+echo "creating granular token '$name' for $user: scopes @$(printf '%s' "$scopes" | sed 's/,/ @/g') read-only, orgs no-access, $expires days"
+echo "npm asks for your password, and opens the browser for 2FA"
+# npm only runs its browser OTP flow on a terminal; a captured stdout gets
+# EOTP instead. `script` gives it a pty and keeps a transcript for the token.
+transcript=$(mktemp -t npm-token)
+script -q "$transcript" npm token create \
+  --name "$name" \
+  --token-description "read-only token for sandboxed agents (safehouse)" \
+  "$@" \
+  --packages-and-scopes-permission read-only \
+  --orgs-permission no-access \
+  --expires "$expires" || true
+token=$(grep -o -E 'npm_[A-Za-z0-9]{36}' "$transcript" | head -1) || true
+rm -f "$transcript"
+if [ -z "$token" ]; then
+  printf 'token not found in npm output above, paste it here: '
+  read -r token
+fi
+
+echo
+echo "GitHub Packages (npm.pkg.github.com) needs a classic PAT with only read:packages."
+echo "  https://github.com/settings/tokens/new?scopes=read:packages&description=$name"
+printf 'paste it, or press enter to skip: '
+stty -echo 2>/dev/null || true
+read -r ghtoken
+stty echo 2>/dev/null || true
+echo
+
+umask 077
+mkdir -p "$(dirname "$out")"
+tmp=$(mktemp "$out.XXXXXX")
+{
+  echo "# read-only tokens for sandboxed agents, written by"
+  echo "# ~/.dotfiles/safehouse/setup/npm-readonly-token on $(date +%F)"
+  # Keep any non-token settings from the real ~/.npmrc (scoped registries etc.).
+  [ -f "$HOME/.npmrc" ] && grep -v '_authToken=' "$HOME/.npmrc" || true
+  echo "//registry.npmjs.org/:_authToken=$token"
+  [ -n "$ghtoken" ] && echo "//npm.pkg.github.com/:_authToken=$ghtoken"
+} > "$tmp"
+mv "$tmp" "$out"
+echo "wrote $out"
+
+if [ -n "$old" ] && [ "$old" != "$token" ]; then
+  npm token revoke "$old" >/dev/null 2>&1 && echo "revoked previous token" || echo "could not revoke previous token; check \`npm token list\`" >&2
+fi
+
+echo "verifying:"
+printf '  npm whoami with the new file: '
+npm_config_userconfig=$out npm whoami
+echo "done. New sandboxed sessions use this file; ~/.npmrc is hidden from them."

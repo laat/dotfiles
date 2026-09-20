@@ -1,0 +1,6 @@
+# This file replaces the global ignore list for this package, so the
+# entries from ~/.stow-global-ignore that matter here are repeated.
+^/readme\.md
+^/roadmap\.md
+^/setup
+\.DS_Store

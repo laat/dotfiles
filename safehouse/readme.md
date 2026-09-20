@@ -18,10 +18,19 @@ dotfiles apply safehouse
 ## Files
 
 - `.local/bin/safehouse-agent` — safehouse with the grants this setup needs
-  (`~/.dotfiles` read-only for the stow symlinks, workmux state dirs, tmux
-  socket, `TMUX`/`TMUX_PANE`)
+  (`~/.dotfiles` read-only for the stow symlinks, `~/.local/bin` read-only so
+  hooks find `workmux`, `~/code` and `~/git` read-write because one session
+  opens PRs in several repos, workmux state dirs, the statusline's usage
+  cache, tmux socket, `TMUX`/`TMUX_PANE`)
 - `.local/bin/{claude,codex,opencode}-safe` — symlinks to it, agent from the name
 - `.config/safehouse/agents.sb` — appended policy: tmux socket allow, `.env` deny
+- `.config/safehouse/npm.sb` — hides `~/.npmrc`; applied only when the read-only
+  token file exists
+- `setup/npm-readonly-token` — not stowed; creates a read-only npm granular
+  token for the `@nrk` scope (`SCOPES=` for others; public packages need
+  none) plus an optional `read:packages` GitHub PAT, in
+  `~/.config/safehouse/npmrc`. From then on npm and pnpm in the sandbox use
+  that file and cannot see `~/.npmrc`. Re-run to rotate
 - `.shrc.d/99_safehouse.sh` — `claude`, `cc`, `codex`, `co`, `opencode`, `oc`
   become the sandboxed wrappers, with claude and codex skipping their own
   permission prompts; `<agent>-unsafe` runs the bare binary with prompts
