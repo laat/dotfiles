@@ -27,6 +27,15 @@ for s in $(printf '%s' "$scopes" | tr ',' ' '); do
   set -- "$@" --scopes "$s"
 done
 
+# The granular-token flags (--name, --scopes, --expires, ...) arrived in npm
+# 11.7.0. Older npms pass them through as unknown config and the registry
+# answers "Token name is required".
+npm_version=$(npm --version 2>/dev/null | sed 's/-.*//')
+if [ "$(printf '%s\n11.7.0\n' "$npm_version" | sort -V | head -1)" != "11.7.0" ]; then
+  echo "npm $npm_version is too old for granular tokens; need 11.7.0 or newer (volta install npm@11)" >&2
+  exit 1
+fi
+
 user=$(npm whoami 2>/dev/null) || {
   echo "not logged in to npm; run \`npm login\` first" >&2
   exit 1

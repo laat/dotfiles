@@ -31,7 +31,8 @@ dotfiles apply safehouse
   token for the `@nrk` scope (`SCOPES=` for others; public packages need
   none) plus an optional `read:packages` GitHub PAT, in
   `~/.config/safehouse/npmrc`. From then on npm and pnpm in the sandbox use
-  that file and cannot see `~/.npmrc`. Re-run to rotate
+  that file and cannot see `~/.npmrc`. Re-run to rotate. Needs npm 11.7 or
+  newer for the granular-token flags
 - `.shrc.d/99_safehouse.sh` — `claude`, `cc`, `codex`, `co`, `opencode`, `oc`
   become the sandboxed wrappers, with claude and codex skipping their own
   permission prompts; `<agent>-unsafe` (short: `ccu`, `cou`, `ocu`) runs the
