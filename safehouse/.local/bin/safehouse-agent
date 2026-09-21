@@ -2,9 +2,10 @@
 # Run a coding agent under agent-safehouse (sandbox-exec) with the grants this
 # machine needs on top of safehouse's defaults:
 #
-# - ~/.dotfiles read-only: ~/.gitconfig, ~/.config/workmux/config.yaml and the
-#   rest of the stowed config are symlinks into it, and sandbox-exec resolves
-#   symlinks before checking the policy, so git fails without it.
+# - ~/.dotfiles and any ~/.dotfiles-* sibling repo read-only: ~/.gitconfig,
+#   ~/.config/workmux/config.yaml, the skills under ~/.claude/skills and the
+#   rest of the stowed config are symlinks into them, and sandbox-exec
+#   resolves symlinks before checking the policy, so git fails without it.
 # - ~/code and ~/git read-write: one session often opens PRs in several
 #   repos. Everything else under $HOME stays hidden.
 # - ~/.local/bin read-only: safehouse only lets the sandbox list it and grants
@@ -28,6 +29,13 @@
 #   over the 1Password agent socket, which the default policy denies, so every
 #   commit failed with "1Password: Could not connect to socket". ~/.ssh stays
 #   hidden; the grant is the socket, the app bundle and ~/.config/1Password.
+# - safehouse's shell-init feature: SHELL inside the sandbox is bash, and
+#   Claude Code's shell snapshot runs it interactively, which sources
+#   ~/.bashrc and printed "~/.bashrc: Operation not permitted" on every
+#   start. The feature grants only the top-level rc files; agents.sb adds
+#   what they source (~/.shrc, ~/.shrc.d, ~/.profile.local, the *.local
+#   files) so aliases and functions load inside, and denies
+#   ~/.profile.local-secrets, where the host's tokens live.
 #
 #   safehouse-agent <agent> [args...]
 #   <agent>-safe [args...]         symlink to this script, agent from the name
@@ -43,6 +51,9 @@ esac
 
 conf=$HOME/.config/safehouse
 ro="${DOTFILES_DIR:-$HOME/.dotfiles}:$HOME/.local/bin"
+for d in "$HOME"/.dotfiles-*; do
+  [ -d "$d" ] && ro="$ro:$d"
+done
 env_pass=TMUX,TMUX_PANE
 
 # ~/.cache/claude-statusline: ~/.claude/statusline.sh caches the Fable usage
@@ -79,7 +90,7 @@ if top=$(git rev-parse --show-toplevel 2>/dev/null); then
 fi
 
 exec safehouse \
-  --enable=1password \
+  --enable=1password,shell-init \
   --add-dirs-ro="$ro" \
   --add-dirs="$rw" \
   --append-profile="$conf/agents.sb" \

@@ -4,6 +4,30 @@
 (allow network-outbound
     (remote unix-socket (path-regex #"^/private/tmp/tmux-[0-9]+/default$")))
 
+;; The shell startup chain under the rc files shell-init grants. These are
+;; stow symlinks into ~/.dotfiles or local files with PATH and prompt setup.
+;; --add-dirs-ro cannot grant a symlinked file (safehouse resolves it first
+;; and the link itself stays denied), so they are literals here.
+(allow file-read*
+    (home-literal "/.shrc")
+    (home-literal "/.profile")
+    (home-literal "/.shrc.local")
+    (home-literal "/.bashrc.local")
+    (home-literal "/.bash_profile.local")
+    (home-literal "/.zshrc.local")
+    (home-literal "/.zprofile.local")
+    (home-literal "/.profile.local")
+    (home-subpath "/.shrc.d")
+    (home-subpath "/.bashrc.d")
+    (home-subpath "/.zshrc.d")
+    (home-subpath "/.profile.d"))
+
+;; Tokens exported on the host live in ~/.profile.local-secrets, sourced
+;; from ~/.profile.local behind a -f test, so inside the sandbox it is
+;; skipped silently. Last rule, so it wins over any grant above.
+(deny file-read*
+    (regex #"/\.[^/]*\.local-secrets$"))
+
 ;; Secrets stay out of the sandbox even though the worktree is readable.
 ;; Matches .env and .env.<anything>, not .envrc or .envrc.cache.enc.
 ;; safehouse-agent appends allows for the .env files git tracks in the

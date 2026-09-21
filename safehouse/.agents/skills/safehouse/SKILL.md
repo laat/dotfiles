@@ -29,7 +29,8 @@ Everything is stowed from `~/.dotfiles/safehouse/` (package readme there).
 | `/opt/homebrew/bin/safehouse` | the tool, `brew install eugene1g/safehouse/agent-safehouse` |
 | `~/.local/bin/safehouse-agent` | wrapper adding this machine's grants (see below) |
 | `~/.local/bin/{claude,codex,opencode}-safe` | symlinks to it, agent picked from the name |
-| `~/.config/safehouse/agents.sb` | appended policy: tmux socket allow, `.env` deny. The wrapper re-allows the `.env` files git tracks in the current repo; gitignored ones stay hidden |
+| `~/.config/safehouse/agents.sb` | appended policy: tmux socket allow, the shell startup chain under `~/.bashrc` (so aliases load), `*.local-secrets` deny, `.env` deny. The wrapper re-allows the `.env` files git tracks in the current repo; gitignored ones stay hidden |
+| `~/.profile.local-secrets` | host-only tokens, sourced from `~/.profile.local` behind a `-f` test; denied inside the sandbox. Put new tokens here, not in `~/.profile.local` |
 | `~/.config/safehouse/npmrc` | read-only npm token; when present npm and pnpm use it and `~/.npmrc` is hidden (`npm.sb`). Made by `~/.dotfiles/safehouse/setup/npm-readonly-token`, host only |
 | `~/.shrc.d/99_safehouse.sh` | the aliases, loaded last so they override `00_claude.sh` etc. |
 | `~/.config/workmux/config.yaml` | `agents.cc-safe`, workmux's sandboxed claude |
@@ -38,10 +39,16 @@ Everything is stowed from `~/.dotfiles/safehouse/` (package readme there).
 
 The wrapper adds, on top of safehouse's defaults:
 
-- `~/.dotfiles` read-only, because `~/.gitconfig` and most of `~/.config` are
-  stow symlinks into it and sandbox-exec checks the resolved path.
+- `~/.dotfiles` and any `~/.dotfiles-*` sibling repo read-only, because
+  `~/.gitconfig`, most of `~/.config` and the skills under `~/.claude/skills`
+  are stow symlinks into them and sandbox-exec checks the resolved path.
 - `~/code` and `~/git` read-write, so a session can change and open PRs in
   several repos. The rest of `$HOME` stays hidden.
+- safehouse's `shell-init` feature, so the interactive bash that Claude
+  Code's shell snapshot runs can read `~/.bashrc` without printing
+  "Operation not permitted". `agents.sb` grants what the rc files source
+  (`~/.shrc`, `~/.shrc.d`, the `*.local` files), so host aliases and
+  functions are available inside. `~/.profile.local-secrets` stays denied.
 - The `.env` files git tracks in the repo the session started in, appended
   after `agents.sb` so the allow wins. A committed `.env` is not a secret.
   Untracked and gitignored `.env` files are still denied, and a repo's

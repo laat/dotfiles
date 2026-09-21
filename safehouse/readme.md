@@ -18,13 +18,20 @@ dotfiles apply safehouse
 ## Files
 
 - `.local/bin/safehouse-agent` — safehouse with the grants this setup needs
-  (`~/.dotfiles` read-only for the stow symlinks, `~/.local/bin` read-only so
+  (`~/.dotfiles` and any `~/.dotfiles-*` sibling repo read-only for the
+  stow symlinks, `~/.local/bin` read-only so
   hooks find `workmux`, `~/code` and `~/git` read-write because one session
   opens PRs in several repos, workmux state dirs, the statusline's usage
   cache, tmux socket, `TMUX`/`TMUX_PANE`, safehouse's `1password` feature so
-  `op-ssh-sign` can sign commits, git-tracked `.env` files readable)
+  `op-ssh-sign` can sign commits, its `shell-init` feature so interactive
+  bash can read `~/.bashrc` without an error, git-tracked `.env` files
+  readable)
 - `.local/bin/{claude,codex,opencode}-safe` — symlinks to it, agent from the name
-- `.config/safehouse/agents.sb` — appended policy: tmux socket allow, `.env` deny.
+- `.config/safehouse/agents.sb` — appended policy: tmux socket allow, the
+  shell startup chain (`~/.shrc`, `~/.shrc.d`, `~/.profile.local` and the
+  other `*.local` files) so aliases load inside, `*.local-secrets` deny
+  (host tokens go in `~/.profile.local-secrets`, sourced from
+  `~/.profile.local`), `.env` deny.
   The wrapper re-allows the `.env` files git tracks in the current repo,
   since a committed file is not a secret; gitignored ones stay hidden. A
   repo's `.safehouse` cannot do this itself because safehouse applies it
