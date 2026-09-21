@@ -29,7 +29,7 @@ Everything is stowed from `~/.dotfiles/safehouse/` (package readme there).
 | `/opt/homebrew/bin/safehouse` | the tool, `brew install eugene1g/safehouse/agent-safehouse` |
 | `~/.local/bin/safehouse-agent` | wrapper adding this machine's grants (see below) |
 | `~/.local/bin/{claude,codex,opencode}-safe` | symlinks to it, agent picked from the name |
-| `~/.config/safehouse/agents.sb` | appended policy: tmux socket allow, ssh ControlMaster socket bind and connect under `~/.cache/ssh-mux`, the shell startup chain under `~/.bashrc` (so aliases load), `*.local-secrets` deny, `.env` deny. The wrapper re-allows the `.env` files git tracks in the current repo; gitignored ones stay hidden |
+| `~/.config/safehouse/agents.sb` | appended policy: tmux socket allow, the shell startup chain under `~/.bashrc` (so aliases load), `*.local-secrets` deny, `.env` deny. The wrapper re-allows the `.env` files git tracks in the current repo; gitignored ones stay hidden |
 | `~/.profile.local-secrets` | host-only tokens, sourced from `~/.profile.local` behind a `-f` test; denied inside the sandbox. Put new tokens here, not in `~/.profile.local` |
 | `~/.config/safehouse/npmrc` | read-only npm token; when present npm and pnpm use it and `~/.npmrc` is hidden (`npm.sb`). Made by `~/.dotfiles/safehouse/setup/npm-readonly-token`, host only |
 | `~/.shrc.d/99_safehouse.sh` | the aliases, loaded last so they override `00_claude.sh` etc. |
@@ -69,12 +69,15 @@ The wrapper adds, on top of safehouse's defaults:
   and `~/.config/1Password`, so `op-ssh-sign` from `~/.gitconfig` can sign
   commits. Without it every commit fails with "1Password: Could not connect
   to socket". `~/.ssh` stays hidden.
-- `~/.cache/ssh-mux` read-write, where `core.sshCommand` in `~/.gitconfig`
-  keeps its ControlMaster sockets, plus unix-socket bind and connect on them
-  in `agents.sb`. ssh exits 255 when it cannot bind its control socket, so
-  without this every sandboxed push over SSH failed with "unix_listener:
-  cannot bind to path ... Operation not permitted". The sockets live outside
-  `~/.ssh` so the sandbox never gets write access to the key directory.
+- `GIT_SSH_COMMAND` for git over ssh: `ControlMaster=no`, `IdentityAgent`
+  pointed at the 1Password socket and `UserKnownHostsFile` pointed at a copy
+  of the host's `known_hosts`. `~/.ssh` is hidden, so without it ssh has no
+  key and no known hosts, and `core.sshCommand` in `~/.gitconfig` makes it
+  exit 255 trying to bind a ControlMaster socket. The host's master is never
+  shared: it is a pre-authenticated session, and connecting to it would let
+  the sandbox act as you without going through 1Password. Every sandboxed
+  push pays the handshake instead. Host aliases from `~/.ssh/config` do not
+  resolve inside; remotes must use real hostnames.
 
 Policy files loaded with `--append-profile` are write-denied as the last rule,
 so `agents.sb` cannot be edited from a sandboxed session. Use `claude-unsafe`

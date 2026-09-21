@@ -25,13 +25,12 @@ dotfiles apply safehouse
   cache, tmux socket, `TMUX`/`TMUX_PANE`, safehouse's `1password` feature so
   `op-ssh-sign` can sign commits, its `shell-init` feature so interactive
   bash can read `~/.bashrc` without an error, git-tracked `.env` files
-  readable)
+  readable, `GIT_SSH_COMMAND` so git over ssh authenticates through the
+  1Password agent with its own connection instead of the host's
+  pre-authenticated ControlMaster)
 - `.local/bin/{claude,codex,opencode}-safe` — symlinks to it, agent from the name
 - `.config/safehouse/agents.sb` — appended policy: tmux socket allow, the
-  ssh ControlMaster sockets in `~/.cache/ssh-mux` from `~/.gitconfig` (ssh
-  exits 255 when it cannot bind one, which broke every sandboxed push; the
-  wrapper grants the directory, this allows the socket bind and connect),
-  the shell startup chain (`~/.shrc`, `~/.shrc.d`, `~/.profile.local` and the
+  shell startup chain (`~/.shrc`, `~/.shrc.d`, `~/.profile.local` and the
   other `*.local` files) so aliases load inside, `*.local-secrets` deny
   (host tokens go in `~/.profile.local-secrets`, sourced from
   `~/.profile.local`), `.env` deny.

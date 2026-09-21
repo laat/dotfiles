@@ -29,6 +29,10 @@
 #   over the 1Password agent socket, which the default policy denies, so every
 #   commit failed with "1Password: Could not connect to socket". ~/.ssh stays
 #   hidden; the grant is the socket, the app bundle and ~/.config/1Password.
+# - GIT_SSH_COMMAND for git over ssh: ControlMaster off, the 1Password agent
+#   as identity source and a copy of the host's known_hosts, since ~/.ssh is
+#   hidden and the host's ControlMaster socket must not be shared (it is a
+#   pre-authenticated session). See the comment at the definition.
 # - safehouse's shell-init feature: SHELL inside the sandbox is bash, and
 #   Claude Code's shell snapshot runs it interactively, which sources
 #   ~/.bashrc and printed "~/.bashrc: Operation not permitted" on every
@@ -58,17 +62,26 @@ env_pass=TMUX,TMUX_PANE
 
 # ~/.cache/claude-statusline: ~/.claude/statusline.sh caches the Fable usage
 # window there; safehouse only allows listing ~/.cache.
-# ~/.cache/ssh-mux: the ssh ControlMaster sockets from core.sshCommand in
-# ~/.gitconfig. Kept out of ~/.ssh so the sandbox shares the host's master
-# without any write access to the key directory. ssh exits 255 when it cannot
-# bind its control socket, so without this every sandboxed push failed.
-# agents.sb allows the unix-socket bind and connect on it.
-mkdir -p "$HOME/.local/state/workmux" "$HOME/.cache/workmux" "$HOME/.cache/claude-statusline" "$HOME/.cache/ssh-mux"
-rw="$HOME/.local/state/workmux:$HOME/.cache/workmux:$HOME/.cache/claude-statusline:$HOME/.cache/ssh-mux"
+mkdir -p "$HOME/.local/state/workmux" "$HOME/.cache/workmux" "$HOME/.cache/claude-statusline"
+rw="$HOME/.local/state/workmux:$HOME/.cache/workmux:$HOME/.cache/claude-statusline"
 # Only dirs that exist on this machine; safehouse warns about missing ones.
 for d in "$HOME/code" "$HOME/git"; do
   [ -d "$d" ] && rw="$rw:$d"
 done
+
+# git over ssh. ~/.ssh is hidden, so inside the sandbox ssh has no config, no
+# key and no known_hosts, and core.sshCommand in ~/.gitconfig points it at a
+# ControlMaster socket it cannot bind (ssh exits 255 on that). Give git its
+# own ssh command: ControlMaster off, so the sandbox never reuses a master the
+# host already authenticated; the 1Password agent as the identity source (the
+# 1password feature grants the socket), so every push authenticates through
+# 1Password like commit signing does; and a copy of the host's known_hosts it
+# can read and extend. Costs the handshake on every remote operation.
+op_sock=$(printf '%s\n' "$HOME"/Library/Group\ Containers/*.com.1password/t/agent.sock | head -1)
+known_hosts=$(mktemp -t safehouse-known-hosts)
+cat "$HOME/.ssh/known_hosts" > "$known_hosts" 2>/dev/null || true
+export GIT_SSH_COMMAND="ssh -F /dev/null -o ControlMaster=no -o 'IdentityAgent=\"$op_sock\"' -o UserKnownHostsFile=$known_hosts -o StrictHostKeyChecking=accept-new"
+env_pass="$env_pass,GIT_SSH_COMMAND"
 
 # Optional flags go in front of the agent command.
 set -- -- "$agent" "$@"
