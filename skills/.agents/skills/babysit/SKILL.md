@@ -26,13 +26,14 @@ read -r owner repo pr < <(gh pr view "<reference>" --json url \
 
 With several targets, run the rounds below per PR. The PRs are independent, so run the watchers for all of them in the same tool-call block. Fixes are per PR: do not batch a change across repositories without reading each one.
 
-Work in rounds. Each round: read status, wait for checks, read the conversation and the review threads, fix what is real, push, then start the next round from the top. A round that finds problems is never the last one.
+Work in rounds. Each round: read status, wait for checks, wait for the workflow runs on the head commit, read the conversation and the review threads, fix what is real, push, then start the next round from the top. A round that finds problems is never the last one.
 
 ## Done means
 
-All four hold at the same time:
+All of these hold at the same time:
 
 - Every check passed or is skipped on purpose.
+- No workflow run on the head commit is still queued or in progress.
 - The review decision does not block merging (no `CHANGES_REQUESTED`).
 - No comment or review summary still asks for something.
 - Every thread you acted on carries your reply saying what changed and in which commit.
@@ -57,6 +58,22 @@ gh pr checks "$pr" -R "$owner/$repo" --watch --fail-fast
 ```
 
 The watcher returning is a hint, not a verdict. Later-stage jobs such as deploys and e2e runs are added to the check rollup only when their upstream job finishes, so the watcher can exit 0 between polls while work is still pending. After it returns, read the PR again. If any check is still `PENDING`, `QUEUED` or `IN_PROGRESS`, run the watcher again. Only a status read with nothing pending counts as checks finished.
+
+## Wait for the workflow runs on the head commit
+
+Automated reviewers are workflow runs that never appear in the check rollup. Copilot code review runs as `Running Copilot Code Review` with event `dynamic`, takes a few minutes, and posts its review when it finishes. `gh pr checks` returns before it does, so a comment read taken right after the watcher misses the review. Wait for every run on the head commit before reading comments and threads.
+
+```bash
+head=$(gh pr view "$pr" -R "$owner/$repo" --json headRefOid -q .headRefOid)
+gh run list -R "$owner/$repo" --commit "$head" --json databaseId,name,status \
+  --jq '.[] | select(.status != "completed") | "\(.databaseId)\t\(.name)"'
+```
+
+Watch each run listed, then list again. Runs are attached to the head commit as they start, so a run that was not there on the first read can be there on the second. Only an empty list counts as finished.
+
+```bash
+gh run watch <run-id> -R "$owner/$repo" --exit-status
+```
 
 ## Read comments and review summaries
 
