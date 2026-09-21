@@ -58,8 +58,13 @@ env_pass=TMUX,TMUX_PANE
 
 # ~/.cache/claude-statusline: ~/.claude/statusline.sh caches the Fable usage
 # window there; safehouse only allows listing ~/.cache.
-mkdir -p "$HOME/.local/state/workmux" "$HOME/.cache/workmux" "$HOME/.cache/claude-statusline"
-rw="$HOME/.local/state/workmux:$HOME/.cache/workmux:$HOME/.cache/claude-statusline"
+# ~/.cache/ssh-mux: the ssh ControlMaster sockets from core.sshCommand in
+# ~/.gitconfig. Kept out of ~/.ssh so the sandbox shares the host's master
+# without any write access to the key directory. ssh exits 255 when it cannot
+# bind its control socket, so without this every sandboxed push failed.
+# agents.sb allows the unix-socket bind and connect on it.
+mkdir -p "$HOME/.local/state/workmux" "$HOME/.cache/workmux" "$HOME/.cache/claude-statusline" "$HOME/.cache/ssh-mux"
+rw="$HOME/.local/state/workmux:$HOME/.cache/workmux:$HOME/.cache/claude-statusline:$HOME/.cache/ssh-mux"
 # Only dirs that exist on this machine; safehouse warns about missing ones.
 for d in "$HOME/code" "$HOME/git"; do
   [ -d "$d" ] && rw="$rw:$d"

@@ -34,3 +34,11 @@
 ;; workdir's repo after this file, so committed ones stay readable.
 (deny file-read*
     (regex #"/\.env(\.[^/]*)?$"))
+
+;; ~/.gitconfig runs ssh with a ControlMaster socket under ~/.cache/ssh-mux so
+;; repeated fetches skip the handshake. safehouse-agent grants the directory
+;; read-write; sandbox-exec checks unix-socket bind and connect separately
+;; from file writes, so they need their own rule. ~/.ssh stays read-only.
+(allow network-bind network-outbound
+    (local unix-socket (path-regex #"^/Users/[^/]+/\.cache/ssh-mux/[^/]+$"))
+    (remote unix-socket (path-regex #"^/Users/[^/]+/\.cache/ssh-mux/[^/]+$")))

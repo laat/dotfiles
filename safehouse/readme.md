@@ -28,7 +28,10 @@ dotfiles apply safehouse
   readable)
 - `.local/bin/{claude,codex,opencode}-safe` — symlinks to it, agent from the name
 - `.config/safehouse/agents.sb` — appended policy: tmux socket allow, the
-  shell startup chain (`~/.shrc`, `~/.shrc.d`, `~/.profile.local` and the
+  ssh ControlMaster sockets in `~/.cache/ssh-mux` from `~/.gitconfig` (ssh
+  exits 255 when it cannot bind one, which broke every sandboxed push; the
+  wrapper grants the directory, this allows the socket bind and connect),
+  the shell startup chain (`~/.shrc`, `~/.shrc.d`, `~/.profile.local` and the
   other `*.local` files) so aliases load inside, `*.local-secrets` deny
   (host tokens go in `~/.profile.local-secrets`, sourced from
   `~/.profile.local`), `.env` deny.
