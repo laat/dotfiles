@@ -29,7 +29,7 @@ Everything is stowed from `~/.dotfiles/safehouse/` (package readme there).
 | `/opt/homebrew/bin/safehouse` | the tool, `brew install eugene1g/safehouse/agent-safehouse` |
 | `~/.local/bin/safehouse-agent` | wrapper adding this machine's grants (see below) |
 | `~/.local/bin/{claude,codex,opencode}-safe` | symlinks to it, agent picked from the name |
-| `~/.config/safehouse/agents.sb` | appended policy: tmux socket allow, `.env` deny |
+| `~/.config/safehouse/agents.sb` | appended policy: tmux socket allow, `.env` deny. The wrapper re-allows the `.env` files git tracks in the current repo; gitignored ones stay hidden |
 | `~/.config/safehouse/npmrc` | read-only npm token; when present npm and pnpm use it and `~/.npmrc` is hidden (`npm.sb`). Made by `~/.dotfiles/safehouse/setup/npm-readonly-token`, host only |
 | `~/.shrc.d/99_safehouse.sh` | the aliases, loaded last so they override `00_claude.sh` etc. |
 | `~/.config/workmux/config.yaml` | `agents.cc-safe`, workmux's sandboxed claude |
@@ -42,6 +42,11 @@ The wrapper adds, on top of safehouse's defaults:
   stow symlinks into it and sandbox-exec checks the resolved path.
 - `~/code` and `~/git` read-write, so a session can change and open PRs in
   several repos. The rest of `$HOME` stays hidden.
+- The `.env` files git tracks in the repo the session started in, appended
+  after `agents.sb` so the allow wins. A committed `.env` is not a secret.
+  Untracked and gitignored `.env` files are still denied, and a repo's
+  `.safehouse` cannot change that because safehouse applies it before the
+  CLI `--append-profile` files.
 - `~/.local/bin` read-only. safehouse only lets the sandbox list it and grants
   single binaries per agent, so without this `command -v workmux` fails and
   every hook in `~/.claude/settings.json` reports "workmux: command not found".

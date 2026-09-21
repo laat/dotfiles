@@ -6,5 +6,7 @@
 
 ;; Secrets stay out of the sandbox even though the worktree is readable.
 ;; Matches .env and .env.<anything>, not .envrc or .envrc.cache.enc.
+;; safehouse-agent appends allows for the .env files git tracks in the
+;; workdir's repo after this file, so committed ones stay readable.
 (deny file-read*
     (regex #"/\.env(\.[^/]*)?$"))

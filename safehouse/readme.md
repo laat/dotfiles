@@ -22,14 +22,18 @@ dotfiles apply safehouse
   hooks find `workmux`, `~/code` and `~/git` read-write because one session
   opens PRs in several repos, workmux state dirs, the statusline's usage
   cache, tmux socket, `TMUX`/`TMUX_PANE`, safehouse's `1password` feature so
-  `op-ssh-sign` can sign commits)
+  `op-ssh-sign` can sign commits, git-tracked `.env` files readable)
 - `.local/bin/{claude,codex,opencode}-safe` — symlinks to it, agent from the name
-- `.config/safehouse/agents.sb` — appended policy: tmux socket allow, `.env` deny
+- `.config/safehouse/agents.sb` — appended policy: tmux socket allow, `.env` deny.
+  The wrapper re-allows the `.env` files git tracks in the current repo,
+  since a committed file is not a secret; gitignored ones stay hidden. A
+  repo's `.safehouse` cannot do this itself because safehouse applies it
+  before the CLI `--append-profile` files
 - `.config/safehouse/npm.sb` — hides `~/.npmrc`; applied only when the read-only
   token file exists
 - `setup/npm-readonly-token` — not stowed; creates a read-only npm granular
-  token for the `@nrk` scope (`SCOPES=` for others; public packages need
-  none) plus an optional `read:packages` GitHub PAT, in
+  token for the private scopes in `SCOPES=` (default in the script; public
+  packages need none) plus an optional `read:packages` GitHub PAT, in
   `~/.config/safehouse/npmrc`. From then on npm and pnpm in the sandbox use
   that file and cannot see `~/.npmrc`. Re-run to rotate. Needs npm 11.7 or
   newer for the granular-token flags
