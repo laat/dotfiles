@@ -83,6 +83,12 @@ cat "$HOME/.ssh/known_hosts" > "$known_hosts" 2>/dev/null || true
 export GIT_SSH_COMMAND="ssh -F /dev/null -o ControlMaster=no -o 'IdentityAgent=\"$op_sock\"' -o UserKnownHostsFile=$known_hosts -o StrictHostKeyChecking=accept-new"
 env_pass="$env_pass,GIT_SSH_COMMAND"
 
+# mise shims last on PATH. The shell startup files only activate mise when it
+# lives in ~/.local/bin, and here it comes from Homebrew, so on the host
+# terraform resolves to ~/bin/terraform, which the sandbox hides. Appended so
+# tools the host already resolves keep resolving the same way.
+[ -d "$HOME/.local/share/mise/shims" ] && export PATH="$PATH:$HOME/.local/share/mise/shims"
+
 # Optional flags go in front of the agent command.
 set -- -- "$agent" "$@"
 if [ -f "$conf/npmrc" ]; then

@@ -28,7 +28,8 @@ dotfiles apply safehouse
   `pbcopy`/`pbpaste`, git-tracked `.env` files
   readable, `GIT_SSH_COMMAND` so git over ssh authenticates through the
   1Password agent with its own connection instead of the host's
-  pre-authenticated ControlMaster)
+  pre-authenticated ControlMaster, mise shims appended to `PATH` so
+  mise-only tools like `terraform` resolve once `~/bin` is hidden)
 - `.local/bin/{claude,codex,opencode}-safe` — symlinks to it, agent from the name
 - `.config/safehouse/agents.sb` — appended policy: tmux socket allow, the
   shell startup chain (`~/.shrc`, `~/.shrc.d`, `~/.profile.local` and the
