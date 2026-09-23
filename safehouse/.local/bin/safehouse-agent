@@ -108,7 +108,7 @@ if top=$(git rev-parse --show-toplevel 2>/dev/null); then
 fi
 
 exec safehouse \
-  --enable=1password,shell-init \
+  --enable=1password,shell-init,clipboard \
   --add-dirs-ro="$ro" \
   --add-dirs="$rw" \
   --append-profile="$conf/agents.sb" \

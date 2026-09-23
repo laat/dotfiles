@@ -69,6 +69,8 @@ The wrapper adds, on top of safehouse's defaults:
   and `~/.config/1Password`, so `op-ssh-sign` from `~/.gitconfig` can sign
   commits. Without it every commit fails with "1Password: Could not connect
   to socket". `~/.ssh` stays hidden.
+- safehouse's `clipboard` feature (the pasteboard and Launch Services mach
+  services), so `pbcopy` and `pbpaste` work inside.
 - `GIT_SSH_COMMAND` for git over ssh: `ControlMaster=no`, `IdentityAgent`
   pointed at the 1Password socket and `UserKnownHostsFile` pointed at a copy
   of the host's `known_hosts`. `~/.ssh` is hidden, so without it ssh has no
@@ -107,7 +109,7 @@ Stream denials while reproducing the failing command:
 Lines read `deny(<pid>) <operation> <path-or-name>`. Then grant the minimum:
 
 - One-off: `safehouse --add-dirs-ro=<path>` or `--add-dirs=<path>` for
-  read-write, `--enable=<feature>` for docker, keychain, clipboard, xcode and
+  read-write, `--enable=<feature>` for docker, keychain, xcode and
   similar (`safehouse --help` lists them).
 - For this machine: a rule in `~/.config/safehouse/agents.sb`, for example
   `(allow file-read* (subpath "/path"))` or

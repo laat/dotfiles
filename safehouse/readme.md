@@ -24,7 +24,8 @@ dotfiles apply safehouse
   opens PRs in several repos, workmux state dirs, the statusline's usage
   cache, tmux socket, `TMUX`/`TMUX_PANE`, safehouse's `1password` feature so
   `op-ssh-sign` can sign commits, its `shell-init` feature so interactive
-  bash can read `~/.bashrc` without an error, git-tracked `.env` files
+  bash can read `~/.bashrc` without an error, its `clipboard` feature for
+  `pbcopy`/`pbpaste`, git-tracked `.env` files
   readable, `GIT_SSH_COMMAND` so git over ssh authenticates through the
   1Password agent with its own connection instead of the host's
   pre-authenticated ControlMaster)
