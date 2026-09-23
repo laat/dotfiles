@@ -48,6 +48,7 @@ Then inside tmux:
 | `C-b C-t` | Toggle the laatmux sidebar on every window |
 | `C-b C-s` | laatmux dashboard popup: Enter jumps, `a` adds, `x`/`X` removes, `s` settles, `S` shell |
 | `C-b T` | New laatmux worktree for the repository of the current directory, with claude |
+| `C-b W` | Remove the workspace this session is: its worktree, managed session and this session, after a confirm |
 
 ## laatmux
 
