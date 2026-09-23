@@ -33,7 +33,7 @@ Everything is stowed from `~/.dotfiles/safehouse/` (package readme there).
 | `~/.profile.local-secrets` | host-only tokens, sourced from `~/.profile.local` behind a `-f` test; denied inside the sandbox. Put new tokens here, not in `~/.profile.local` |
 | `~/.config/safehouse/npmrc` | read-only npm token; when present npm and pnpm use it and `~/.npmrc` is hidden (`npm.sb`). Made by `~/.dotfiles/safehouse/setup/npm-readonly-token`, host only |
 | `~/.shrc.d/99_safehouse.sh` | the aliases, loaded last so they override `00_claude.sh` etc. |
-| `~/.config/workmux/config.yaml` | `agents.cc-safe`, workmux's sandboxed claude |
+| `~/.config/laatmux/config.yaml` | `agents.cc-safe`, laatmux's sandboxed claude (personal, not in the repo) |
 | `<repo>/.safehouse` | optional per-repo policy, only loaded with `--trust-workdir-config` |
 | `~/.config/safehouse/trusted-workdirs` | repos trusted with `--always-trust-workdir-config` |
 

@@ -39,7 +39,7 @@ function +vi-git-untracked(){
 }
 
 ### git: Show a tree icon (nerd font) before the branch in a linked worktree,
-# such as the ones workmux makes. In the main worktree the git dir and the
+# such as the ones laatmux makes. In the main worktree the git dir and the
 # common dir are the same directory.
 function +vi-git-worktree(){
     local gitdir common

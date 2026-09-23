@@ -3,10 +3,10 @@
 [agent-safehouse](https://agent-safehouse.dev/) runs coding agents under
 macOS `sandbox-exec`: the worktree is read-write, toolchains and agent config
 are readable, SSH keys, cloud credentials and the rest of `$HOME` are not.
-Unlike workmux's container sandbox it needs no Docker, keeps the keychain
+Unlike a container sandbox it needs no Docker, keeps the keychain
 (Claude login, `gh`), `~/.npmrc` and Homebrew tools working, and starts
 instantly. It does not restrict the network and the agent can write git
-hooks, so use `workmux add -S` for code you do not trust at all.
+hooks, so use a container for code you do not trust at all.
 
 macOS only. Not in the default package list; stow it by hand.
 
@@ -20,8 +20,8 @@ dotfiles apply safehouse
 - `.local/bin/safehouse-agent` — safehouse with the grants this setup needs
   (`~/.dotfiles` and any `~/.dotfiles-*` sibling repo read-only for the
   stow symlinks, `~/.local/bin` read-only so
-  hooks find `workmux`, `~/code` and `~/git` read-write because one session
-  opens PRs in several repos, workmux state dirs, the statusline's usage
+  hooks find `laatmux`, `~/code` and `~/git` read-write because one session
+  opens PRs in several repos, laatmux and workmux state dirs, the statusline's usage
   cache, tmux socket, `TMUX`/`TMUX_PANE`, safehouse's `1password` feature so
   `op-ssh-sign` can sign commits, its `shell-init` feature so interactive
   bash can read `~/.bashrc` without an error, its `clipboard` feature for
@@ -60,6 +60,6 @@ dotfiles apply safehouse
 Policy files are write-denied inside the sandbox, so edit this package from
 `claude-unsafe`.
 
-workmux uses the same wrapper through the `cc-safe` agent in
-`tmux/.config/workmux/config.yaml` (`wms`, or `agent: cc-safe` in a repo's
-`.workmux.yaml`).
+laatmux uses the same wrapper through the `cc-safe` agent in
+`tmux/.config/laatmux/config.yaml` (`lms`, `laatmux add --agent cc-safe`, or
+the agent picker in the dashboard).

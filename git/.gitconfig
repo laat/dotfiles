@@ -51,7 +51,7 @@
 	excludesfile = ~/.gitignore_global
 	# Reuse one SSH connection per host for an hour. The handshake to GitHub is
 	# ~1.3s of every fetch/pull/push; with a warm master a fetch is ~0.5s. Keeps
-	# wm-add (cmd+shift+t) snappy since it fetches before workmux add. Not
+	# laatmux add (cmd+shift+t) snappy since it fetches before the worktree. Not
 	# used under safehouse: safehouse-agent sets GIT_SSH_COMMAND so the
 	# sandbox never touches the host's authenticated master.
 	sshCommand = ssh -o ControlMaster=auto -o ControlPath=~/.ssh/cm-%C -o ControlPersist=1h
