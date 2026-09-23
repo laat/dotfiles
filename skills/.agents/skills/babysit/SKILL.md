@@ -26,7 +26,7 @@ read -r owner repo pr < <(gh pr view "<reference>" --json url \
 
 With several targets, run the rounds below per PR. The PRs are independent, so run the watchers for all of them in the same tool-call block. Fixes are per PR: do not batch a change across repositories without reading each one.
 
-Work in rounds. Each round: read status, wait for checks, wait for the workflow runs on the head commit, read the conversation and the review threads, fix what is real, push, then start the next round from the top. A round that finds problems is never the last one.
+Work in rounds. Each round: read status, wait for checks, wait for a pending Copilot review, wait for the workflow runs on the head commit, read the conversation and the review threads, fix what is real, push, then start the next round from the top. A round that finds problems is never the last one.
 
 ## Done means
 
@@ -34,6 +34,7 @@ All of these hold at the same time:
 
 - Every check passed or is skipped on purpose.
 - No workflow run on the head commit is still queued or in progress.
+- No Copilot review is pending (see Wait for Copilot review).
 - The review decision does not block merging (no `CHANGES_REQUESTED`).
 - No comment or review summary still asks for something.
 - Every thread you acted on carries your reply saying what changed and in which commit.
@@ -59,9 +60,32 @@ gh pr checks "$pr" -R "$owner/$repo" --watch --fail-fast
 
 The watcher returning is a hint, not a verdict. Later-stage jobs such as deploys and e2e runs are added to the check rollup only when their upstream job finishes, so the watcher can exit 0 between polls while work is still pending. After it returns, read the PR again. If any check is still `PENDING`, `QUEUED` or `IN_PROGRESS`, run the watcher again. Only a status read with nothing pending counts as checks finished.
 
+## Wait for Copilot review
+
+Copilot code review is not in the check rollup, and its workflow run is created only after GitHub requests the review. That request can come a minute or two after the push, which is often after CI has finished. An empty run list therefore does not mean Copilot is done. Use the PR timeline instead: a Copilot review is pending when the last Copilot `review_requested` event comes after the last Copilot `reviewed` event.
+
+```bash
+gh api --paginate "repos/$owner/$repo/issues/$pr/timeline" --jq '.[]
+  | select((.event == "review_requested" and .requested_reviewer.login == "Copilot")
+        or (.event == "reviewed" and .user.login == "Copilot"))
+  | .event' | tail -n 1
+```
+
+`review_requested` means pending: wait for the runs below, then check again. `reviewed` or no output means no review is pending right now.
+
+A request may not have arrived yet. Check whether the base branch has a ruleset that makes Copilot review every push:
+
+```bash
+base=$(gh pr view "$pr" -R "$owner/$repo" --json baseRefName -q .baseRefName)
+gh api "repos/$owner/$repo/rules/branches/$base" \
+  --jq '.[] | select(.type == "copilot_code_review") | .parameters.review_on_push'
+```
+
+If this prints `true`, Copilot is expected to review the head commit. Until a `copilot-pull-request-reviewer` review with `commit.oid` equal to the head SHA exists (`gh pr view --json reviews,headRefOid`), treat the review as pending, and check again every minute. If no request has appeared ten minutes after the push, stop waiting and mention it in the report. Without `review_on_push`, Copilot reviews a later push only when someone requests it, and the timeline check covers that case.
+
 ## Wait for the workflow runs on the head commit
 
-Automated reviewers are workflow runs that never appear in the check rollup. Copilot code review runs as `Running Copilot Code Review` with event `dynamic`, takes a few minutes, and posts its review when it finishes. `gh pr checks` returns before it does, so a comment read taken right after the watcher misses the review. Wait for every run on the head commit before reading comments and threads.
+Other automated reviewers also run as workflow runs outside the check rollup, and Copilot runs as `Running Copilot Code Review` with event `dynamic`. Wait for every run on the head commit before reading comments and threads.
 
 ```bash
 head=$(gh pr view "$pr" -R "$owner/$repo" --json headRefOid -q .headRefOid)
