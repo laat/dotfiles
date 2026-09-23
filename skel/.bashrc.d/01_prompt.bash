@@ -20,7 +20,7 @@ function prompt_command {
     fi
 
 
-    # Tree icon (nerd font) in a linked git worktree, such as the ones workmux
+    # Tree icon (nerd font) in a linked git worktree, such as the ones laatmux
     # makes. In the main worktree the git dir and the common dir are the same.
     local worktree="" gitdir common
     if gitdir=$(git rev-parse --path-format=absolute --git-dir 2>/dev/null) \

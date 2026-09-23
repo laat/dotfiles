@@ -38,7 +38,7 @@ Everything is stowed from `~/.dotfiles/safehouse/` (`readme.md` there).
 | `~/.config/safehouse/npmrc` | read-only npm token, made on the host by `~/.dotfiles/safehouse/setup/npm-readonly-token` |
 | `~/.profile.local-secrets` | host-only tokens, denied inside. New tokens go here, not in `~/.profile.local` |
 | `~/.shrc.d/99_safehouse.sh` | the aliases, loaded last so they override `00_claude.sh` etc. |
-| `~/.config/workmux/config.yaml` | `agents.cc-safe`, workmux's sandboxed claude |
+| `~/.config/laatmux/config.yaml` | `agents.cc-safe`, laatmux's sandboxed claude (personal, not in the repo) |
 | `<repo>/.safehouse` | optional per-repo config, loaded only when the repo is trusted |
 | `~/.config/safehouse/trusted-workdirs` | trusted repos, one path per line |
 

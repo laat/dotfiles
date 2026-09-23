@@ -19,8 +19,8 @@ name = "tmuxconf"
 path = "~/.dotfiles"
 startup_command = "nvim ~/.tmux.conf"
 
-# Any repo under ~/code (top level only; worktrees are created by workmux,
-# which starts claude itself) opens with claude running.
+# Any repo under ~/code (top level only; worktrees are created by laatmux,
+# which starts the agent itself) opens with claude running.
 [[wildcard]]
 pattern = "~/code/*"
 startup_command = "claude"
