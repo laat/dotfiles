@@ -50,7 +50,7 @@ and are tracked in `~/.agents/.skill-lock.json`, not in git. Leave them alone.
    - `disable-model-invocation: true` makes it user-invoked only
      (`/<name>`). Use it for skills that take actions (edit repos, open
      PRs, run migrations). Omit it for skills that should apply on their own
-     (`unslop`, `fetchmd`).
+     (`fetchmd`).
    - Body: enough context to do the task in a fresh session with no
      conversation history. Why the problem exists, the exact target state,
      numbered steps, verify commands, known dead ends and why, links to a
