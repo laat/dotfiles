@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Claude Code status line.
 # stdin: the status line JSON payload (see https://code.claude.com/docs/en/statusline)
-# Shows: model name + version (Opus 5) + context size ([1M]) · context left · 5h/7d limits · Fable weekly limit · dir · git branch (+ uncommitted changes).
+# Shows: effort fill meter (Nerd Font circle slices) · model name + version (Opus 5) + context size ([1M]) · context left · 5h/7d limits · Fable weekly limit · dir · git branch (+ uncommitted changes).
 # All percentages count down (% left); colour is still keyed on % used.
 #
 # The Fable window is not part of the stdin payload, so it is read from the same
@@ -21,9 +21,10 @@ dim=$'\e[2m'; bold=$'\e[1m'; reset=$'\e[0m'
 red=$'\e[31m'; yellow=$'\e[33m'; green=$'\e[32m'; blue=$'\e[34m'; cyan=$'\e[36m'; magenta=$'\e[35m'
 
 # --- payload fields ---------------------------------------------------------
-IFS=$'\t' read -r model ctx_size cwd ctx_pct five_pct seven_pct has_limits < <(
+IFS=$'\t' read -r model effort ctx_size cwd ctx_pct five_pct seven_pct has_limits < <(
   jq -r '[
     (.model.display_name // .model.id // "?"),
+    (.effort.level // "" | if . == "" then "-" else . end),
     (.context_window.context_window_size // "-"),
     (.workspace.current_dir // .cwd // "-"),
     (.context_window.used_percentage // "-" | if . == "-" then "-" else floor end),
@@ -33,7 +34,7 @@ IFS=$'\t' read -r model ctx_size cwd ctx_pct five_pct seven_pct has_limits < <(
   ] | map(tostring) | @tsv' <<<"$input"
 )
 # "-" marks an absent field (tab-separated reads collapse empty fields).
-for v in ctx_size cwd ctx_pct five_pct seven_pct; do [ "${!v}" = "-" ] && printf -v "$v" ''; done
+for v in effort ctx_size cwd ctx_pct five_pct seven_pct; do [ "${!v}" = "-" ] && printf -v "$v" ''; done
 model=${model%% (*}  # drop a "(1M context)" suffix; the size is shown from ctx_size
 model=${model#Claude }  # "Claude Opus 5" -> "Opus 5"
 
@@ -129,7 +130,17 @@ if [ -n "$ctx_size" ]; then  # 1000000 -> [1M], 200000 -> [200k]
   if [ "$ctx_size" -ge 1000000 ] && [ $(( ctx_size % 1000000 )) -eq 0 ]; then model+="[$(( ctx_size / 1000000 ))M]"
   else model+="[$(( ctx_size / 1000 ))k]"; fi
 fi
-out="${cyan}${model}${reset}"
+out=""
+# Colours match Claude Code's /effort picker in the dark theme: warning, success,
+# permission, autoAccept; max is animated rainbow there, so use its red here.
+case "$effort" in
+  low)    out+=$'\e[38;2;255;193;7m󰄰'"$reset " ;;
+  medium) out+=$'\e[38;2;78;186;101m󰪟'"$reset " ;;
+  high)   out+=$'\e[38;2;177;185;249m󰪡'"$reset " ;;
+  xhigh)  out+=$'\e[38;2;175;135;255m󰪣'"$reset " ;;
+  max)    out+=$'\e[38;2;235;95;87m󰪥'"$reset " ;;
+esac
+out+="${cyan}${model}${reset}"
 [ -n "$ctx_pct" ] && out+=" ctx $(pct_color "$ctx_pct")$(( 100 - ctx_pct ))%${reset}"
 if [ -n "$five_pct" ] || [ -n "$seven_pct" ]; then
   out+=" ${dim}│${reset}"
