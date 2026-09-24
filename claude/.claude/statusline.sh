@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Claude Code status line.
 # stdin: the status line JSON payload (see https://code.claude.com/docs/en/statusline)
-# Shows: model initial + version (Opus 5 -> O 5) · dir · git branch (+ uncommitted changes) · context · 5h/7d limits · Fable weekly limit left.
+# Shows: model name + version (Opus 5) + context size ([1M]) · context left · 5h/7d limits · Fable weekly limit · dir · git branch (+ uncommitted changes).
+# All percentages count down (% left); colour is still keyed on % used.
 #
 # The Fable window is not part of the stdin payload, so it is read from the same
 # endpoint /usage uses (/api/oauth/usage) and cached; the fetch runs in the
@@ -17,12 +18,13 @@ lock_file="$cache_dir/usage.lock"
 usage_ttl=300  # seconds before the usage cache is refreshed (undocumented endpoint; poll gently)
 
 dim=$'\e[2m'; bold=$'\e[1m'; reset=$'\e[0m'
-red=$'\e[31m'; yellow=$'\e[33m'; green=$'\e[32m'; cyan=$'\e[36m'; magenta=$'\e[35m'
+red=$'\e[31m'; yellow=$'\e[33m'; green=$'\e[32m'; blue=$'\e[34m'; cyan=$'\e[36m'; magenta=$'\e[35m'
 
 # --- payload fields ---------------------------------------------------------
-IFS=$'\t' read -r model cwd ctx_pct five_pct seven_pct has_limits < <(
+IFS=$'\t' read -r model ctx_size cwd ctx_pct five_pct seven_pct has_limits < <(
   jq -r '[
     (.model.display_name // .model.id // "?"),
+    (.context_window.context_window_size // "-"),
     (.workspace.current_dir // .cwd // "-"),
     (.context_window.used_percentage // "-" | if . == "-" then "-" else floor end),
     (.rate_limits.five_hour.used_percentage // "-" | if . == "-" then "-" else floor end),
@@ -31,8 +33,9 @@ IFS=$'\t' read -r model cwd ctx_pct five_pct seven_pct has_limits < <(
   ] | map(tostring) | @tsv' <<<"$input"
 )
 # "-" marks an absent field (tab-separated reads collapse empty fields).
-for v in cwd ctx_pct five_pct seven_pct; do [ "${!v}" = "-" ] && printf -v "$v" ''; done
-model=${model#Claude }; ver=${model#* }; [ "$ver" = "$model" ] && ver=""; model=${model:0:1}${ver:+ $ver}  # "Opus 5" -> "O 5", "Fable 5.1" -> "F 5.1"
+for v in ctx_size cwd ctx_pct five_pct seven_pct; do [ "${!v}" = "-" ] && printf -v "$v" ''; done
+model=${model%% (*}  # drop a "(1M context)" suffix; the size is shown from ctx_size
+model=${model#Claude }  # "Claude Opus 5" -> "Opus 5"
 
 # --- git (mirrors zsh/.zshrc.d/prompt.zsh: (branch✗⚑), ✗ staged, ⚑ unstaged,
 # ✗ replaces ⚑ when there are untracked files, tree icon in a linked worktree) --
@@ -115,22 +118,27 @@ if [ "$has_limits" = "1" ]; then
         # ISO 8601 with fractional seconds and +00:00 offset -> epoch
         iso=${f_reset%%.*}; reset_s=$(TZ=UTC date -j -f "%Y-%m-%dT%H:%M:%S" "$iso" +%s 2>/dev/null || true)
       fi
-      fable_part=" ${dim}│${reset} $(pct_color "$f_pct")Fable ${left}% left${reset}"
+      fable_part=" F $(pct_color "$f_pct")${left}%${reset}"
       [ -n "$reset_s" ] && fable_part+=" ${dim}↻ $(fmt_left "$reset_s")${reset}"
     fi
   fi
 fi
 
 # --- assemble ----------------------------------------------------------------
+if [ -n "$ctx_size" ]; then  # 1000000 -> [1M], 200000 -> [200k]
+  if [ "$ctx_size" -ge 1000000 ] && [ $(( ctx_size % 1000000 )) -eq 0 ]; then model+="[$(( ctx_size / 1000000 ))M]"
+  else model+="[$(( ctx_size / 1000 ))k]"; fi
+fi
 out="${cyan}${model}${reset}"
-[ -n "$cwd" ] && out+=" ${dim}${cwd##*/}${reset}"
-out+="$git_part"
-[ -n "$ctx_pct" ] && out+=" ${dim}│${reset} ctx $(pct_color "$ctx_pct")${ctx_pct}%${reset}"
+[ -n "$ctx_pct" ] && out+=" ctx $(pct_color "$ctx_pct")$(( 100 - ctx_pct ))%${reset}"
 if [ -n "$five_pct" ] || [ -n "$seven_pct" ]; then
   out+=" ${dim}│${reset}"
-  [ -n "$five_pct" ]  && out+=" 5h $(pct_color "$five_pct")${five_pct}%${reset}"
-  [ -n "$seven_pct" ] && out+=" 7d $(pct_color "$seven_pct")${seven_pct}%${reset}"
+  [ -n "$five_pct" ]  && out+=" 5h $(pct_color "$five_pct")$(( 100 - five_pct ))%${reset}"
+  [ -n "$seven_pct" ] && out+=" 7d $(pct_color "$seven_pct")$(( 100 - seven_pct ))%${reset}"
 fi
 out+="$fable_part"
+if [ -n "$cwd" ]; then
+  out+=" ${dim}│${reset} ${bold}${blue}${cwd##*/}/${reset}$git_part"
+fi
 
 printf '%s\n' "$out"
