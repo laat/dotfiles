@@ -5,3 +5,5 @@ alias lmd='laatmux dashboard'
 alias lma='laatmux add'
 # Worktree whose agent runs sandboxed (cc-safe in config.yaml, safehouse package).
 alias lms='laatmux add --agent cc-safe'
+# Background tasks the laptop's daemon holds: lmt, lmt show <id>, lmt dismiss <id>.
+alias lmt='laatmux tasks'

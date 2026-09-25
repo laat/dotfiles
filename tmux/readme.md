@@ -46,8 +46,8 @@ Then inside tmux:
 | `C-b -` | Split vertical (`laatmux split -v`) |
 | `C-b c` | New window |
 | `C-b C-t` | Toggle the laatmux sidebar on every window |
-| `C-b C-s` | laatmux dashboard popup: Enter jumps, `a` adds, `x`/`X` removes, `s` settles, `S` shell |
-| `C-b T` | New laatmux worktree for the repository of the current directory, with claude |
+| `C-b C-s` | laatmux dashboard popup: Enter jumps, `a` opens the task form, `x`/`X` removes, `s` settles, `S` shell; on a task's row `p` delivers its prompt, `x` dismisses it |
+| `C-b T` | laatmux task form: repository, host, agent, prompt, branch; the add runs in the background and shows as a row until its worktree takes over |
 | `C-b W` | Remove the workspace this session is: its worktree, managed session and this session, after a confirm |
 
 ## laatmux
@@ -74,6 +74,8 @@ Then inside tmux:
       cmd: [claude]
     cc-safe:
       cmd: [claude-safe, --dangerously-skip-permissions]
+  default_agent: claude
+  copy: ["**/.envrc.cache.enc"]
   repos:
     - git@github.com:owner/repo.git
   sidebar:
@@ -81,7 +83,7 @@ Then inside tmux:
     layout: tiles
   ```
 
-- `.shrc.d/00_laatmux.sh` — `lm`, `lmd`, `lma`, `lms` aliases
+- `.shrc.d/00_laatmux.sh` — `lm`, `lmd`, `lma`, `lms`, `lmt` aliases
 - `cc-safe` agent in `config.yaml` — claude under sandbox-exec, see `safehouse/readme.md`
 
 Worktrees stay under `~/code/.worktrees/<repo>/<branch>`, the layout workmux
