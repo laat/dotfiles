@@ -51,7 +51,10 @@ dotfiles apply safehouse
 - `.shrc.d/99_safehouse.sh` — `claude`, `cc`, `codex`, `co`, `opencode`, `oc`
   become the sandboxed wrappers, with claude and codex skipping their own
   permission prompts; `<agent>-unsafe` (short: `ccu`, `cou`, `ocu`) runs the
-  bare binary with prompts
+  bare binary with prompts. codex also gets `--no-daemon`: since 0.157 it
+  starts a shared app-server and records it with setuid `/bin/ps`, which the
+  sandbox refuses to exec, and a shared server started outside the sandbox
+  would run sandboxed sessions' tools unconfined
 - `roadmap.md` — planned hardening: read-only npm token, read-only cloud identity
 - `.agents/skills/safehouse/` — agent-invoked skill: what safehouse is, where
   its files and docs are, how to read a denial. `.claude/skills/safehouse` is
