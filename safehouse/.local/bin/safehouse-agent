@@ -25,6 +25,8 @@
 #   pnpm use its read-only token via npm_config_userconfig and the real
 #   ~/.npmrc is hidden (npm.sb). Without it, safehouse's default applies and
 #   the agent sees ~/.npmrc.
+# - Whatever the drop-ins in ~/.config/safehouse/agent.d/*.sh add, for
+#   grants kept in private dotfiles.
 # - safehouse's 1password feature: ~/.gitconfig signs commits with op-ssh-sign
 #   over the 1Password agent socket, which the default policy denies, so every
 #   commit failed with "1Password: Could not connect to socket". ~/.ssh stays
@@ -65,11 +67,17 @@ env_pass=TMUX,TMUX_PANE
 mkdir -p "$HOME/.local/state/workmux" "$HOME/.cache/workmux" "$HOME/.cache/claude-statusline"
 rw="$HOME/.local/state/workmux:$HOME/.cache/workmux:$HOME/.cache/claude-statusline"
 # Only dirs that exist on this machine; safehouse warns about missing ones.
-# ~/Library/Application Support/nrk-stash: nrk-stash keeps its login there
-# and updates the files after login, so without it every push says "not
-# logged in". Read-write so a token refresh inside the sandbox can save.
-for d in "$HOME/code" "$HOME/git" "$HOME/Library/Application Support/nrk-stash"; do
+for d in "$HOME/code" "$HOME/git"; do
   [ -d "$d" ] && rw="$rw:$d"
+done
+
+# Drop-ins from other stow packages (e.g. a private ~/.dotfiles-* repo) for grants that
+# don't belong in this public repo. Sourced with this script's variables in
+# scope; they append to ro and rw (colon-separated) and env_pass
+# (comma-separated). ~/.config/safehouse is not writable from inside the
+# sandbox, so a sandboxed agent cannot add one.
+for f in "$conf"/agent.d/*.sh; do
+  [ -f "$f" ] && . "$f"
 done
 
 # git over ssh. ~/.ssh is hidden, so inside the sandbox ssh has no config, no

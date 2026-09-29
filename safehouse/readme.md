@@ -30,6 +30,10 @@ dotfiles apply safehouse
   1Password agent with its own connection instead of the host's
   pre-authenticated ControlMaster, mise shims appended to `PATH` so
   mise-only tools like `terraform` resolve once `~/bin` is hidden)
+- `~/.config/safehouse/agent.d/*.sh` — not in this package; drop-ins other
+  stow packages add for grants that don't belong in this public repo. The
+  wrapper sources them after its own grants; they append to `ro`, `rw`
+  (colon-separated) and `env_pass` (comma-separated)
 - `.local/bin/{claude,codex,opencode}-safe` — symlinks to it, agent from the name
 - `.config/safehouse/agents.sb` — appended policy: tmux socket allow, the
   shell startup chain (`~/.shrc`, `~/.shrc.d`, `~/.profile.local` and the
@@ -43,8 +47,8 @@ dotfiles apply safehouse
 - `.config/safehouse/npm.sb` — hides `~/.npmrc`; applied only when the read-only
   token file exists
 - `setup/npm-readonly-token` — not stowed; creates a read-only npm granular
-  token for the private scopes in `SCOPES=` (default in the script; public
-  packages need none) plus an optional `read:packages` GitHub PAT, in
+  token for the private scopes in `SCOPES=` (required; public packages need
+  none) plus an optional `read:packages` GitHub PAT, in
   `~/.config/safehouse/npmrc`. From then on npm and pnpm in the sandbox use
   that file and cannot see `~/.npmrc`. Re-run to rotate. Needs npm 11.7 or
   newer for the granular-token flags

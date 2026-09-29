@@ -7,10 +7,10 @@
 # Run on the host, logged in to npm (`npm whoami`), never inside the sandbox.
 # Safe to re-run: the previous token from the file is revoked afterwards.
 #
-#   safehouse/setup/npm-readonly-token
+#   SCOPES=<a,b> safehouse/setup/npm-readonly-token
 #
 #   EXPIRES=<days>        token lifetime, default 365
-#   SCOPES=<a,b>          private scopes the token may read, default nrk.
+#   SCOPES=<a,b>          private scopes the token may read, required.
 #                         Public packages need no token, and the registry
 #                         refuses a token with no scope, package or org.
 #
@@ -19,7 +19,7 @@ set -eu
 
 out=$HOME/.config/safehouse/npmrc
 expires=${EXPIRES:-365}
-scopes=${SCOPES:-nrk}
+scopes=${SCOPES:?set SCOPES to the private scopes the token may read, e.g. SCOPES=myorg}
 name="safehouse-readonly-$(hostname -s)"
 
 set --

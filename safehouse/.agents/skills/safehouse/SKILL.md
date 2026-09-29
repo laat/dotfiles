@@ -31,6 +31,7 @@ Everything is stowed from `~/.dotfiles/safehouse/` (package readme there).
 | `~/.local/bin/{claude,codex,opencode}-safe` | symlinks to it, agent picked from the name |
 | `~/.config/safehouse/agents.sb` | appended policy: tmux socket allow, the shell startup chain under `~/.bashrc` (so aliases load), `*.local-secrets` deny, `.env` deny. The wrapper re-allows the `.env` files git tracks in the current repo; gitignored ones stay hidden |
 | `~/.profile.local-secrets` | host-only tokens, sourced from `~/.profile.local` behind a `-f` test; denied inside the sandbox. Put new tokens here, not in `~/.profile.local` |
+| `~/.config/safehouse/agent.d/*.sh` | drop-ins with extra grants from other stow packages, sourced by the wrapper |
 | `~/.config/safehouse/npmrc` | read-only npm token; when present npm and pnpm use it and `~/.npmrc` is hidden (`npm.sb`). Made by `~/.dotfiles/safehouse/setup/npm-readonly-token`, host only |
 | `~/.shrc.d/99_safehouse.sh` | the aliases, loaded last so they override `00_claude.sh` etc. |
 | `~/.config/workmux/config.yaml` | `agents.cc-safe`, workmux's sandboxed claude |
@@ -60,9 +61,10 @@ The wrapper adds, on top of safehouse's defaults:
 - `~/.local/state/workmux` and `~/.cache/workmux` read-write, the tmux socket,
   and `TMUX`/`TMUX_PANE` passed through, so those workmux status hooks work
   from inside.
-- `~/Library/Application Support/nrk-stash` read-write when it exists, where
-  nrk-stash keeps its login. Without it every sandboxed `nrk-stash push`
-  fails with "not logged in".
+- Whatever the drop-ins in `~/.config/safehouse/agent.d/*.sh` add. They are
+  sourced by the wrapper and append to its `ro`, `rw` and `env_pass`
+  variables; private dotfiles (a `~/.dotfiles-*` repo) stow work-specific
+  grants there so they stay out of the public repo.
 - `~/.cache/claude-statusline` read-write, where `~/.claude/statusline.sh`
   caches the Fable usage window. safehouse allows only listing `~/.cache`, so
   a tool that needs its own cache dir there needs a grant like this.
@@ -114,7 +116,9 @@ Lines read `deny(<pid>) <operation> <path-or-name>`. Then grant the minimum:
 - One-off: `safehouse --add-dirs-ro=<path>` or `--add-dirs=<path>` for
   read-write, `--enable=<feature>` for docker, keychain, xcode and
   similar (`safehouse --help` lists them).
-- For this machine: a rule in `~/.config/safehouse/agents.sb`, for example
+- For this machine: a directory in the wrapper's `ro` or `rw` (or a drop-in
+  in `~/.config/safehouse/agent.d/` if it is work-specific), or a rule in
+  `~/.config/safehouse/agents.sb`, for example
   `(allow file-read* (subpath "/path"))` or
   `(allow mach-lookup (global-name "<name>"))`. Later rules win.
 - For one repo: a `.safehouse` file in the repo root, run with
