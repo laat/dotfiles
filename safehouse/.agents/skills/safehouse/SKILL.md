@@ -60,6 +60,9 @@ The wrapper adds, on top of safehouse's defaults:
 - `~/.local/state/workmux` and `~/.cache/workmux` read-write, the tmux socket,
   and `TMUX`/`TMUX_PANE` passed through, so those workmux status hooks work
   from inside.
+- `~/Library/Application Support/nrk-stash` read-write when it exists, where
+  nrk-stash keeps its login. Without it every sandboxed `nrk-stash push`
+  fails with "not logged in".
 - `~/.cache/claude-statusline` read-write, where `~/.claude/statusline.sh`
   caches the Fable usage window. safehouse allows only listing `~/.cache`, so
   a tool that needs its own cache dir there needs a grant like this.

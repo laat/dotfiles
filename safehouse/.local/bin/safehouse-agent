@@ -65,7 +65,10 @@ env_pass=TMUX,TMUX_PANE
 mkdir -p "$HOME/.local/state/workmux" "$HOME/.cache/workmux" "$HOME/.cache/claude-statusline"
 rw="$HOME/.local/state/workmux:$HOME/.cache/workmux:$HOME/.cache/claude-statusline"
 # Only dirs that exist on this machine; safehouse warns about missing ones.
-for d in "$HOME/code" "$HOME/git"; do
+# ~/Library/Application Support/nrk-stash: nrk-stash keeps its login there
+# and updates the files after login, so without it every push says "not
+# logged in". Read-write so a token refresh inside the sandbox can save.
+for d in "$HOME/code" "$HOME/git" "$HOME/Library/Application Support/nrk-stash"; do
   [ -d "$d" ] && rw="$rw:$d"
 done
 
