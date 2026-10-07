@@ -1,0 +1,6 @@
+# This file replaces the global ignore list for this package, so the
+# entries from ~/.stow-global-ignore that matter here are repeated.
+# mods/ is loaded in place through CLAUDE_CODE_PLUGIN_DIRS: the plugin loader
+# refuses a hooks module that is a symlink out of the plugin's folder.
+^/mods
+\.DS_Store

@@ -1,0 +1,5 @@
+{
+  "name": "zoxide-complete",
+  "version": "0.1.0",
+  "description": "Type %query in the prompt to complete an @-mention of a zoxide directory, ranked by fzf"
+}
