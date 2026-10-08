@@ -11,16 +11,19 @@ The `workmux` branch of this repository has the workmux setup this replaced.
 brew install tmux sesh fzf
 ```
 
-laatmux is built from its checkout; there is no release yet:
+laatmux is built from its checkout; there is no release yet. The installed
+binary builds, installs and restarts the daemon per host:
 
 ```sh
-cd ~/code/laatmux && go build -ldflags "-X main.version=$(git describe --always)" -o ~/.local/bin/laatmux ./cmd/laatmux
+cd ~/code/laatmux && go build -o ~/.local/bin/laatmux ./cmd/laatmux   # first time only
+~/.local/bin/laatmux upgrade mac vm                                     # from the checkout, later
 ```
 
-Rerun the same command to upgrade. The local daemon is started by the first
-command that needs it and keeps running; after an upgrade stop it so the next
-command starts the new build: `kill $(jq .pid ~/.local/state/laatmux/runtime.json)`.
-A remote host runs its own daemon from its own binary and config.
+`upgrade` builds for each host's platform, installs over ssh for a remote one
+and restarts its daemon; `laatmux hosts` marks daemons that differ from the
+binary. Run it as `~/.local/bin/laatmux`, not `go run`: the latter would
+install into Go's build cache. The local daemon is started by the first
+command that needs it; `laatmux stop` ends it.
 
 ## Setup
 
@@ -46,9 +49,14 @@ Then inside tmux:
 | `C-b -` | Split vertical (`laatmux split -v`) |
 | `C-b c` | New window |
 | `C-b C-t` | Toggle the laatmux sidebar on every window |
-| `C-b C-s` | laatmux dashboard popup: Enter jumps, `a` opens the task form, `x`/`X` removes, `s` settles, `S` shell; on a task's row `p` delivers its prompt, `x` dismisses it |
+| `C-b C-s` | laatmux dashboard popup: Enter jumps, `Tab` switches agent/tree view, `v` layout, `/` filter, `1`..`9` jump to the nth row, `s` folds, `z` settles, `a` opens the task form, `x`/`X` removes, `S` shell; on a task's row `p` delivers its prompt, `x` dismisses it |
 | `C-b T` | laatmux task form: repository, host, agent, prompt, branch; the add runs in the background and shows as a row until its worktree takes over |
+| `C-b S` | laatmux shell: a window at the worktree root on its host in the workspace session, selected again on a second press |
 | `C-b W` | Remove the workspace this session is: its worktree, managed session and this session, after a confirm |
+
+The sidebar pane takes the same keys as the dashboard (`j`/`k`, `Tab`, `v`,
+`/`, `s`, `z`, `F` cycles the scope all/session/project, `q` closes the pane);
+`laatmux sidebar next | prev | jump N | view | scope` drive it from a binding.
 
 ## laatmux
 
