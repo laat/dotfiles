@@ -1,0 +1,20 @@
+;; Appended by safehouse-agent to every sandbox but codex's own. Those get
+;; ~/.codex read-write so the agent can run codex, which writes its sessions,
+;; databases and refreshed tokens there. ~/.codex also holds codex's config and
+;; files it runs as code, and an unsandboxed codex on the host (codex-unsafe,
+;; cou) picks up any change to them, so writes to those are denied. codex run
+;; from inside still reads them.
+(deny file-write*
+    ;; config.toml and the profile files: MCP server commands, notify, hook
+    ;; trust, sandbox mode.
+    (regex (string-append "^" HOME_DIR "/\\.codex/[^/]*\\.toml$"))
+    (home-literal "/.codex/hooks.json")
+    (home-prefix "/.codex/AGENTS")             ;; AGENTS.md, AGENTS.override.md
+    (home-subpath "/.codex/rules")             ;; commands that run without approval
+    (home-subpath "/.codex/skills")
+    (home-subpath "/.codex/prompts")
+    (home-subpath "/.codex/plugins")
+    (home-subpath "/.codex/.tmp")              ;; plugin sync staging
+    (home-subpath "/.codex/packages")          ;; the app-server daemon binary
+    (home-subpath "/.codex/tmp/arg0")          ;; shims a host session puts first on PATH
+    (home-subpath "/.codex/shell_snapshots"))  ;; sourced before every command in a host session

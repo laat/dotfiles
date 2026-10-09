@@ -8,8 +8,8 @@ description: Context for agent-safehouse, the macOS sandbox-exec wrapper that co
 [agent-safehouse](https://agent-safehouse.dev/) wraps a command in a
 deny-by-default macOS `sandbox-exec` policy. The workdir (git root of the
 current directory) is read-write, installed toolchains and the agent's own
-config are readable, the keychain works, and `~/.ssh`, `~/.aws` and the rest
-of `$HOME` are not visible. Outbound network is not restricted.
+config are readable, the keychain works, and the keys in `~/.ssh`, `~/.aws`
+and the rest of `$HOME` are not visible. Outbound network is not restricted.
 
 **You are probably running inside it right now.** `claude`, `cc`, `codex`,
 `co`, `opencode` and `oc` are aliased to the sandboxed wrappers, and workmux
@@ -34,6 +34,7 @@ Everything is stowed from `~/.dotfiles/safehouse/` (`readme.md` there).
 | `~/.local/bin/safehouse-agent` | wrapper adding this machine's grants, each explained in its header comment |
 | `~/.local/bin/{claude,codex,opencode}-safe` | symlinks to it, agent picked from the name |
 | `~/.config/safehouse/agents.sb` | appended rules: tmux socket, shell startup chain, `*.local-secrets` and `.env` denies |
+| `~/.config/safehouse/codex.sb` | appended to every sandbox but codex's own: denies writes to codex's config and the files it runs as code |
 | `~/.config/safehouse/agent.d/*.sh` | drop-ins from other stow packages; they append to the wrapper's `ro`, `rw` (colon-separated) and `env_pass` (comma-separated) |
 | `~/.config/safehouse/npmrc` | read-only npm token, made on the host by `~/.dotfiles/safehouse/setup/npm-readonly-token` |
 | `~/.profile.local-secrets` | host-only tokens, denied inside. New tokens go here, not in `~/.profile.local` |
@@ -62,16 +63,20 @@ removing or loosening one.
 | mise shims appended to `PATH` | mise-only tools such as `terraform` are not found |
 | `npm_config_userconfig` pointing at the read-only token | npm and pnpm can't reach private scopes |
 | `agent.d/*.sh` drop-ins | work-specific grants from a private `~/.dotfiles-*` repo are missing |
-| `~/.codex` read-write | codex started from another agent's sandbox can't load its config or login |
+| `~/.codex` read-write for the other agents, its config and code write-denied (`codex.sb`) | codex started from another agent's sandbox can't load its config or login |
 | inside the sandbox the wrapper starts the agent directly, codex with its own sandbox off | `codex` from inside fails with "sandbox_apply: Operation not permitted" |
 
 ## Denied on purpose
 
 Don't grant these unless the user asks to change the policy:
 
-- `~/.ssh`. The host's ControlMaster is a pre-authenticated session and is
-  never shared, so every sandboxed push pays the handshake. Host aliases from
-  `~/.ssh/config` don't resolve; remotes need real hostnames.
+- `~/.ssh`, apart from `config` and `known_hosts`, which safehouse lets the
+  sandbox read. The host's ControlMaster is a pre-authenticated session and
+  is never shared, so every sandboxed push pays the handshake. git's ssh runs
+  with `-F /dev/null`, so host aliases from `~/.ssh/config` don't resolve;
+  remotes need real hostnames.
+- Writes to codex's config and the files it runs as code, from any sandbox
+  but codex's own (`codex.sb`). An unsandboxed codex on the host loads them.
 - `~/.profile.local-secrets` and gitignored `.env` files. A repo's
   `.safehouse` can't lift the `.env` deny, because safehouse applies it before
   the `--append-profile` files.

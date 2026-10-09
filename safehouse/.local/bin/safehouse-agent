@@ -29,12 +29,14 @@
 #   grants kept in private dotfiles.
 # - safehouse's 1password feature: ~/.gitconfig signs commits with op-ssh-sign
 #   over the 1Password agent socket, which the default policy denies, so every
-#   commit failed with "1Password: Could not connect to socket". ~/.ssh stays
-#   hidden; the grant is the socket, the app bundle and ~/.config/1Password.
+#   commit failed with "1Password: Could not connect to socket". The keys in
+#   ~/.ssh stay denied; the grant is the socket, the app bundle and
+#   ~/.config/1Password.
 # - GIT_SSH_COMMAND for git over ssh: ControlMaster off, the 1Password agent
-#   as identity source and a copy of the host's known_hosts, since ~/.ssh is
-#   hidden and the host's ControlMaster socket must not be shared (it is a
-#   pre-authenticated session). See the comment at the definition.
+#   as identity source and a copy of the host's known_hosts, since the keys in
+#   ~/.ssh are denied, known_hosts is read-only and the host's ControlMaster
+#   socket must not be shared (it is a pre-authenticated session). See the
+#   comment at the definition.
 # - safehouse's shell-init feature: SHELL inside the sandbox is bash, and
 #   Claude Code's shell snapshot runs it interactively, which sources
 #   ~/.bashrc and printed "~/.bashrc: Operation not permitted" on every
@@ -42,11 +44,12 @@
 #   what they source (~/.shrc, ~/.shrc.d, ~/.profile.local, the *.local
 #   files) so aliases and functions load inside, and denies
 #   ~/.profile.local-secrets, where the host's tokens live.
-# - ~/.codex read-write, and when the wrapper runs inside the sandbox it
-#   starts the agent directly instead of nesting a second sandbox: a
-#   sandboxed claude asking codex for a review failed because safehouse
-#   grants each agent only its own state and Seatbelt can't apply a policy
-#   inside another. Every sandboxed agent can read codex's login
+# - ~/.codex read-write for agents other than codex, except its config and
+#   what it runs as code (codex.sb), and when the wrapper runs inside the
+#   sandbox it starts the agent directly instead of nesting a second
+#   sandbox: a sandboxed claude asking codex for a review failed because
+#   safehouse grants each agent only its own state and Seatbelt can't apply
+#   a policy inside another. Every sandboxed agent can read codex's login
 #   (auth.json). See the comments at the definitions.
 #
 #   safehouse-agent <agent> [args...]
@@ -91,10 +94,7 @@ env_pass=TMUX,TMUX_PANE,SAFEHOUSE_AGENT
 mkdir -p "$HOME/.local/state/workmux" "$HOME/.cache/workmux" "$HOME/.cache/claude-statusline"
 rw="$HOME/.local/state/workmux:$HOME/.cache/workmux:$HOME/.cache/claude-statusline"
 # Only dirs that exist on this machine; safehouse warns about missing ones.
-# ~/.codex: safehouse grants it only to codex's own sandbox, so codex started
-# from another agent's sandbox could not load its config and login. It needs
-# write access for sessions, logs and refreshed tokens.
-for d in "$HOME/code" "$HOME/git" "$HOME/.codex"; do
+for d in "$HOME/code" "$HOME/git"; do
   [ -d "$d" ] && rw="$rw:$d"
 done
 
@@ -107,14 +107,16 @@ for f in "$conf"/agent.d/*.sh; do
   [ -f "$f" ] && . "$f"
 done
 
-# git over ssh. ~/.ssh is hidden, so inside the sandbox ssh has no config, no
-# key and no known_hosts, and core.sshCommand in ~/.gitconfig points it at a
+# git over ssh. safehouse lets the sandbox read ~/.ssh/config and
+# ~/.ssh/known_hosts but nothing else in ~/.ssh, so ssh has no key and cannot
+# add to known_hosts, and core.sshCommand in ~/.gitconfig points it at a
 # ControlMaster socket it cannot bind (ssh exits 255 on that). Give git its
-# own ssh command: ControlMaster off, so the sandbox never reuses a master the
-# host already authenticated; the 1Password agent as the identity source (the
-# 1password feature grants the socket), so every push authenticates through
-# 1Password like commit signing does; and a copy of the host's known_hosts it
-# can read and extend. Costs the handshake on every remote operation.
+# own ssh command: no ~/.ssh/config and ControlMaster off, so the sandbox
+# never reuses a master the host already authenticated; the 1Password agent
+# as the identity source (the 1password feature grants the socket), so every
+# push authenticates through 1Password like commit signing does; and a copy
+# of the host's known_hosts it can read and extend. Costs the handshake on
+# every remote operation.
 op_sock=$(printf '%s\n' "$HOME"/Library/Group\ Containers/*.com.1password/t/agent.sock | head -1)
 known_hosts=$(mktemp -t safehouse-known-hosts)
 cat "$HOME/.ssh/known_hosts" > "$known_hosts" 2>/dev/null || true
@@ -134,6 +136,16 @@ if [ -f "$conf/npmrc" ]; then
   export npm_config_userconfig="$conf/npmrc"
   env_pass="$env_pass,npm_config_userconfig"
   set -- --append-profile="$conf/npm.sb" "$@"
+fi
+
+# ~/.codex for the other agents, so one can run codex (claude asking it for a
+# review). safehouse grants it only to codex's own sandbox, and codex writes
+# its sessions, databases and refreshed tokens there. codex.sb denies writes
+# to its config and to files it runs as code, which an unsandboxed codex on
+# the host would pick up.
+if [ "$agent" != codex ] && [ -d "$HOME/.codex" ]; then
+  rw="$rw:$HOME/.codex"
+  set -- --append-profile="$conf/codex.sb" "$@"
 fi
 
 # Allow the .env files git tracks, appended after agents.sb so the allow wins.

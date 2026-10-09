@@ -30,9 +30,9 @@ dotfiles apply safehouse
   1Password agent with its own connection instead of the host's
   pre-authenticated ControlMaster, mise shims appended to `PATH` so
   mise-only tools like `terraform` resolve once `~/bin` is hidden,
-  `~/.codex` read-write so another agent can run codex. Run inside the
-  sandbox, it starts the agent directly with codex's own sandbox off,
-  since Seatbelt can't nest)
+  `~/.codex` read-write for the other agents so they can run codex, minus
+  what `codex.sb` denies. Run inside the sandbox, it starts the agent
+  directly with codex's own sandbox off, since Seatbelt can't nest)
 - `~/.config/safehouse/agent.d/*.sh` — not in this package; drop-ins other
   stow packages add for grants that don't belong in this public repo. The
   wrapper sources them after its own grants; they append to `ro`, `rw`
@@ -49,6 +49,11 @@ dotfiles apply safehouse
   before the CLI `--append-profile` files
 - `.config/safehouse/npm.sb` — hides `~/.npmrc`; applied only when the read-only
   token file exists
+- `.config/safehouse/codex.sb` — denies writes to codex's config and to files
+  it runs as code (`*.toml`, `hooks.json`, `AGENTS*`, `rules/`, `skills/`,
+  `prompts/`, `plugins/`, `packages/`, `tmp/arg0/`, `shell_snapshots/`), so
+  an agent that can run codex can't change what an unsandboxed codex on the
+  host loads. Applied to every sandbox but codex's own
 - `setup/npm-readonly-token` — not stowed; creates a read-only npm granular
   token for the private scopes in `SCOPES=` (required; public packages need
   none) plus an optional `read:packages` GitHub PAT, in
