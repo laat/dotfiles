@@ -29,7 +29,10 @@ dotfiles apply safehouse
   readable, `GIT_SSH_COMMAND` so git over ssh authenticates through the
   1Password agent with its own connection instead of the host's
   pre-authenticated ControlMaster, mise shims appended to `PATH` so
-  mise-only tools like `terraform` resolve once `~/bin` is hidden)
+  mise-only tools like `terraform` resolve once `~/bin` is hidden,
+  `~/.codex` read-write so another agent can run codex. Run inside the
+  sandbox, it starts the agent directly with codex's own sandbox off,
+  since Seatbelt can't nest)
 - `~/.config/safehouse/agent.d/*.sh` — not in this package; drop-ins other
   stow packages add for grants that don't belong in this public repo. The
   wrapper sources them after its own grants; they append to `ro`, `rw`

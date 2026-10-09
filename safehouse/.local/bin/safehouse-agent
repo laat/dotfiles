@@ -42,6 +42,12 @@
 #   what they source (~/.shrc, ~/.shrc.d, ~/.profile.local, the *.local
 #   files) so aliases and functions load inside, and denies
 #   ~/.profile.local-secrets, where the host's tokens live.
+# - ~/.codex read-write, and when the wrapper runs inside the sandbox it
+#   starts the agent directly instead of nesting a second sandbox: a
+#   sandboxed claude asking codex for a review failed because safehouse
+#   grants each agent only its own state and Seatbelt can't apply a policy
+#   inside another. Every sandboxed agent can read codex's login
+#   (auth.json). See the comments at the definitions.
 #
 #   safehouse-agent <agent> [args...]
 #   <agent>-safe [args...]         symlink to this script, agent from the name
@@ -55,19 +61,40 @@ case $(basename "$0") in
   *) agent=$1; shift ;;
 esac
 
+# Already inside the sandbox: an agent running another agent, such as claude
+# asking codex for a review. Seatbelt can't apply a second policy inside the
+# first (sandbox_apply: Operation not permitted), so run the agent directly
+# under the outer policy, which grants its state below. SAFEHOUSE_AGENT is
+# set for processes this wrapper starts; the probe checks that the sandbox is
+# really there, so a SAFEHOUSE_AGENT leaked to the host can't skip it.
+# codex's own sandbox is Seatbelt too and fails the same way, so it is turned
+# off with -c, which unlike --dangerously-bypass-approvals-and-sandbox also
+# reaches subcommands such as codex review.
+if [ -n "${SAFEHOUSE_AGENT:-}" ] &&
+  ! sandbox-exec -p '(version 1)(allow default)' /usr/bin/true 2>/dev/null; then
+  case $agent in
+    codex) set -- -c sandbox_mode=danger-full-access -c approval_policy=never "$@" ;;
+  esac
+  exec "$agent" "$@"
+fi
+export SAFEHOUSE_AGENT="$agent"
+
 conf=$HOME/.config/safehouse
 ro="${DOTFILES_DIR:-$HOME/.dotfiles}:$HOME/.local/bin"
 for d in "$HOME"/.dotfiles-*; do
   [ -d "$d" ] && ro="$ro:$d"
 done
-env_pass=TMUX,TMUX_PANE
+env_pass=TMUX,TMUX_PANE,SAFEHOUSE_AGENT
 
 # ~/.cache/claude-statusline: ~/.claude/statusline.sh caches the Fable usage
 # window there; safehouse only allows listing ~/.cache.
 mkdir -p "$HOME/.local/state/workmux" "$HOME/.cache/workmux" "$HOME/.cache/claude-statusline"
 rw="$HOME/.local/state/workmux:$HOME/.cache/workmux:$HOME/.cache/claude-statusline"
 # Only dirs that exist on this machine; safehouse warns about missing ones.
-for d in "$HOME/code" "$HOME/git"; do
+# ~/.codex: safehouse grants it only to codex's own sandbox, so codex started
+# from another agent's sandbox could not load its config and login. It needs
+# write access for sessions, logs and refreshed tokens.
+for d in "$HOME/code" "$HOME/git" "$HOME/.codex"; do
   [ -d "$d" ] && rw="$rw:$d"
 done
 

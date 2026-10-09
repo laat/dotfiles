@@ -62,6 +62,8 @@ removing or loosening one.
 | mise shims appended to `PATH` | mise-only tools such as `terraform` are not found |
 | `npm_config_userconfig` pointing at the read-only token | npm and pnpm can't reach private scopes |
 | `agent.d/*.sh` drop-ins | work-specific grants from a private `~/.dotfiles-*` repo are missing |
+| `~/.codex` read-write | codex started from another agent's sandbox can't load its config or login |
+| inside the sandbox the wrapper starts the agent directly, codex with its own sandbox off | `codex` from inside fails with "sandbox_apply: Operation not permitted" |
 
 ## Denied on purpose
 
