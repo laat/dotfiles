@@ -31,7 +31,9 @@ dotfiles apply safehouse
   pre-authenticated ControlMaster, mise shims appended to `PATH` so
   mise-only tools like `terraform` resolve once `~/bin` is hidden,
   `~/.codex` read-write for the other agents so they can run codex, minus
-  what `codex.sb` denies. Run inside the sandbox, it starts the agent
+  what `codex.sb` denies, safehouse's `chromium-headless` feature,
+  `playwright.sb` and `MOZ_DISABLE_*_SANDBOX` so Playwright's Chromium,
+  Firefox and WebKit start. Run inside the sandbox, it starts the agent
   directly with codex's own sandbox off, since Seatbelt can't nest)
 - `~/.config/safehouse/agent.d/*.sh` — not in this package; drop-ins other
   stow packages add for grants that don't belong in this public repo. The
@@ -54,6 +56,10 @@ dotfiles apply safehouse
   `prompts/`, `plugins/`, `packages/`, `tmp/arg0/`, `shell_snapshots/`), so
   an agent that can run codex can't change what an unsandboxed codex on the
   host loads. Applied to every sandbox but codex's own
+- `.config/safehouse/playwright.sb` — what Playwright's Firefox and WebKit
+  builds need beyond `chromium-headless`: Firefox's
+  `org.mozilla.machname.*` Mach service, WebKit's XPC services, one sandbox
+  extension and its data dirs under `~/Library`
 - `setup/npm-readonly-token` — not stowed; creates a read-only npm granular
   token for the private scopes in `SCOPES=` (required; public packages need
   none) plus an optional `read:packages` GitHub PAT, in

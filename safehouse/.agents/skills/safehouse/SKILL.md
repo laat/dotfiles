@@ -35,6 +35,7 @@ Everything is stowed from `~/.dotfiles/safehouse/` (`readme.md` there).
 | `~/.local/bin/{claude,codex,opencode}-safe` | symlinks to it, agent picked from the name |
 | `~/.config/safehouse/agents.sb` | appended rules: tmux socket, shell startup chain, `*.local-secrets` and `.env` denies |
 | `~/.config/safehouse/codex.sb` | appended to every sandbox but codex's own: denies writes to codex's config and the files it runs as code |
+| `~/.config/safehouse/playwright.sb` | appended rules for Playwright's Firefox and WebKit: Mach services, one sandbox extension, WebKit's data dirs |
 | `~/.config/safehouse/agent.d/*.sh` | drop-ins from other stow packages; they append to the wrapper's `ro`, `rw` (colon-separated) and `env_pass` (comma-separated) |
 | `~/.config/safehouse/npmrc` | read-only npm token, made on the host by `~/.dotfiles/safehouse/setup/npm-readonly-token` |
 | `~/.profile.local-secrets` | host-only tokens, denied inside. New tokens go here, not in `~/.profile.local` |
@@ -65,6 +66,8 @@ removing or loosening one.
 | `agent.d/*.sh` drop-ins | work-specific grants from a private `~/.dotfiles-*` repo are missing |
 | `~/.codex` read-write for the other agents, its config and code write-denied (`codex.sb`) | codex started from another agent's sandbox can't load its config or login |
 | inside the sandbox the wrapper starts the agent directly, codex with its own sandbox off | `codex` from inside fails with "sandbox_apply: Operation not permitted" |
+| `chromium-headless` feature | Playwright's Chromium dies at launch with "Received signal 11 SEGV_ACCERR" |
+| `playwright.sb` plus `MOZ_DISABLE_*_SANDBOX` | Playwright's Firefox logs "parent bootstrap_check_in failed" and `newPage` fails; WebKit launches but every page closes at once |
 
 ## Denied on purpose
 

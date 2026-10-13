@@ -51,6 +51,12 @@
 #   safehouse grants each agent only its own state and Seatbelt can't apply
 #   a policy inside another. Every sandboxed agent can read codex's login
 #   (auth.json). See the comments at the definitions.
+# - Playwright's browsers: safehouse's chromium-headless feature (without it
+#   chrome-headless-shell dies with SIGSEGV at startup), playwright.sb for
+#   Firefox's and WebKit's Mach services, and MOZ_DISABLE_*_SANDBOX so
+#   Firefox's child processes don't try to apply a Seatbelt profile inside
+#   this one. Playwright already passes Chromium --no-sandbox for the same
+#   reason.
 #
 #   safehouse-agent <agent> [args...]
 #   <agent>-safe [args...]         symlink to this script, agent from the name
@@ -129,6 +135,14 @@ env_pass="$env_pass,GIT_SSH_COMMAND"
 # tools the host already resolves keep resolving the same way.
 [ -d "$HOME/.local/share/mise/shims" ] && export PATH="$PATH:$HOME/.local/share/mise/shims"
 
+# Firefox applies its own Seatbelt profile to its child processes, which
+# can't happen inside this one, so Playwright's Firefox started but no tab
+# ever loaded. Firefox still runs these processes, just not sandboxed.
+for p in CONTENT GMP RDD SOCKET_PROCESS UTILITY; do
+  export "MOZ_DISABLE_${p}_SANDBOX=1"
+  env_pass="$env_pass,MOZ_DISABLE_${p}_SANDBOX"
+done
+
 # Optional flags go in front of the agent command.
 set -- -- "$agent" "$@"
 if [ -f "$conf/npmrc" ]; then
@@ -164,9 +178,10 @@ if top=$(git rev-parse --show-toplevel 2>/dev/null); then
 fi
 
 exec safehouse \
-  --enable=1password,shell-init,clipboard \
+  --enable=1password,shell-init,clipboard,chromium-headless \
   --add-dirs-ro="$ro" \
   --add-dirs="$rw" \
   --append-profile="$conf/agents.sb" \
+  --append-profile="$conf/playwright.sb" \
   --env-pass="$env_pass" \
   "$@"

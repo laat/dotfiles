@@ -1,0 +1,29 @@
+;; Appended by safehouse-agent. Lets Playwright's Firefox and WebKit builds
+;; start inside the sandbox. Chromium needs only safehouse's chromium-headless
+;; feature, which the wrapper enables, and the --no-sandbox Playwright passes.
+
+;; Firefox: the parent registers org.mozilla.machname.<n> and its tab, socket
+;; and utility processes look it up to connect back. Without it they never
+;; start ("parent bootstrap_check_in failed") and newPage fails. The wrapper
+;; also sets MOZ_DISABLE_*_SANDBOX, since those processes can't apply
+;; Firefox's own Seatbelt profile inside this one.
+(allow mach-register mach-lookup
+    (global-name-regex #"^org\.mozilla\.machname\."))
+
+;; WebKit: the UI process starts its WebContent, Networking and GPU processes
+;; as XPC services and hands them a sandbox extension for launchservicesd.
+;; Without these the browser launches but every page closes at once. It also
+;; logs "Could not create a '...' sandbox extension" for trustd, fonts and
+;; mach-bootstrap; pages load and render the same without those.
+(allow mach-lookup
+    (global-name-regex #"^com\.apple\.WebKit\.")
+    (global-name "com.apple.nsurlsessiond"))
+(allow mach-issue-extension
+    (global-name "com.apple.coreservices.launchservicesd"))
+
+;; WebKit's website data and caches. Playwright's contexts are ephemeral and
+;; pages load without these, but WebKit tries to create them on every launch
+;; and logs a "could not create directory" error for each one.
+(allow file-read* file-write*
+    (home-subpath "/Library/WebKit/org.webkit.Playwright")
+    (home-subpath "/Library/Caches/org.webkit.Playwright"))
