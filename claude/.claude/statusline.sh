@@ -53,7 +53,7 @@ if [ -n "$cwd" ] && git -C "$cwd" rev-parse --is-inside-work-tree >/dev/null 2>&
     if [ "$x" = "?" ]; then unstaged="✗"; continue; fi
     [ "$x" != " " ] && staged="✗"
     [ "$y" != " " ] && [ "$unstaged" != "✗" ] && unstaged="⚑"
-  done < <(git -C "$cwd" status --porcelain 2>/dev/null)
+  done < <(git -C "$cwd" --no-optional-locks status --porcelain 2>/dev/null)
   git_part=" (${bold}${yellow}${branch}${reset}"
   [ -n "$staged$unstaged" ] && git_part+="${red}${staged}${unstaged}${reset}"
   git_part+=")"
