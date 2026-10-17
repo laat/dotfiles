@@ -42,7 +42,9 @@ dotfiles apply safehouse
 - `.local/bin/{claude,codex,opencode}-safe` — symlinks to it, agent from the name
 - `.config/safehouse/agents.sb` — appended policy: tmux socket allow, the
   shell startup chain (`~/.shrc`, `~/.shrc.d`, `~/.profile.local` and the
-  other `*.local` files) so aliases load inside, `*.local-secrets` deny
+  other `*.local` files) so aliases load inside, read access to
+  `/Applications/Google Chrome.app` so `open <url>` from the agent finds the
+  default browser instead of falling back to Safari, `*.local-secrets` deny
   (host tokens go in `~/.profile.local-secrets`, sourced from
   `~/.profile.local`), `.env` deny.
   The wrapper re-allows the `.env` files git tracks in the current repo,

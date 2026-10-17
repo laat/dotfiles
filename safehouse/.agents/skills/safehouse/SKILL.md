@@ -33,7 +33,7 @@ Everything is stowed from `~/.dotfiles/safehouse/` (`readme.md` there).
 | `/opt/homebrew/bin/safehouse` | the tool, `brew install eugene1g/safehouse/agent-safehouse` |
 | `~/.local/bin/safehouse-agent` | wrapper adding this machine's grants, each explained in its header comment |
 | `~/.local/bin/{claude,codex,opencode}-safe` | symlinks to it, agent picked from the name |
-| `~/.config/safehouse/agents.sb` | appended rules: tmux socket, shell startup chain, `*.local-secrets` and `.env` denies |
+| `~/.config/safehouse/agents.sb` | appended rules: tmux socket, shell startup chain, the default browser's bundle, `*.local-secrets` and `.env` denies |
 | `~/.config/safehouse/codex.sb` | appended to every sandbox but codex's own: denies writes to codex's config and the files it runs as code |
 | `~/.config/safehouse/playwright.sb` | appended rules for Playwright's Firefox and WebKit: Mach services, one sandbox extension, WebKit's data dirs |
 | `~/.config/safehouse/agent.d/*.sh` | drop-ins from other stow packages; they append to the wrapper's `ro`, `rw` (colon-separated) and `env_pass` (comma-separated) |
@@ -61,6 +61,7 @@ removing or loosening one.
 | `1password` feature | commits fail with "1Password: Could not connect to socket" |
 | `GIT_SSH_COMMAND`: 1Password agent, a copy of `known_hosts`, `ControlMaster=no` | git over ssh has no key and exits 255 |
 | `clipboard` feature | `pbcopy` and `pbpaste` fail |
+| `/Applications` metadata and `Google Chrome.app` read in `agents.sb` | links the agent opens (Claude Code's fullscreen TUI, `gh --web`, login flows) go to Safari, not the default browser |
 | mise shims appended to `PATH` | mise-only tools such as `terraform` are not found |
 | `npm_config_userconfig` pointing at the read-only token | npm and pnpm can't reach private scopes |
 | `agent.d/*.sh` drop-ins | work-specific grants from a private `~/.dotfiles-*` repo are missing |

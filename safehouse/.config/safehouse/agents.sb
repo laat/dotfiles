@@ -22,6 +22,16 @@
     (home-subpath "/.zshrc.d")
     (home-subpath "/.profile.d"))
 
+;; `open <url>` from the agent (Claude Code's fullscreen TUI handles link
+;; clicks itself, gh --web, login flows) asks LaunchServices for the default
+;; browser. It skips a handler whose bundle the caller can't read and falls
+;; back to Safari, so links opened from inside the sandbox went to Safari
+;; instead of Chrome. Both rules are needed; the bundle alone is not enough.
+(allow file-read-metadata
+    (literal "/Applications"))
+(allow file-read*
+    (subpath "/Applications/Google Chrome.app"))
+
 ;; Tokens exported on the host live in ~/.profile.local-secrets, sourced
 ;; from ~/.profile.local behind a -f test, so inside the sandbox it is
 ;; skipped silently. Last rule, so it wins over any grant above.
