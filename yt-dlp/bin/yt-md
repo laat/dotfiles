@@ -1,0 +1,243 @@
+#!/usr/bin/env python3
+"""Print a video's transcript as Markdown, with a timestamped heading every few minutes."""
+
+import argparse
+import html
+import json
+import os
+import re
+import subprocess
+import sys
+import tempfile
+from dataclasses import dataclass
+
+PARAGRAPH = 60  # seconds per paragraph, roughly
+SECTION_SLACK = 45  # how far past a heading mark to look for a sentence end
+PARAGRAPH_SLACK = 20
+MIN_TAIL = 60  # don't start a section this close to the end
+SENTENCE_END = re.compile(r"[.?!…][\"'”’)\]]*$")
+CUE_TIME = re.compile(r"(?:(\d+):)?(\d\d):(\d\d)[.,](\d{3})\s+-->")
+
+
+@dataclass
+class Token:
+    t: float  # seconds
+    text: str  # no surrounding whitespace
+    space: bool  # a word boundary comes before it
+    speaker: bool = False  # a ">>" speaker change comes before it
+
+
+def die(msg):
+    sys.exit(f"yt-md: {msg}")
+
+
+def ytdlp(args, extra):
+    cmd = ["yt-dlp", "--quiet", "--no-warnings", "--no-playlist", *extra, *args]
+    try:
+        r = subprocess.run(cmd, stdout=subprocess.PIPE)
+    except FileNotFoundError:
+        die("yt-dlp not found")
+    if r.returncode:
+        sys.exit(r.returncode)
+    return r.stdout
+
+
+def choose_track(info, lang):
+    """Return (language key, is_auto) for the best transcript in lang, or in the video's own language."""
+    manual = [k for k in info.get("subtitles") or {} if k != "live_chat"]
+    auto = info.get("automatic_captions") or {}
+    orig = [k[: -len("-orig")] for k in auto if k.endswith("-orig")]
+    want = lang or info.get("language") or (orig[0] if orig else None)
+    if want:
+        close = [k for k in manual if k == want or k.startswith(want + "-") or want.startswith(k + "-")]
+        if close:
+            return min(close, key=lambda k: k != want), False
+        for k in (want + "-orig", want):
+            if k in auto:
+                return k, True
+        if lang:
+            die(f"no {lang} transcript (subtitles: {', '.join(manual) or 'none'})")
+    if orig:
+        return orig[0] + "-orig", True
+    if manual:  # nothing says what language is spoken, so prefer English
+        return min(manual, key=lambda k: k.split("-")[0] != "en"), False
+    die("no transcript available")
+
+
+def add(tokens, t, text, space):
+    """Append text's tokens; return whether a word boundary follows it."""
+    for i, piece in enumerate(re.split(r"\s*>>\s*", text)):
+        if piece.strip():
+            tokens.append(Token(t, piece.strip(), space or i > 0 or piece[0].isspace(), i > 0))
+            space = piece[-1].isspace()
+        else:
+            space = space or bool(piece)
+    return space
+
+
+def parse_json3(data):
+    tokens = []
+    for ev in json.loads(data).get("events", []):
+        space = True
+        for seg in ev.get("segs") or []:
+            t = (ev.get("tStartMs", 0) + seg.get("tOffsetMs", 0)) / 1000
+            space = add(tokens, t, seg.get("utf8", "").replace("\n", " "), space)
+    return tokens
+
+
+def parse_cues(data):
+    """VTT or SRT."""
+    tokens = []
+    for block in re.split(r"\n\s*\n", data.replace("\r", "")):
+        lines = block.strip().split("\n")
+        for i, line in enumerate(lines):
+            if m := CUE_TIME.search(line):
+                break
+        else:
+            continue
+        h, mi, s, ms = m.groups()
+        text = html.unescape(re.sub(r"<[^>]*>", "", " ".join(lines[i + 1 :])))
+        add(tokens, int(h or 0) * 3600 + int(mi) * 60 + int(s) + int(ms) / 1000, text, True)
+    return tokens
+
+
+def good_break(tokens, j):
+    return tokens[j].speaker or bool(SENTENCE_END.search(tokens[j - 1].text))
+
+
+def pick(tokens, lo, hi, target, slack):
+    """Index in [lo, hi) to break before: the first sentence start in [target, target + slack],
+    else the longest pause there, else the first word after target."""
+    window = []
+    for j in range(lo, hi):
+        if tokens[j].t > target + slack:
+            break
+        if tokens[j].t >= target and tokens[j].space:
+            if good_break(tokens, j):
+                return j
+            window.append(j)
+    if window:
+        return max(window, key=lambda j: tokens[j].t - tokens[j - 1].t)
+    return next((j for j in range(lo, hi) if tokens[j].t >= target and tokens[j].space), None)
+
+
+def sections(tokens, interval):
+    starts = [0]
+    mark = interval
+    while (j := pick(tokens, starts[-1] + 1, len(tokens), mark, SECTION_SLACK)) is not None:
+        if tokens[-1].t - tokens[j].t < MIN_TAIL:
+            break
+        starts.append(j)
+        mark = (tokens[j].t // interval + 1) * interval
+    return list(zip(starts, starts[1:] + [len(tokens)]))
+
+
+def paragraphs(tokens, a, b):
+    starts = [a]
+    while True:
+        p = starts[-1]
+        speaker = next((j for j in range(p + 1, b) if tokens[j].speaker), None)
+        end = b if speaker is None else speaker
+        j = pick(tokens, p + 1, end, tokens[p].t + PARAGRAPH, PARAGRAPH_SLACK)
+        if j is not None and tokens[end - 1].t - tokens[j].t >= PARAGRAPH_SLACK:
+            starts.append(j)
+        elif speaker is not None:
+            starts.append(speaker)
+        else:
+            return list(zip(starts, starts[1:] + [b]))
+
+
+def join(tokens):
+    text = "".join((" " if tok.space else "") + tok.text for tok in tokens)
+    text = re.sub(r"\s+", " ", text).strip()
+    # Keep a paragraph from turning into a heading, quote or list.
+    return re.sub(r"^(\d+)([.)])", r"\1\\\2", re.sub(r"^([#>*+-])", r"\\\1", text))
+
+
+def clock(t, hours):
+    t = int(t)
+    if hours:
+        return f"{t // 3600}:{t // 60 % 60:02}:{t % 60:02}"
+    return f"{t // 60:02}:{t % 60:02}"
+
+
+def render(info, track, auto, tokens, interval):
+    title = info.get("title") or info.get("id")
+    out = [f"# {title}", ""]
+    channel = info.get("channel") or info.get("uploader")
+    channel_url = info.get("channel_url") or info.get("uploader_url")
+    if channel:
+        out.append(f"- Channel: [{channel}]({channel_url})" if channel_url else f"- Channel: {channel}")
+    if d := info.get("upload_date"):
+        out.append(f"- Published: {d[:4]}-{d[4:6]}-{d[6:]}")
+    hours = max(info.get("duration") or 0, tokens[-1].t) >= 3600
+    if info.get("duration"):
+        out.append(f"- Duration: {clock(info['duration'], hours)}")
+    url = info.get("webpage_url")
+    if url:
+        out.append(f"- URL: <{url}>")
+    out.append(f"- Transcript: {track.removesuffix('-orig')}, {'auto-generated' if auto else 'subtitles'}")
+
+    youtube = info.get("extractor_key") == "Youtube" and info.get("id")
+    for a, b in sections(tokens, interval * 60):
+        stamp = clock(tokens[a].t, hours)
+        if youtube:
+            stamp = f"[{stamp}](https://www.youtube.com/watch?v={info['id']}&t={int(tokens[a].t)}s)"
+        out += ["", f"## {stamp}"]
+        for p, q in paragraphs(tokens, a, b):
+            out += ["", join(tokens[p:q])]
+    return "\n".join(out) + "\n"
+
+
+def main():
+    argv = sys.argv[1:]
+    extra = []
+    if "--" in argv:
+        i = argv.index("--")
+        argv, extra = argv[:i], argv[i + 1 :]
+    parser = argparse.ArgumentParser(
+        prog="yt-md",
+        description=__doc__,
+        epilog="Arguments after -- go to yt-dlp, e.g. yt-md URL -- --cookies-from-browser firefox",
+    )
+    parser.add_argument("url")
+    parser.add_argument("-l", "--lang", help="transcript language code (default: the video's own language)")
+    parser.add_argument(
+        "-i", "--interval", type=float, default=5, metavar="MIN", help="minutes between headings (default: 5)"
+    )
+    args = parser.parse_args(argv)
+    if args.interval <= 0:
+        parser.error("--interval must be positive")
+
+    with tempfile.TemporaryDirectory(prefix="yt-md.") as tmp:
+        info_path = os.path.join(tmp, "info.json")
+        with open(info_path, "wb") as f:
+            f.write(ytdlp(["--dump-single-json", args.url], extra))
+        with open(info_path) as f:
+            info = json.load(f)
+        track, auto = choose_track(info, args.lang)
+        ytdlp(
+            [
+                "--load-info-json", info_path,
+                "--skip-download",
+                "--write-auto-subs" if auto else "--write-subs",
+                "--sub-langs", re.escape(track),
+                "--sub-format", "json3/vtt/srt",
+                "-o", os.path.join(tmp, "sub.%(ext)s"),
+            ],
+            extra,
+        )
+        subs = [n for n in os.listdir(tmp) if n.startswith("sub.")]
+        if not subs:
+            die(f"yt-dlp wrote no {track} transcript")
+        with open(os.path.join(tmp, subs[0]), encoding="utf-8") as f:
+            data = f.read()
+
+    tokens = parse_json3(data) if subs[0].endswith(".json3") else parse_cues(data)
+    if not tokens:
+        die(f"the {track} transcript is empty")
+    sys.stdout.write(render(info, track, auto, tokens, args.interval))
+
+
+if __name__ == "__main__":
+    main()
