@@ -50,3 +50,5 @@ CLAUDE.local.md
 
 # Git worktrees
 .worktrees/
+
+**/.claude/.cc-writes/
