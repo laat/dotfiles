@@ -68,6 +68,10 @@ dotfiles apply safehouse
   `~/.config/safehouse/npmrc`. From then on npm and pnpm in the sandbox use
   that file and cannot see `~/.npmrc`. Re-run to rotate. Needs npm 11.7 or
   newer for the granular-token flags
+- `.profile.d/50_galley.sh` — exports `GALLEY_NPMRC` as that file when it
+  exists, so galley's reviews install private packages with the read-only
+  token instead of `~/.npmrc`. In the login profile, which galley.app reads
+  too when it starts the server
 - `.shrc.d/99_safehouse.sh` — `claude`, `cc`, `codex`, `co`, `opencode`, `oc`
   become the sandboxed wrappers, with claude and codex skipping their own
   permission prompts; `<agent>-unsafe` (short: `ccu`, `cou`, `ocu`) runs the
