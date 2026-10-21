@@ -17,6 +17,7 @@ DEFAULT_PACKAGES=(
   codex
   opencode
   skills
+  galley
 )
 
 BASE_PACKAGES=(stow skel)
