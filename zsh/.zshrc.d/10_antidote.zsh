@@ -14,5 +14,7 @@ if [[ ! ${zsh_plugins}.zsh -nt ${zsh_plugins}.txt ]]; then
     antidote bundle <${zsh_plugins}.txt >${zsh_plugins}.zsh
   )
 fi
+# Ubuntu's thefuck breaks on Python 3.12, so Linux hosts go without it.
+has-thefuck() { (( $+commands[thefuck] )) }
 source ${zsh_plugins}.zsh
 unset ANTIDOTE_FOLDER

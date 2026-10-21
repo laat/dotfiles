@@ -3,7 +3,7 @@ zdharma-continuum/fast-syntax-highlighting kind:defer
 ohmyzsh/ohmyzsh path:lib
 ohmyzsh/ohmyzsh path:plugins/npm
 ohmyzsh/ohmyzsh path:plugins/sdk
-ohmyzsh/ohmyzsh path:plugins/thefuck
+ohmyzsh/ohmyzsh path:plugins/thefuck conditional:has-thefuck
 
 zsh-users/zsh-autosuggestions kind:defer
 zsh-users/zsh-history-substring-search kind:defer
