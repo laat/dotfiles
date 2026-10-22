@@ -24,6 +24,8 @@ and Claude Code loads the skill once.
 | `workmux` | [raine/workmux](https://github.com/raine/workmux/blob/main/skills/workmux/SKILL.md) (MIT, see `LICENSE` beside it; vendored unmodified from v0.1.263; user-invoked only) |
 | `babysit` | own; user-invoked only (`/babysit <pr>`); watches a PR's checks, comments and review threads until clean, fixes and pushes, replies before resolving. |
 | `codex-review-loop` | own; user-invoked only (`/codex-review-loop`); review with the codex CLI, fix, re-review in the same thread until clean or 7 rounds; never commits, pushes or posts. |
+| `full-stop` | own; model-invoked on an explicit "full stop"; galley stage, reviewer agents, publish, babysit until ready to merge; never merges |
+| `full-send` | own; model-invoked on an explicit "full send"; same as `full-stop`, then merges once the merge gate holds |
 
 Skills marked `own` are dedicated to the public domain under CC0 1.0; each
 folder has the `LICENSE`. Vendored skills keep their upstream licence beside
