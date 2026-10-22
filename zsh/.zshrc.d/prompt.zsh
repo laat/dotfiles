@@ -1,4 +1,9 @@
 autoload -U colors && colors
+
+# Hex colours (Catppuccin Mocha) rather than ANSI names, so the prompt looks
+# the same in terminals with harsh default palettes, such as T3 Code's.
+# Without truecolor, zsh/nearcolor maps them to the nearest 256-colour entry.
+[[ $COLORTERM == (24bit|truecolor) ]] || zmodload zsh/nearcolor
 autoload -Uz vcs_info
 
 precmd() {
@@ -17,11 +22,11 @@ zstyle ':vcs_info:*' enable git hg
 zstyle ':vcs_info:*' check-for-changes true
 zstyle ':vcs_info:*' check-for-staged-changes true
 
-zstyle ':vcs_info:*' stagedstr '%F{red}✗%f'
-zstyle ':vcs_info:*' unstagedstr "%F{red}⚑%f"
+zstyle ':vcs_info:*' stagedstr '%F{#f38ba8}✗%f'
+zstyle ':vcs_info:*' unstagedstr "%F{#f38ba8}⚑%f"
 
-zstyle ':vcs_info:*' formats "(%{$fg_bold[yellow]%}%b%c%u%{$reset_color%})"
-zstyle ':vcs_info:*' actionformats "(%{$fg_bold[yellow]%}%b%c%u|%a%{$reset_color%})"
+zstyle ':vcs_info:*' formats "(%B%F{#f9e2af}%b%c%u%f%%b)"
+zstyle ':vcs_info:*' actionformats "(%B%F{#f9e2af}%b%c%u|%a%f%%b)"
 
 zstyle ':vcs_info:git*+set-message:*' hooks git-untracked git-worktree
 
@@ -34,7 +39,7 @@ function +vi-git-untracked(){
         # If instead you want to show the marker only if there are untracked
         # files in $PWD, use:
         #[[ -n $(git ls-files --others --exclude-standard) ]] ; then
-        hook_com[unstaged]='%F{red}✗%f'
+        hook_com[unstaged]='%F{#f38ba8}✗%f'
     fi
 }
 
@@ -58,7 +63,7 @@ _newline=$'\n'
 if [ $UID -eq 0 ]; then NCOLOR="red"; else NCOLOR="white"; fi
 : ${PROMPT_USER:=%n}
 : ${PROMPT_HOST:=%m}
-PROMPT='%{$fg[$NCOLOR]%}%B${PROMPT_USER}%b@$FG[145]${PROMPT_HOST}%{$reset_color%}:%{$fg[blue]%}%B%c/%b%{$reset_color%} ${vcs_info_msg_0_} %{$fg[red]%}${_DM_NAME}%{$reset_color%}${_newline}%(!.#.$) '
+PROMPT='%{$fg[$NCOLOR]%}%B${PROMPT_USER}%b@$FG[145]${PROMPT_HOST}%{$reset_color%}:%F{#89b4fa}%B%c/%b%f ${vcs_info_msg_0_} %F{#f38ba8}${_DM_NAME}%f${_newline}%(!.#.$) '
 
 RPROMPT='%{${_lineup}%}%F{008}[%D{%H:%M:%S}]%f%{${_linedown}%}'
 
