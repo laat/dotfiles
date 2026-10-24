@@ -112,4 +112,5 @@ When the ready gate holds, end with a short report, so it reads well when the us
 - what the reviewer agents, bots and humans raised, and what you did about it;
 - anything you left open, with the thread URL.
 
-Do not merge. The user does.
+Do not merge. The user does. If the user later asks for full send, the full-send skill replaces
+this rule.

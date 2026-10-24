@@ -23,6 +23,16 @@ permission to:
 You do not have permission to turn on GitHub auto-merge (it merges on required checks alone,
 before the merge gate holds), to merge with a failing gate, or to push to any other branch.
 
+Nobody else merges it: not galley, not GitHub. You run `gh pr merge` yourself once the gate holds.
+
+## Picking up existing work
+
+- If full-stop ran earlier in this conversation, this request replaces its rule against merging.
+  Everything else from full-stop still applies, and the result is the same pull request.
+- Start the [flow](#flow) at the first step that is not done yet. If the pull request is already
+  published on GitHub, skip steps 1 to 4 and go on with babysit (step 5). If the merge gate
+  already holds, merge (step 6).
+
 ## Flow
 
 1. **Finish the change.** Do the work the user asked for. Commit on a branch with at least one
@@ -38,7 +48,8 @@ before the merge gate holds), to merge with a failing gate, or to push to any ot
    ```
 
    Pass the reviewer flags from the `galley` skill if the user named reviewers. Do not ask the user
-   to review in galley; auto-publish replaces that step.
+   to review in galley; auto-publish replaces that step. Do not add `--auto-merge`, although the
+   `galley` skill says to when the user asks for a merge.
 4. **Loop with the reviewer agents** as in the `galley` skill, steps 2 to 5: `galley pr wait`,
    address every thread, wait again. When the reviewer agents are done and the feedback is
    answered, galley publishes and `pr wait` prints `Published to GitHub: <url>`.
@@ -72,6 +83,10 @@ screenshot. Use the most direct proof the change allows.
 - UI or runtime behaviour: run the app and look at the change (the `run` skill). Green mocked
   tests do not prove what the user sees.
 - Put the proof in the pull request description: what you ran and what it showed.
+
+When you pick up existing work, proof from earlier in this conversation, or proof written in the
+pull request description, still counts as long as the head SHA has not changed since. If it has
+changed, run the checks again locally.
 
 If you cannot prove a change, do not merge it. Ask the user, and say what you could not prove.
 
