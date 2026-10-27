@@ -49,11 +49,17 @@ You do not have permission to merge, to turn on auto-merge, or to push to any ot
 
 In T3 Code (the `t3-code` MCP tools are present):
 
+- Until it is published, nothing on GitHub keeps the thread in Working. In Claude Code, wait
+  with the Monitor tool as the `galley` skill says, not with a background Bash command, or
+  T3 Code moves the thread to Active and it looks done.
 - After `Published to GitHub: <url>`, call `link_pull_request` with the URL.
 - While babysitting, call `watch_pull_request` and end your turn instead of blocking on
   `gh pr checks --watch`. T3 Code wakes you when checks finish, someone comments, or the branch
-  conflicts. Keep `galley pr wait` running in the background as well; it reports a merge or close.
-- Call `unwatch_pull_request` before the final message, also when you stop early.
+  conflicts, and the watch keeps the thread in Working. Keep `galley pr wait` running in the
+  background as well (Bash with `run_in_background` is enough now); it reports a merge or close.
+- When a wake needs no action, end your turn without a message.
+- Before the final message or a question, call `unwatch_pull_request` and stop any monitor with
+  `TaskStop`, also when you stop early.
 
 ## Proof
 
