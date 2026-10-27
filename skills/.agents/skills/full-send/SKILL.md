@@ -1,6 +1,6 @@
 ---
 name: full-send
-description: Own the work end to end until the pull request is merged. Stage it in galley, let the reviewer agents review it, publish it to GitHub, babysit checks and review threads until it is clean, then merge it. Use only when the user explicitly asks for "full send", as in "take over and get this landed, full send", or invokes /full-send. For the same flow that stops before the merge, see full-stop.
+description: Trigger when the user says "full send", or invokes /full-send.
 ---
 
 # Full send
@@ -57,6 +57,9 @@ Nobody else merges it: not galley, not GitHub. You run `gh pr merge` yourself on
    - Where babysit says push, commit and run `galley pr wait`. It pushes your commits to GitHub.
      Never `git push` or `gh pr edit` yourself.
    - Edit the title and description with `galley pr edit`, then `galley pr wait`.
+   - Wait as in babysit's Waiting section. Outside T3 Code that is
+     `~/.agents/skills/babysit/prctl wait "$pr" -R "$owner/$repo" --clean 2>&1`, with
+     `--clean` so a branch that is behind its base does not count as done.
    - Keep running rounds until the [merge gate](#merge-gate) holds, not only babysit's Done.
 6. **Merge** as in babysit's Merge section: squash by default, delete the branch, and read the
    merge commit back. Then run `galley pr wait` until it prints `Merged on GitHub as <sha>`, and
@@ -70,7 +73,7 @@ In T3 Code (the `t3-code` MCP tools are present):
   T3 Code moves the thread to Active and it looks done.
 - After `Published to GitHub: <url>`, call `link_pull_request` with the URL.
 - While babysitting, call `watch_pull_request` and end your turn instead of blocking on
-  `gh pr checks --watch`. T3 Code wakes you when checks finish, someone comments, or the branch
+  `prctl wait`. T3 Code wakes you when checks finish, someone comments, or the branch
   conflicts, and the watch keeps the thread in Working. Keep `galley pr wait` running in the
   background as well (Bash with `run_in_background` is enough now); it reports a merge or close.
 - When a wake needs no action, end your turn without a message.
@@ -105,15 +108,18 @@ All of these hold at the same time:
 - All review bots and reviewer agents have finished, and each finding is fixed or answered in a
   written reply.
 - No human review still requests changes, and no human thread is unresolved.
-- The branch is up to date with its base, and GitHub reports it mergeable:
+- The branch is up to date with its base, and GitHub reports it `MERGEABLE` and `CLEAN`.
 
-  ```bash
-  gh pr view "$pr" -R "$owner/$repo" --json mergeable,mergeStateStatus
-  ```
+`prctl status --clean` checks all of these except the proof and whether a comment still asks for
+something. It must print `done`:
 
-  Expect `MERGEABLE` and `CLEAN`. On `BEHIND` or `DIRTY`: `git fetch origin`, rebase onto
-  `origin/<base>`, resolve conflicts, run the tests again, and run `galley pr wait`, which
-  force-pushes with a lease. Then start a new babysit round, since CI runs again.
+```bash
+~/.agents/skills/babysit/prctl status "$pr" -R "$owner/$repo" --clean
+```
+
+On `BEHIND` or `DIRTY`: `git fetch origin`, rebase onto `origin/<base>`, resolve conflicts, run
+the tests again, and run `galley pr wait`, which force-pushes with a lease. Then start a new
+babysit round, since CI runs again.
 
 ## Asking the user
 

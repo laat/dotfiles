@@ -1,0 +1,656 @@
+#!/usr/bin/env python3
+"""prctl: read, wait on and answer a GitHub pull request, for the babysit skill.
+
+  prctl status <pr> [-R owner/repo] [--clean] [--full] [--all-comments]
+  prctl wait   <pr> [-R owner/repo] [--clean] [--interval 30] [--timeout SECONDS]
+  prctl reply  <thread-id> (-b TEXT | --body-file FILE|-) [--resolve] [--human-ok]
+
+<pr> is a number, a PR URL or a branch name, as for `gh pr view`.
+
+status
+  One read of everything babysit's Done depends on: checks, workflow runs on
+  the head commit, a pending Copilot review, the review decision, unresolved
+  review threads, and recent comments and review summaries. The last line is
+  `done` or `not done: <reasons>`.
+
+wait
+  Polls until something needs you, then prints what and exits. Each stdout
+  line is one event, so a monitor wakes once per event. It remembers what it
+  already reported (per PR, in the temp directory), so feedback that arrives
+  between two runs is reported by the next one. The first run for a PR only
+  records what is already there; read that with `status`.
+
+reply
+  Replies on a review thread and, with --resolve, resolves it. It refuses to
+  resolve a thread a human opened unless you pass --human-ok, and checks that
+  before posting anything.
+
+--clean also requires GitHub to report the PR MERGEABLE and CLEAN (up to date
+with its base, no conflicts, nothing blocking), as the full-stop and full-send
+gates do.
+
+Exit codes
+  status  0 done, 1 not done, 2 bad input or GitHub unreachable
+  wait    0 settled and done, or merged
+          1 needs you: a check failed, new feedback, a conflict, the PR closed,
+            or settled but not done (the last line says why)
+          2 bad input, or another prctl already waits on this PR
+          124 --timeout reached with nothing to report; run it again
+  reply   0 posted (and resolved), 2 refused or failed
+"""
+
+from __future__ import annotations
+
+import argparse
+import fcntl
+import json
+import os
+import re
+import subprocess
+import sys
+import tempfile
+import time
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, NoReturn
+
+Json = dict[str, Any]
+
+# Top-level comments from these bots repeat what the checks already say.
+STATUS_BOTS = ("github-actions", "vercel", "netlify", "codecov", "railway", "cloudflare")
+FAILED_RUN = ("FAILURE", "TIMED_OUT", "CANCELLED", "ACTION_REQUIRED", "STARTUP_FAILURE", "STALE")
+# Copilot is sometimes expected but never requested, or requested and never
+# finishes. Stop waiting for it after this long on one head commit.
+COPILOT_GRACE = {"expected": 10 * 60, "requested": 30 * 60}
+STATE_TTL = 12 * 3600
+TRANSIENT = re.compile(
+    r"HTTP (5\d\d|429)|rate limit|timed? ?out|connection (reset|refused)|EOF|"
+    r"temporar|could not resolve host|TLS handshake|Something went wrong",
+    re.IGNORECASE,
+)
+
+PR_QUERY = """
+query($owner: String!, $repo: String!, $number: Int!, $cursor: String) {
+  viewer { login }
+  repository(owner: $owner, name: $repo) {
+    pullRequest(number: $number) {
+      url state isDraft headRefOid headRefName baseRefName
+      mergeable mergeStateStatus reviewDecision
+      author { login }
+      commits(last: 1) { nodes { commit {
+        committedDate
+        statusCheckRollup { contexts(first: 100) {
+          pageInfo { hasNextPage }
+          nodes {
+            __typename
+            ... on CheckRun { name status conclusion detailsUrl isRequired(pullRequestNumber: $number) }
+            ... on StatusContext { context state targetUrl isRequired(pullRequestNumber: $number) }
+          }
+        } }
+      } } }
+      comments(last: 100) { nodes { id url body createdAt author { login __typename } } }
+      reviews(last: 100) {
+        nodes { id url body state submittedAt commit { oid } author { login __typename } }
+      }
+      reviewThreads(first: 100, after: $cursor) {
+        pageInfo { hasNextPage endCursor }
+        nodes {
+          id isResolved isOutdated path line
+          comments(first: 100) { nodes { id url body createdAt author { login __typename } } }
+        }
+      }
+    }
+  }
+}
+"""
+
+THREAD_QUERY = """
+query($id: ID!) {
+  viewer { login }
+  node(id: $id) {
+    ... on PullRequestReviewThread {
+      isResolved
+      comments(first: 1) { nodes { author { login __typename } } }
+    }
+  }
+}
+"""
+
+REPLY_MUTATION = """
+mutation($id: ID!, $body: String!) {
+  addPullRequestReviewThreadReply(input: {pullRequestReviewThreadId: $id, body: $body}) {
+    comment { url }
+  }
+}
+"""
+
+RESOLVE_MUTATION = """
+mutation($id: ID!) {
+  resolveReviewThread(input: {threadId: $id}) { thread { isResolved } }
+}
+"""
+
+
+class GhError(Exception):
+    def __init__(self, message: str, transient: bool) -> None:
+        super().__init__(message)
+        self.transient = transient
+
+
+def die(message: str, code: int = 2) -> NoReturn:
+    # stdout, so a monitor shows the agent why it stopped.
+    print(f"prctl: {message}", flush=True)
+    sys.exit(code)
+
+
+def gh(*args: str, ok: tuple[int, ...] = (0,)) -> str:
+    """Run gh and return stdout. Retries transient failures a few times."""
+    delay = 2
+    for attempt in range(4):
+        proc = subprocess.run(["gh", *args], capture_output=True, text=True)
+        if proc.returncode in ok:
+            return proc.stdout
+        message = (proc.stderr.strip().splitlines() or [f"gh exited {proc.returncode}"])[-1]
+        transient = bool(TRANSIENT.search(proc.stderr))
+        if not transient or attempt == 3:
+            raise GhError(f"gh {' '.join(args[:2])}: {message}", transient)
+        time.sleep(delay)
+        delay *= 2
+    raise AssertionError("unreachable")
+
+
+def graphql(query: str, **variables: Any) -> Json:
+    args = ["api", "graphql", "-f", f"query={query}"]
+    for key, value in variables.items():
+        if value is None:
+            continue
+        args += ["-F" if isinstance(value, int) else "-f", f"{key}={value}"]
+    return json.loads(gh(*args))["data"]
+
+
+def one_line(text: str, limit: int = 160) -> str:
+    text = re.sub(r"<!--.*?-->", " ", text or "", flags=re.DOTALL)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text if len(text) <= limit else text[: limit - 3] + "..."
+
+
+def indent(text: str) -> str:
+    return "\n".join("      " + line for line in (text or "").strip().splitlines())
+
+
+def login(node: Json) -> tuple[str, bool]:
+    author = node.get("author") or {}
+    return author.get("login") or "ghost", author.get("__typename") == "Bot"
+
+
+def is_copilot(name: str) -> bool:
+    return "copilot" in name.lower()
+
+
+@dataclass
+class Item:
+    """One piece of feedback: a comment, a review, or a comment in a thread."""
+
+    id: str
+    kind: str
+    who: str
+    bot: bool
+    at: str
+    url: str
+    body: str
+    where: str = ""
+
+
+@dataclass
+class Thread:
+    id: str
+    outdated: bool
+    where: str
+    opener: str
+    opener_bot: bool
+    replied: bool
+    comments: list[Item]
+
+
+@dataclass
+class Snapshot:
+    repo: str
+    number: int
+    url: str
+    state: str
+    draft: bool
+    head: str
+    head_date: str
+    head_ref: str
+    base: str
+    viewer: str
+    mergeable: str
+    merge_state: str
+    decision: str
+    checks: dict[str, tuple[str, str, bool]] = field(default_factory=dict)
+    truncated_checks: bool = False
+    runs: list[tuple[str, str]] = field(default_factory=list)
+    copilot: str = ""
+    threads: list[Thread] = field(default_factory=list)
+    feedback: list[Item] = field(default_factory=list)
+
+    @property
+    def short(self) -> str:
+        return self.head[:7]
+
+    def bucket(self, wanted: str) -> list[str]:
+        return sorted(name for name, (b, _, _) in self.checks.items() if b == wanted)
+
+
+def resolve(ref: str, repo: str | None) -> tuple[str, int]:
+    """Turn a PR reference into the base repository and number."""
+    ref = ref.strip()
+    if not ref:
+        die("empty PR reference. Did a variable expand to nothing?")
+    args = ["pr", "view", ref, "--json", "url", "--jq", ".url"]
+    if repo:
+        args += ["-R", repo]
+    try:
+        url = gh(*args).strip()
+    except GhError as error:
+        die(f"cannot find PR {ref!r}: {error}")
+    match = re.fullmatch(r"https://github\.com/([^/]+/[^/]+)/pull/(\d+)", url)
+    if not match:
+        die(f"unexpected PR URL {url!r}")
+    return match.group(1), int(match.group(2))
+
+
+def check_bucket(node: Json) -> tuple[str, str, str]:
+    if node["__typename"] == "CheckRun":
+        name, link = node["name"], node.get("detailsUrl") or ""
+        if node["status"] != "COMPLETED":
+            return name, "pending", link
+        conclusion = node.get("conclusion") or ""
+        if conclusion == "SUCCESS":
+            return name, "pass", link
+        if conclusion in FAILED_RUN:
+            return name, "fail", link
+        return name, "skip", link
+    name, link, state = node["context"], node.get("targetUrl") or "", node["state"]
+    if state == "SUCCESS":
+        return name, "pass", link
+    if state in ("PENDING", "EXPECTED"):
+        return name, "pending", link
+    return name, "fail", link
+
+
+RANK = {"fail": 3, "pending": 2, "pass": 1, "skip": 0}
+
+
+class Reader:
+    def __init__(self, repo: str, number: int) -> None:
+        self.repo, self.number = repo, number
+        self.owner, self.name = repo.split("/")
+        self._review_on_push: dict[str, bool] = {}
+
+    def review_on_push(self, base: str) -> bool:
+        """Whether a ruleset on the base makes Copilot review every push."""
+        if base not in self._review_on_push:
+            try:
+                out = gh(
+                    "api", f"repos/{self.repo}/rules/branches/{base}", "--jq",
+                    '.[] | select(.type == "copilot_code_review") | .parameters.review_on_push',
+                )
+            except GhError:
+                out = ""
+            self._review_on_push[base] = "true" in out.split()
+        return self._review_on_push[base]
+
+    def copilot_requested(self) -> bool:
+        """A Copilot review request newer than its last review, on the timeline."""
+        out = gh(
+            "api", "--paginate", f"repos/{self.repo}/issues/{self.number}/timeline", "--jq",
+            '.[] | select((.event == "review_requested" and .requested_reviewer.login == "Copilot")'
+            ' or (.event == "reviewed" and .user.login == "Copilot")) | .event',
+        )
+        events = out.split()
+        return bool(events) and events[-1] == "review_requested"
+
+    def read(self) -> Snapshot:
+        threads_raw: list[Json] = []
+        cursor = None
+        while True:
+            data = graphql(PR_QUERY, owner=self.owner, repo=self.name, number=self.number, cursor=cursor)
+            pr = data["repository"]["pullRequest"]
+            page = pr["reviewThreads"]
+            threads_raw += page["nodes"]
+            if not page["pageInfo"]["hasNextPage"]:
+                break
+            cursor = page["pageInfo"]["endCursor"]
+
+        commit = pr["commits"]["nodes"][0]["commit"]
+        snap = Snapshot(
+            repo=self.repo, number=self.number, url=pr["url"], state=pr["state"], draft=pr["isDraft"],
+            head=pr["headRefOid"], head_date=commit["committedDate"], head_ref=pr["headRefName"],
+            base=pr["baseRefName"], viewer=data["viewer"]["login"], mergeable=pr["mergeable"],
+            merge_state=pr["mergeStateStatus"], decision=pr["reviewDecision"] or "",
+        )
+
+        rollup = commit.get("statusCheckRollup") or {"contexts": {"nodes": [], "pageInfo": {}}}
+        snap.truncated_checks = bool(rollup["contexts"]["pageInfo"].get("hasNextPage"))
+        for node in rollup["contexts"]["nodes"]:
+            name, bucket, link = check_bucket(node)
+            required = bool(node.get("isRequired"))
+            old = snap.checks.get(name)
+            if old is None or RANK[bucket] > RANK[old[0]]:
+                snap.checks[name] = (bucket, link, required or bool(old and old[2]))
+
+        if snap.state == "OPEN":
+            out = gh(
+                "run", "list", "-R", self.repo, "--commit", snap.head, "-L", "100",
+                "--json", "databaseId,name,status", "--jq",
+                '.[] | select(.status != "completed") | "\\(.databaseId)\\t\\(.name)"',
+            )
+            snap.runs = [tuple(line.split("\t", 1)) for line in out.splitlines() if line]  # type: ignore[misc]
+
+        for node in pr["comments"]["nodes"]:
+            who, bot = login(node)
+            if who == snap.viewer or (bot and any(b in who for b in STATUS_BOTS)):
+                continue
+            snap.feedback.append(Item(node["id"], "comment", who, bot, node["createdAt"], node["url"], node["body"]))
+
+        copilot_on_head = False
+        for node in pr["reviews"]["nodes"]:
+            who, bot = login(node)
+            if is_copilot(who) and (node.get("commit") or {}).get("oid") == snap.head:
+                copilot_on_head = True
+            if who == snap.viewer or not node["submittedAt"]:
+                continue
+            if node["body"].strip() or node["state"] in ("APPROVED", "CHANGES_REQUESTED"):
+                kind = f"review {node['state']}"
+                snap.feedback.append(Item(node["id"], kind, who, bot, node["submittedAt"], node["url"], node["body"]))
+
+        for node in threads_raw:
+            where = f"{node['path']}:{node['line']}" if node["line"] else f"{node['path']} (no line)"
+            items = []
+            for c in node["comments"]["nodes"]:
+                who, bot = login(c)
+                items.append(Item(c["id"], "thread", who, bot, c["createdAt"], c["url"], c["body"], where))
+            for index, item in enumerate(items):
+                if item.who != snap.viewer:
+                    item.kind = "new thread" if index == 0 else "thread reply"
+                    snap.feedback.append(item)
+            if node["isResolved"] or not items:
+                continue
+            snap.threads.append(Thread(
+                id=node["id"], outdated=node["isOutdated"], where=where,
+                opener=items[0].who, opener_bot=items[0].bot,
+                replied=any(i.who == snap.viewer for i in items[1:]), comments=items,
+            ))
+
+        if snap.state == "OPEN" and not copilot_on_head:
+            if self.copilot_requested():
+                snap.copilot = "requested"
+            elif self.review_on_push(snap.base):
+                snap.copilot = "expected"
+        return snap
+
+
+def blockers(snap: Snapshot, clean: bool, copilot_waived: bool = False) -> list[str]:
+    reasons: list[str] = []
+    if snap.state != "OPEN":
+        return [f"PR is {snap.state.lower()}"]
+    if snap.draft:
+        reasons.append("PR is a draft")
+    if failed := snap.bucket("fail"):
+        reasons.append(f"failed checks: {', '.join(failed)}")
+    if pending := snap.bucket("pending"):
+        reasons.append(f"pending checks: {', '.join(pending)}")
+    if snap.runs:
+        reasons.append(f"workflow runs not finished: {', '.join(name for _, name in snap.runs)}")
+    if snap.copilot and not copilot_waived:
+        reasons.append(f"Copilot review {snap.copilot}")
+    if snap.decision == "CHANGES_REQUESTED":
+        reasons.append("changes requested")
+    if snap.threads:
+        reasons.append(f"{len(snap.threads)} unresolved threads")
+    if clean:
+        if snap.merge_state == "UNKNOWN" or snap.mergeable == "UNKNOWN":
+            reasons.append("mergeability not computed yet, read again in a moment")
+        elif snap.mergeable != "MERGEABLE" or snap.merge_state not in ("CLEAN", "HAS_HOOKS"):
+            reasons.append(f"merge state {snap.mergeable} {snap.merge_state}")
+    return reasons
+
+
+def kind_of(who: str, bot: bool, viewer: str) -> str:
+    return "you" if who == viewer else "bot" if bot else "human"
+
+
+def print_status(snap: Snapshot, clean: bool, full: bool, all_comments: bool, waived: bool = False) -> bool:
+    out = print
+    out(f"{snap.repo}#{snap.number} {snap.state}{' DRAFT' if snap.draft else ''} "
+        f"head {snap.short} ({snap.head_ref} -> {snap.base}) {snap.url}")
+    out(f"merge: {snap.mergeable} {snap.merge_state}; review decision: {snap.decision or 'none'}")
+
+    counts = {b: len(snap.bucket(b)) for b in ("pass", "skip", "fail", "pending")}
+    out("checks: " + ", ".join(f"{n} {b}" for b, n in counts.items())
+        + (" (first 100 only)" if snap.truncated_checks else ""))
+    for bucket in ("fail", "pending"):
+        for name in snap.bucket(bucket):
+            _, link, required = snap.checks[name]
+            out(f"  {bucket:<7} {name}{' (required)' if required else ''} {link}".rstrip())
+    if snap.runs:
+        out("workflow runs on head not finished:")
+        for run_id, name in snap.runs:
+            out(f"  {run_id} {name}")
+    if snap.copilot:
+        why = "review requested, not submitted" if snap.copilot == "requested" else \
+            "the base ruleset reviews every push, no review on this head yet"
+        out(f"copilot: pending ({why}){' - waived after waiting' if waived else ''}")
+
+    out(f"threads: {len(snap.threads)} unresolved")
+    for t in snap.threads:
+        out(f"  {t.id} {'outdated' if t.outdated else 'current'} {t.where} "
+            f"opened by {t.opener} ({kind_of(t.opener, t.opener_bot, snap.viewer)}), "
+            f"{'you replied' if t.replied else 'no reply from you'} {t.comments[0].url}")
+        if full:
+            for c in t.comments:
+                out(f"    {c.who} at {c.at}:")
+                out(indent(c.body))
+        else:
+            out(f"    {t.opener}: {one_line(t.comments[0].body)}")
+            last = t.comments[-1]
+            if len(t.comments) > 1:
+                out(f"    last, {last.who}: {one_line(last.body)}")
+
+    listed = [i for i in snap.feedback if not i.kind.startswith(("new thread", "thread"))]
+    if not all_comments:
+        listed = [i for i in listed if i.at >= snap.head_date]
+    label = "comments and reviews" + ("" if all_comments else f" since the head commit ({snap.head_date})")
+    out(f"{label}: {len(listed)}")
+    for i in sorted(listed, key=lambda i: i.at):
+        out(f"  {i.at} {i.who} ({'bot' if i.bot else 'human'}) {i.kind} {i.url}")
+        out(indent(i.body) if full else f"    {one_line(i.body)}")
+
+    reasons = blockers(snap, clean, waived)
+    out("done" if not reasons else f"not done: {'; '.join(reasons)}")
+    return not reasons
+
+
+def cmd_status(args: argparse.Namespace) -> NoReturn:
+    repo, number = resolve(args.pr, args.repo)
+    try:
+        snap = Reader(repo, number).read()
+    except GhError as error:
+        die(str(error))
+    sys.exit(0 if print_status(snap, args.clean, args.full, args.all_comments) else 1)
+
+
+def state_path(repo: str, number: int) -> Path:
+    # The temp directory, because sandboxed agents can write there.
+    folder = Path(tempfile.gettempdir()) / f"prctl-{os.getuid()}"
+    folder.mkdir(parents=True, exist_ok=True)
+    return folder / f"{repo.replace('/', '__')}__{number}"
+
+
+def take_lock(path: Path) -> Any:
+    handle = open(path.with_suffix(".lock"), "a+")
+    try:
+        fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        handle.seek(0)
+        pid = handle.read().strip() or "unknown"
+        die(f"pid {pid} already waits on this PR. Use its events, or `kill {pid}` if they do not reach you.")
+    handle.seek(0)
+    handle.truncate()
+    handle.write(str(os.getpid()))
+    handle.flush()
+    return handle
+
+
+def cmd_wait(args: argparse.Namespace) -> NoReturn:
+    repo, number = resolve(args.pr, args.repo)
+    path = state_path(repo, number)
+    _lock = take_lock(path)
+    file = path.with_suffix(".json")
+    try:
+        fresh = time.time() - file.stat().st_mtime < STATE_TTL
+        state: Json = json.loads(file.read_text()) if fresh else {}
+    except (OSError, ValueError):
+        state = {}
+    baseline = not state
+    seen: set[str] = set(state.get("seen", []))
+    first_seen: dict[str, float] = state.get("heads", {})
+
+    def save() -> None:
+        tmp = file.with_suffix(".tmp")
+        tmp.write_text(json.dumps({"seen": sorted(seen), "heads": first_seen}))
+        tmp.replace(file)
+
+    def finish(code: int, *lines: str) -> NoReturn:
+        for line in lines:
+            print(f"#{number} {line}", flush=True)
+        save()
+        sys.exit(code)
+
+    reader = Reader(repo, number)
+    deadline = time.time() + args.timeout if args.timeout else None
+    last_head = None
+    settled: tuple[Any, float] | None = None
+    failures = 0
+    while True:
+        try:
+            snap = reader.read()
+            failures = 0
+        except GhError as error:
+            failures += 1
+            if not error.transient or failures >= 10:
+                finish(1, f"stopped: {error}")
+            print(f"prctl: poll failed ({failures}/10): {error}", file=sys.stderr, flush=True)
+            time.sleep(args.interval * 2)
+            continue
+
+        if snap.state == "MERGED":
+            finish(0, f"merged: {snap.url}")
+        if snap.state == "CLOSED":
+            finish(1, f"closed without merging: {snap.url}")
+        now = time.time()
+        if last_head and snap.head != last_head:
+            print(f"#{number} head moved to {snap.short}", flush=True)
+            settled = None
+        last_head = snap.head
+        first_seen.setdefault(snap.head, now)
+
+        new = [i for i in snap.feedback if i.id not in seen]
+        seen.update(i.id for i in snap.feedback)
+        if new and not baseline:
+            finish(1, *(
+                f"{i.kind} from {i.who} ({'bot' if i.bot else 'human'})"
+                f"{' on ' + i.where if i.where else ''}: {one_line(i.body, 120)} {i.url}"
+                for i in sorted(new, key=lambda i: i.at)
+            ))
+        baseline = False
+
+        if failed := snap.bucket("fail"):
+            finish(1, *(f"check failed on {snap.short}: {name} {snap.checks[name][1]}".rstrip() for name in failed))
+        if snap.merge_state == "DIRTY":
+            finish(1, f"conflicts with {snap.base}: rebase {snap.head_ref}")
+
+        waived = bool(snap.copilot) and now - first_seen[snap.head] > COPILOT_GRACE[snap.copilot]
+        busy = snap.bucket("pending") or snap.runs or (snap.copilot and not waived)
+        # Later jobs register only when earlier ones finish, so require the same
+        # quiet picture for a while before calling it settled.
+        picture = (snap.head, tuple(sorted((n, c[0]) for n, c in snap.checks.items())))
+        if busy:
+            settled = None
+        elif settled is None or settled[0] != picture:
+            settled = (picture, now)
+        elif now - settled[1] >= args.settle:
+            print(f"#{number} settled on {snap.short}:", flush=True)
+            done = print_status(snap, args.clean, False, False, waived)
+            finish(0 if done else 1)
+
+        save()
+        if deadline and now >= deadline:
+            finish(124, f"nothing new on {snap.short} before the timeout; run wait again")
+        time.sleep(args.interval)
+
+
+def cmd_reply(args: argparse.Namespace) -> NoReturn:
+    if args.body is None and args.body_file is None:
+        die("give the reply with -b TEXT or --body-file FILE")
+    body = args.body if args.body is not None else (
+        sys.stdin.read() if args.body_file == "-" else Path(args.body_file).read_text()
+    )
+    if not body.strip():
+        die("empty reply")
+    try:
+        data = graphql(THREAD_QUERY, id=args.thread)
+        node = data.get("node") or {}
+        if "isResolved" not in node:
+            die(f"{args.thread} is not a review thread id (they start with PRRT_)")
+        opener = node["comments"]["nodes"][0] if node["comments"]["nodes"] else {}
+        who, bot = login(opener)
+        if args.resolve and not bot and who != data["viewer"]["login"] and not args.human_ok:
+            die(f"{who} (a human) opened this thread, so it is theirs to resolve. Reply without "
+                "--resolve, or pass --human-ok if the user said you may resolve human threads.")
+        url = graphql(REPLY_MUTATION, id=args.thread, body=body)[
+            "addPullRequestReviewThreadReply"]["comment"]["url"]
+        print(f"replied: {url}")
+        if args.resolve and not node["isResolved"]:
+            graphql(RESOLVE_MUTATION, id=args.thread)
+            print("resolved")
+    except GhError as error:
+        die(str(error))
+    sys.exit(0)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(prog="prctl", description="Read, wait on and answer a GitHub PR.")
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    status = sub.add_parser("status", help="print everything Done depends on")
+    wait = sub.add_parser("wait", help="block until the PR needs you or settles")
+    for p in (status, wait):
+        p.add_argument("pr", help="PR number, URL or branch")
+        p.add_argument("-R", "--repo", help="owner/repo, when <pr> is a number or branch of another repo")
+        p.add_argument("--clean", action="store_true", help="also require MERGEABLE and CLEAN")
+    status.add_argument("--full", action="store_true", help="print whole comment bodies")
+    status.add_argument("--all-comments", action="store_true", help="list comments from before the head commit too")
+    wait.add_argument("--interval", type=int, default=30, help="seconds between polls (default 30, min 10)")
+    wait.add_argument("--settle", type=int, default=60, help="seconds with nothing pending before settled (default 60)")
+    wait.add_argument("--timeout", type=int, default=0, help="exit 124 after this many seconds (default: none)")
+
+    reply = sub.add_parser("reply", help="reply on a review thread, optionally resolve it")
+    reply.add_argument("thread", help="review thread id (PRRT_...), from status")
+    reply.add_argument("-b", "--body", help="reply text")
+    reply.add_argument("--body-file", help="read the reply from a file, or - for stdin")
+    reply.add_argument("--resolve", action="store_true", help="resolve the thread after replying")
+    reply.add_argument("--human-ok", action="store_true", help="allow resolving a thread a human opened")
+
+    args = parser.parse_args()
+    if args.command == "wait":
+        args.interval = max(args.interval, 10)
+    {"status": cmd_status, "wait": cmd_wait, "reply": cmd_reply}[args.command](args)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        sys.exit(130)

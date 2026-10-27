@@ -22,7 +22,7 @@ and Claude Code loads the skill once.
 | `fetchmd` | own; last-resort verbatim URL fetcher, wraps the `fetchmd` uv script in its folder; try WebFetch first |
 | `technical-writing` | [cursor/plugins](https://github.com/cursor/plugins/blob/main/pstack/skills/technical-writing/SKILL.md) (MIT, see `LICENSE` beside it; vendored unmodified; user-invoked only) |
 | `workmux` | [raine/workmux](https://github.com/raine/workmux/blob/main/skills/workmux/SKILL.md) (MIT, see `LICENSE` beside it; vendored unmodified from v0.1.263; user-invoked only) |
-| `babysit` | own; user-invoked only (`/babysit <pr>`); watches a PR's checks, comments and review threads until clean, fixes and pushes, replies before resolving. |
+| `babysit` | own; triggers on "babysit" and similar or `/babysit <pr>`; watches a PR's checks, comments and review threads until clean, fixes and pushes, replies before resolving. Ships `prctl` (status, wait, reply), a stdlib Python script on `gh`. |
 | `codex-review-loop` | own; user-invoked only (`/codex-review-loop`); review with the codex CLI, fix, re-review in the same thread until clean or 7 rounds; never commits, pushes or posts. |
 | `full-stop` | own; model-invoked on an explicit "full stop"; galley stage, reviewer agents, publish, babysit until ready to merge; never merges |
 | `full-send` | own; model-invoked on an explicit "full send"; same as `full-stop`, then merges once the merge gate holds |

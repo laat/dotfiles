@@ -1,15 +1,21 @@
 ---
 name: babysit
-description: Supervise one or more pull requests until they are ready to merge. Waits on CI, works through review threads and comments, fixes and pushes, replies on and resolves every thread it handled, then checks everything again. Merges only when asked. Use whenever the user says babysit, shepherd, watch or keep an eye on a PR, also as a plain word mid-conversation and not only as /babysit.
+description: Trigger when the user says babysit, shepherd, watch or keep an eye on a pull request, as a plain word mid-conversation as well as /babysit.
 ---
 
 # Babysit a pull request
 
 Arguments: `$ARGUMENTS`.
 
+`prctl` in this skill's folder does the reading, waiting and replying. Call it by full path:
+`~/.agents/skills/babysit/prctl`. Run it with `-h` for the details; its subcommands are
+`status`, `wait` and `reply`.
+
 ## Pick the targets
 
-The arguments may hold PR references, instructions, or both. A PR reference is a number, a PR URL or a branch name. Anything else is an instruction, such as "merge when done". Never pass instruction text to `gh pr view`.
+The arguments may hold PR references, instructions, or both. A PR reference is a number, a PR URL
+or a branch name. Anything else is an instruction, such as "merge when done". Never pass
+instruction text to `prctl` or `gh pr view`.
 
 Targets, in order of preference:
 
@@ -17,166 +23,152 @@ Targets, in order of preference:
 2. If there are none, the PRs opened or discussed earlier in this conversation.
 3. If there are none, the PR for the checked-out branch.
 
-Resolve each target once to its base repository and number, then use `$owner`, `$repo` and `$pr` everywhere below. Review threads live on the base repository, so do not use the head repository fields or `gh repo view`, which reads whatever checkout the current directory is in.
+Resolve each target once to its base repository and number, and use `$owner`, `$repo` and `$pr`
+everywhere below. Review threads live on the base repository, so do not use the head repository
+or `gh repo view`, which reads whatever checkout the current directory is in.
 
 ```bash
 read -r owner repo pr < <(gh pr view "<reference>" --json url \
   -q '.url | capture("github.com/(?<o>[^/]+)/(?<r>[^/]+)/pull/(?<n>[0-9]+)") | [.o, .r, .n] | @tsv')
 ```
 
-With several targets, run the rounds below per PR. The PRs are independent, so run the watchers for all of them in the same tool-call block. Fixes are per PR: do not batch a change across repositories without reading each one.
-
-Work in rounds. Each round: read status, wait for checks, wait for a pending Copilot review, wait for the workflow runs on the head commit, read the conversation and the review threads, fix what is real, push, then start the next round from the top. A round that finds problems is never the last one.
+With several targets, run the rounds per PR, and start the waits for all of them in the same
+tool-call block. Fixes are per PR: do not batch a change across repositories without reading each
+one.
 
 ## Done means
 
 All of these hold at the same time:
 
-- Every check passed or is skipped on purpose.
+- Every check passed or was skipped on purpose.
 - No workflow run on the head commit is still queued or in progress.
-- No Copilot review is pending (see Wait for Copilot review).
-- The review decision does not block merging (no `CHANGES_REQUESTED`).
+- No Copilot review is pending.
+- The review decision is not `CHANGES_REQUESTED`.
 - No comment or review summary still asks for something.
 - Every thread you acted on carries your reply saying what changed and in which commit.
 - Zero unresolved review threads.
 
-Pushing a fix is not the end of a thread. A thread without a reply is still open work, even when the code is already correct.
+`prctl status` checks all of these except the comments: read those yourself. Pushing a fix is not
+the end of a thread. A thread without a reply is still open work, even when the code is already
+correct.
 
-## Read the PR
+## Rounds
 
-```bash
-gh pr view "$pr" -R "$owner/$repo" --json number,url,state,isDraft,headRefName,baseRefName,headRefOid,mergeable,mergeStateStatus,reviewDecision,statusCheckRollup
-```
+Each round:
 
-If `isDraft` is true, stop and tell the user. `mergeable` and `mergeStateStatus` are computed lazily after each push and read `UNKNOWN` in the meantime. That means "not computed yet", not a verdict. Wait a moment and read again.
+1. **Read** the PR:
 
-## Wait for checks
+   ```bash
+   ~/.agents/skills/babysit/prctl status "$pr" -R "$owner/$repo"
+   ```
 
-Block on the watcher instead of sleeping in a loop. Give the command a ten-minute timeout. If it times out while checks are still running, run it again.
+   It prints the head, merge state, failed and pending checks with links, unfinished workflow
+   runs on the head, whether Copilot is pending, every unresolved thread with its id, and the
+   comments and review summaries since the head commit. The last line is `done` or
+   `not done: <reasons>`. Add `--full` for whole comment bodies, `--all-comments` for comments
+   from before the head commit.
 
-```bash
-gh pr checks "$pr" -R "$owner/$repo" --watch --fail-fast
-```
+   If the PR is a draft, stop and tell the user. `UNKNOWN` mergeability means GitHub has not
+   computed it since the last push: read again in a moment.
+2. **Act** on what it shows ([Act on findings](#act-on-findings)), then
+   [reply and resolve](#reply-and-resolve).
+3. **Push** the fixes.
+4. **Wait** ([Waiting](#waiting)) until the PR needs you again, then start the next round.
 
-The watcher returning is a hint, not a verdict. Later-stage jobs such as deploys and e2e runs are added to the check rollup only when their upstream job finishes, so the watcher can exit 0 between polls while work is still pending. After it returns, read the PR again. If any check is still `PENDING`, `QUEUED` or `IN_PROGRESS`, run the watcher again. Only a status read with nothing pending counts as checks finished.
+A round that finds problems is never the last one. Stop when `status` prints `done` and no comment
+still asks for something.
 
-## Wait for Copilot review
+## Waiting
 
-Copilot code review is not in the check rollup, and its workflow run is created only after GitHub requests the review. That request can come a minute or two after the push, which is often after CI has finished. An empty run list therefore does not mean Copilot is done. Use the PR timeline instead: a Copilot review is pending when the last Copilot `review_requested` event comes after the last Copilot `reviewed` event.
+Never write your own polling or `sleep` loop. Use one watcher per PR, never both on the same PR.
 
-```bash
-gh api --paginate "repos/$owner/$repo/issues/$pr/timeline" --jq '.[]
-  | select((.event == "review_requested" and .requested_reviewer.login == "Copilot")
-        or (.event == "reviewed" and .user.login == "Copilot"))
-  | .event' | tail -n 1
-```
+In T3 Code (the `t3-code` MCP tools are present):
 
-`review_requested` means pending: wait for the runs below, then check again. `reviewed` or no output means no review is pending right now.
+- Handle what `status` shows first. Then call `watch_pull_request` and end your turn. T3 Code
+  wakes you when a check finishes or fails, someone comments or reviews, or the branch conflicts.
+- A wake is news, not a verdict: run `status` again. `watch_pull_request` does not see workflow
+  runs outside the check rollup or a pending Copilot review; if those are the only reasons left,
+  end your turn and let the next wake come.
+- Only the thread that owns the PR watches it. As a delegated child task, never call
+  `watch_pull_request`; report back to the parent instead.
+- Before your final message or a question to the user, call `unwatch_pull_request`.
 
-A request may not have arrived yet. Check whether the base branch has a ruleset that makes Copilot review every push:
-
-```bash
-base=$(gh pr view "$pr" -R "$owner/$repo" --json baseRefName -q .baseRefName)
-gh api "repos/$owner/$repo/rules/branches/$base" \
-  --jq '.[] | select(.type == "copilot_code_review") | .parameters.review_on_push'
-```
-
-If this prints `true`, Copilot is expected to review the head commit. Until a `copilot-pull-request-reviewer` review with `commit.oid` equal to the head SHA exists (`gh pr view --json reviews,headRefOid`), treat the review as pending, and check again every minute. If no request has appeared ten minutes after the push, stop waiting and mention it in the report. Without `review_on_push`, Copilot reviews a later push only when someone requests it, and the timeline check covers that case.
-
-## Wait for the workflow runs on the head commit
-
-Other automated reviewers also run as workflow runs outside the check rollup, and Copilot runs as `Running Copilot Code Review` with event `dynamic`. Wait for every run on the head commit before reading comments and threads.
-
-```bash
-head=$(gh pr view "$pr" -R "$owner/$repo" --json headRefOid -q .headRefOid)
-gh run list -R "$owner/$repo" --commit "$head" --json databaseId,name,status \
-  --jq '.[] | select(.status != "completed") | "\(.databaseId)\t\(.name)"'
-```
-
-Watch each run listed, then list again. Runs are attached to the head commit as they start, so a run that was not there on the first read can be there on the second. Only an empty list counts as finished.
+Everywhere else, use `prctl wait`:
 
 ```bash
-gh run watch <run-id> -R "$owner/$repo" --exit-status
+~/.agents/skills/babysit/prctl wait "$pr" -R "$owner/$repo" 2>&1
 ```
 
-## Read comments and review summaries
+- Claude Code: run it with the Monitor tool and `timeout_ms: 3600000`, so each line wakes you.
+- A shell tool with a time limit, or a subagent: run it in the foreground with `--timeout 270`
+  and a tool timeout above that. On exit 124 run it again; nothing is lost.
 
-```bash
-gh pr view "$pr" -R "$owner/$repo" --json comments,reviews --jq '
-  (.comments[] | {at: .createdAt, who: .author.login, state: "COMMENT", body}),
-  (.reviews[]  | {at: .submittedAt, who: .author.login, state, body})
-  | "\(.at) \(.who) [\(.state)]\n\(.body)\n"'
-```
+It exits when the PR needs you:
 
-## Read inline review threads
+| Exit | Last lines say | Do |
+|------|----------------|----|
+| 0 | `merged`, or `settled` and `done` | stop, or go to the report |
+| 1 | `check failed`, new feedback, `conflicts with`, `closed`, or `settled` and `not done` | act, push, wait again |
+| 2 | bad input, or another prctl already waits on this PR | fix the call; use the running one |
+| 124 | the `--timeout` passed | run it again |
 
-`gh pr view` does not expose these. Query the `reviewThreads` connection over GraphQL and page through it. Output is one unresolved thread per line: thread id, outdated flag, file:line, last author, last comment url, first 120 characters of the last comment.
+`settled` means nothing was pending for a minute; `wait` holds off until then because later CI
+jobs register only when earlier ones finish. It stops waiting for a Copilot review that was not
+requested within 10 minutes of the head commit, or not submitted within 30, and says
+`waived after waiting`; mention that in the report. It remembers what it has already reported, so
+start it again after every push and every exit. The first run for a PR reports only what arrives
+after it starts; `status` shows what was already there.
 
-```bash
-cursor=null
-while :; do
-  page=$(gh api graphql -F owner="$owner" -F repo="$repo" -F pr="$pr" -F cursor="$cursor" -f query='
-    query($owner: String!, $repo: String!, $pr: Int!, $cursor: String) {
-      repository(owner: $owner, name: $repo) {
-        pullRequest(number: $pr) {
-          reviewThreads(first: 100, after: $cursor) {
-            pageInfo { hasNextPage endCursor }
-            nodes {
-              id isResolved isOutdated path line
-              comments(last: 1) { nodes { author { login } body createdAt url } }
-            }
-          }
-        }
-      }
-    }')
-  jq -r '.data.repository.pullRequest.reviewThreads.nodes[]
-    | select(.isResolved | not)
-    | .comments.nodes[0] as $c
-    | [.id, (if .isOutdated then "outdated" else "current" end),
-       "\(.path):\(.line // "-")", ($c.author.login // "ghost"), $c.url,
-       ($c.body | gsub("\\s+"; " ") | .[0:120])]
-    | @tsv' <<<"$page"
-  cursor=$(jq -r '.data.repository.pullRequest.reviewThreads.pageInfo
-    | if .hasNextPage then .endCursor else empty end' <<<"$page")
-  [ -n "$cursor" ] || break
-done
-```
+When a wake needs no action, end your turn without a message. Never post or say "still waiting".
 
 ## Act on findings
 
-- Bot review summaries (CodeRabbit, Copilot and the like) are hints. Read the code each claim is about before changing anything. Drop claims that do not hold.
-- An outdated thread points at code that has changed since the comment. Check whether the current head already covers it before doing anything.
-- If the repo commits generated files, regenerate and confirm source and output agree before calling a thread handled.
-- One small, focused commit per fix. Run the tests or build that cover the change. Push. Go back to reading the PR.
+- Bot review summaries (Copilot, CodeRabbit and the like) are hints. Read the code each claim is
+  about before changing anything. Drop claims that do not hold, with a reply that says why.
+- An `outdated` thread points at code that has changed since the comment. Check whether the
+  current head already covers it before doing anything.
+- Keep the PR at the size its goal needs. Fix real bugs in the case the PR is for. Decline the
+  rest with a written reason and list them as follow-ups: tests nobody needs, guards for cases
+  that do not happen, refactors next to the change.
+- If the repo commits generated files, regenerate and confirm source and output agree before
+  calling a thread handled.
+- One small, focused commit per fix. Run the tests or build that cover the change. Push.
 
 ## Reply and resolve
 
-Reply on every thread you addressed. The comment id is the digits after `discussion_r` in the last comment's url.
+Reply on every thread you addressed, with the thread id from `status`:
 
 ```bash
-gh api -X POST "/repos/$owner/$repo/pulls/$pr/comments/<comment-id>/replies" \
-  -f body='Addressed in <sha>: <one-line summary of the change>'
+~/.agents/skills/babysit/prctl reply <thread-id> --resolve -b 'Fixed in <sha>: <one line on the change>'
+~/.agents/skills/babysit/prctl reply <thread-id> -b 'Not changed: <reason>'
 ```
 
-```bash
-gh api graphql -F id=<thread-id> -f query='
-  mutation($id: ID!) {
-    resolveReviewThread(input: {threadId: $id}) { thread { id isResolved } }
-  }'
-```
+For a longer reply, pass `--body-file -` and the text on stdin.
 
-Rules:
-
-- Reply first, resolve second.
-- Resolve only after the fix is confirmed in the pushed code.
+- `reply` posts first and resolves second.
+- Resolve only once the fix is in the pushed code.
 - Threads opened by bots: resolve them yourself.
-- Threads opened by humans: leave them to the reviewer unless the user has explicitly said you may resolve them.
+- Threads opened by humans: leave them for the reviewer. `reply --resolve` refuses these unless
+  you add `--human-ok`, which you may only do when the user has said you may resolve human
+  threads.
 
 ## Merge
 
-Only when the user asked for it, in the arguments or earlier in the conversation. Otherwise stop at Done and leave merging to them.
+Only when the user asked for it, in the arguments or earlier in the conversation. Otherwise stop at
+Done and leave merging to them.
 
-Merge once Done holds for that PR, per PR, without waiting for the others. Squash by default and delete the branch. If the repository rejects squash, fall back to a merge commit. Then confirm the result instead of trusting the exit code.
+Merge per PR once its Done holds, without waiting for the others. Right before merging, run
+`git fetch` and check again with `--clean`, which also requires GitHub to report the PR `MERGEABLE`
+and `CLEAN`:
+
+```bash
+~/.agents/skills/babysit/prctl status "$pr" -R "$owner/$repo" --clean
+```
+
+On `BEHIND` or `DIRTY`, rebase onto the base, run the tests, push, and start a new round. Squash by
+default and delete the branch. If the repository rejects squash, fall back to a merge commit. Never
+pass `--admin` or otherwise bypass branch protection. Confirm the result instead of trusting the
+exit code.
 
 ```bash
 gh pr merge "$pr" -R "$owner/$repo" --squash --delete-branch \
@@ -184,17 +176,27 @@ gh pr merge "$pr" -R "$owner/$repo" --squash --delete-branch \
 gh pr view "$pr" -R "$owner/$repo" --json state,mergeCommit -q '"\(.state) \(.mergeCommit.oid)"'
 ```
 
-Do not merge a PR that still has an unresolved human thread, even if the user said to merge. Report it instead.
+Do not merge a PR that still has an unresolved human thread, even if the user said to merge.
+Report it instead.
 
 ## Final report
 
-Before writing it, re-run the status, comment and thread queries and run `git status`. Report facts only:
+Before writing it, run `prctl status` and `git status` again. Report facts only:
 
 - head commit SHA
-- each check by name with its result
-- number of unresolved threads
+- failed or pending checks by name, and the count that passed
+- number of unresolved threads, with the URLs of any you left open
 - tests or builds you ran
 - uncommitted local files you left alone
 - if merged: the merge commit SHA and whether the branch was deleted
 
-With several PRs, use one table row per PR: repo, number, head, checks summary, unresolved threads, merge commit. Name every failed or pending check. Passing checks may be summarised as a count.
+With several PRs, use one table row per PR: repo, number, head, checks summary, unresolved
+threads, merge commit.
+
+## If prctl fails
+
+`prctl` needs `python3` and `gh`. If GitHub's GraphQL rate limit is used up
+(`gh api rate_limit --jq .resources.graphql`), wait for `reset` with one background command
+instead of retrying. If `prctl` itself is broken, fall back to `gh pr view --json`,
+`gh pr checks --watch`, `gh run list --commit <head>` and the `reviewThreads` GraphQL connection,
+and tell the user that `prctl` failed and how.
