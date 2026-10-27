@@ -1,6 +1,6 @@
 ---
 name: hallan
-description: Trigger when the user asks to rebase a pull request, update an old or stale pull request, bring a pull request up to date with its base, says "hallan", or invokes /hallan.
+description: Trigger when the user says "hallan", or invokes /hallan.
 ---
 
 # Hallan
