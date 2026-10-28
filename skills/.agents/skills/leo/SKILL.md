@@ -1,9 +1,9 @@
 ---
-name: hallan
-description: Trigger when the user says "hallan" or "hellan", or invokes /hallan.
+name: leo
+description: Trigger when the user says "leo", "leonardo" or "dicaprio", or invokes /leo.
 ---
 
-# Hallan
+# Leonardo DiCaprio
 
 Bring a stale pull request up to date with its base, after deciding whether it should be updated
 at all.
