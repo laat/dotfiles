@@ -26,7 +26,7 @@ and Claude Code loads the skill once.
 | `codex-review-loop` | own; user-invoked only (`/codex-review-loop`); review with the codex CLI, fix, re-review in the same thread until clean or 7 rounds; never commits, pushes or posts. |
 | `full-stop` | own; model-invoked on an explicit "full stop"; galley stage, reviewer agents, publish, babysit until ready to merge; never merges |
 | `full-send` | own; model-invoked on an explicit "full send"; same as `full-stop`, then merges once the merge gate holds |
-| `hallan` | own; model-invoked on an explicit "hallan" or `/hallan`; judges whether the PR still makes sense (`REBASE`, `REWRITE` or `CLOSE`) before rebasing; pushes only with a lease, never merges or closes |
+| `hallan` | own; model-invoked on an explicit "hallan", "hellan" or `/hallan`; judges whether the PR still makes sense (`REBASE`, `REWRITE` or `CLOSE`) before rebasing; pushes only with a lease, never merges or closes |
 
 Skills marked `own` are dedicated to the public domain under CC0 1.0; each
 folder has the `LICENSE`. Vendored skills keep their upstream licence beside

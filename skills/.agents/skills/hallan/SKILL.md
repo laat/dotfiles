@@ -1,6 +1,6 @@
 ---
 name: hallan
-description: Trigger when the user says "hallan", or invokes /hallan.
+description: Trigger when the user says "hallan" or "hellan", or invokes /hallan.
 ---
 
 # Hallan
