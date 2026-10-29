@@ -18,8 +18,8 @@ codex() {
   command codex "$@"
 }
 
-# Profiles are ~/.codex/<name>.config.toml. `max` ships here; others can come
-# from any other stow package.
+# Profiles are ~/.codex/<name>.config.toml. None ship here: they are local
+# files or come from other stow packages.
 codex-profile() {
   local name="$1"
   if [ -z "$name" ]; then
