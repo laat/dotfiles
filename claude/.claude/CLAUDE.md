@@ -3,3 +3,4 @@
 - Please remove all mannered prose.
 - My npm token is short-lived. Before running `npm install`, run `npm whoami`. Before running `pnpm install`, run `pnpm whoami`. If either check fails, ask me to run `! npm login` before continuing. Never suggest `pnpm login`; it only updates pnpm's auth and leaves npm logged out.
 - Never add a `Co-Authored-By` trailer to commits or PR bodies.
+- `pkill -f <name>` kills the shell that runs it, since its command line contains `<name>`; use `pkill -x <name>`.
