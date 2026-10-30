@@ -2,6 +2,12 @@ alias co='codex'
 alias cor='codex resume'
 alias cop='codex-profile'
 
+# What the codex function runs. 99_safehouse.sh redefines it to run codex in
+# the sandbox, so the profile below is injected there too.
+_codex_exec() {
+  command codex "$@"
+}
+
 # Codex has no config key for a default profile, so remember the active one
 # in ~/.codex/.active-profile and inject --profile on every invocation.
 # Only runtime commands accept --profile; `login`, `doctor`, `update`, etc. reject it.
@@ -11,11 +17,11 @@ codex() {
   if [ -n "$profile" ] && [ -f "$HOME/.codex/$profile.config.toml" ]; then
     case "${1:--}" in
       -*|exec|e|review|resume|queue|archive|delete|unarchive|fork|mcp|sandbox)
-        command codex --profile "$profile" "$@"
+        _codex_exec --profile "$profile" "$@"
         return ;;
     esac
   fi
-  command codex "$@"
+  _codex_exec "$@"
 }
 
 # Profiles are ~/.codex/<name>.config.toml. None ship here: they are local

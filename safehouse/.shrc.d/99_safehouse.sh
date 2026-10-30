@@ -1,5 +1,8 @@
 # Coding agents run sandboxed by default; <agent>-unsafe (ccu, cou, ocu) is the bare binary.
-# Loads after the agents' own 00_*.sh so it overrides cc, co and oc.
+# Loads after the agents' own 00_*.sh so it overrides cc and oc, and the
+# _codex_exec that the codex function in 00_codex.sh runs. codex is not an
+# alias here: an alias would shadow that function and drop the --profile it
+# adds from ~/.codex/.active-profile.
 # The sandbox is the permission boundary, so claude and codex skip their own
 # prompts. opencode has no such flag; its permissions live in its config.
 # codex needs --no-daemon since 0.157: its shared app-server records itself with
@@ -13,8 +16,9 @@ if command -v safehouse >/dev/null 2>&1; then
 
   alias codex-unsafe='command codex'
   alias cou='command codex'
-  alias codex='codex-safe --dangerously-bypass-approvals-and-sandbox --no-daemon'
-  alias co='codex-safe --dangerously-bypass-approvals-and-sandbox --no-daemon'
+  _codex_exec() {
+    codex-safe --dangerously-bypass-approvals-and-sandbox --no-daemon "$@"
+  }
 
   alias opencode-unsafe='command opencode'
   alias ocu='command opencode'
