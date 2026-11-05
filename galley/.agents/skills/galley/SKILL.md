@@ -13,7 +13,8 @@ description: Trigger when the user says "stage PR" or "stage a PR", or invokes /
   for you ([Publishing](#publishing)). After that, commit and run `galley pr wait`: it pushes
   your commits, and publishes your edits of the title and description. Never push to GitHub or
   edit the pull request there yourself.
-- Do not run `galley pr publish`, `pr close` or `pr review` unless the user asks.
+- Do not run `galley pr publish`, `pr close`, `pr review` or `pr edit --add-reviewer` unless the
+  user asks.
 - When `galley` cannot reach the server, as from a sandbox that keeps it out, tell the user what
   it printed and wait for them. Do not work around it: do not start a server yourself, run
   `galley` outside the sandbox, or open the pull request on GitHub.
@@ -163,7 +164,8 @@ description: Trigger when the user says "stage PR" or "stage a PR", or invokes /
    `host`: T3 never learns that one's state, and it would sit with no status next to the GitHub
    link.
 
-   Then wait again. From now on no reviewer agent reviews your commits, and each commit you wait
+   Then wait again. From now on no reviewer agent reviews your commits, unless the user asks for
+   another review loop ([Reviewer agents](#reviewer-agents)), and each commit you wait
    with is pushed to GitHub. Your edits of the title and description (`galley pr edit`) are
    published at your next wait too, like commits, unless the user edited them since publishing:
 
@@ -243,6 +245,13 @@ says otherwise when asking you to stage. Add to `galley pr create`:
 - "with codex and claude": `--reviewer codex --reviewer claude`.
 - "no review": `--no-review`.
 - "all of them", or a name you do not know: `galley reviewers` lists those that review this repository.
+
+When the user asks for another review loop ("review it again", "a new review loop"), before or
+after publishing: commit, then start one with `galley pr edit --add-reviewer codex,claude`, with
+the reviewers the user names, or else those `galley reviewers` lists, and `:3` for a limit as
+above. They review your head again, with their limit counted afresh; loop with them as in steps
+2 to 5. Published, galley holds your commits until the reviewer agents are done with one: `pr
+wait` then prints `Pushed <sha> to GitHub`, not that they are done, and the loop ends there.
 
 ## Reference
 
