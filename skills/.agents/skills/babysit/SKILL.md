@@ -52,6 +52,12 @@ All of these hold at the same time:
 the end of a thread. A thread without a reply is still open work, even when the code is already
 correct.
 
+A Copilot review on the head commit whose body says **No open issues** asks for nothing, whatever
+its summary says above that line. Notes such as "Needs a closer look" or "Human assessment is
+needed" are for the user: quote them in the final report and stop. Do not fix, push or search for
+more bugs because of them. Each push starts a new Copilot review with a new note, so that loop
+never ends.
+
 ## Rounds
 
 Each round:
@@ -76,7 +82,7 @@ Each round:
 4. **Wait** ([Waiting](#waiting)) until the PR needs you again, then start the next round.
 
 A round that finds problems is never the last one. Stop when `status` prints `done` and no comment
-still asks for something.
+still asks for something. Copilot's "No open issues" counts as asking for nothing.
 
 ## Waiting
 
@@ -188,6 +194,7 @@ Before writing it, run `prctl status` and `git status` again. Report facts only:
 - number of unresolved threads, with the URLs of any you left open
 - tests or builds you ran
 - uncommitted local files you left alone
+- any "Needs a closer look" note from Copilot's last review, quoted
 - if merged: the merge commit SHA and whether the branch was deleted
 
 With several PRs, use one table row per PR: repo, number, head, checks summary, unresolved
