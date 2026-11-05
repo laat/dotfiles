@@ -27,6 +27,7 @@ and Claude Code loads the skill once.
 | `full-stop` | own; model-invoked on an explicit "full stop"; galley stage, reviewer agents, publish, babysit until ready to merge; never merges |
 | `full-send` | own; model-invoked on an explicit "full send"; same as `full-stop`, then merges once the merge gate holds |
 | `leo` | own; model-invoked on an explicit "leo", "leonardo" or "dicaprio", or `/leo`; judges whether the PR still makes sense (`REBASE`, `REWRITE` or `CLOSE`) before rebasing; pushes only with a lease, never merges or closes |
+| `ai-moot` | own; model-invoked on an explicit "ai moot", or `/ai-moot`; Claude Opus and GPT Sol (or members the user names) review in parallel at high effort, fix what holds, re-review until all are satisfied; scores per round go in the PR description |
 
 Skills marked `own` are dedicated to the public domain under CC0 1.0; each
 folder has the `LICENSE`. Vendored skills keep their upstream licence beside
