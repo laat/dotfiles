@@ -20,8 +20,6 @@ and Claude Code loads the skill once.
 | `zizmor` | own; user-invoked only (`/zizmor`); audit GitHub Actions, fix findings, open a PR |
 | `skill-me` | own; user-invoked only (`/skill-me`); how to add or update a skill in this package: SKILL.md, symlink, README row, restow |
 | `fetchmd` | own; last-resort verbatim URL fetcher, wraps the `fetchmd` uv script in its folder; try WebFetch first |
-| `technical-writing` | [cursor/plugins](https://github.com/cursor/plugins/blob/main/pstack/skills/technical-writing/SKILL.md) (MIT, see `LICENSE` beside it; vendored unmodified; user-invoked only) |
-| `workmux` | [raine/workmux](https://github.com/raine/workmux/blob/main/skills/workmux/SKILL.md) (MIT, see `LICENSE` beside it; vendored unmodified from v0.1.263; user-invoked only) |
 | `babysit` | own; triggers on "babysit" and similar or `/babysit <pr>`; watches a PR's checks, comments and review threads until clean, fixes and pushes, replies before resolving. Ships `prctl` (status, wait, reply), a stdlib Python script on `gh`. |
 | `sol-loop` | own; model-invoked on an explicit "sol loop" or "codex review loop", or `/sol-loop`; GPT Sol reviews the change as a T3 delegated task (codex CLI outside T3), fix what holds, re-review until approved or 3 rounds; pushes only if asked, never posts. |
 | `full-stop` | own; model-invoked on an explicit "full stop"; galley stage, reviewer agents, publish, babysit until ready to merge; never merges |
