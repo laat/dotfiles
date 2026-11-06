@@ -12,8 +12,8 @@ config are readable, the keychain works, and the keys in `~/.ssh`, `~/.aws`
 and the rest of `$HOME` are not visible. Outbound network is not restricted.
 
 **You are probably running inside it right now.** `claude`, `cc`, `codex`,
-`co`, `opencode` and `oc` are aliased to the sandboxed wrappers, and workmux
-worktrees started with `wms` use the `cc-safe` agent. A file or socket that
+`co`, `opencode` and `oc` are aliased to the sandboxed wrappers, and laatmux
+sessions started with `lms` use the `cc-safe` agent. A file or socket that
 exists but returns `Operation not permitted` is a sandbox denial, not a
 permissions bug in the project. The bare, unsandboxed binaries are
 `claude-unsafe`, `codex-unsafe` and `opencode-unsafe`, or `ccu`, `cou` and
@@ -53,7 +53,7 @@ removing or loosening one.
 |---|---|
 | `~/.dotfiles` and `~/.dotfiles-*` read-only | git and stowed config fail; sandbox-exec checks the symlink target |
 | `~/code` and `~/git` read-write | sibling repos are invisible |
-| `~/.local/bin` read-only | hooks print "workmux: command not found" |
+| `~/.local/bin` read-only | hooks print "laatmux: command not found" |
 | workmux state and cache dirs, tmux socket, `TMUX`/`TMUX_PANE` | workmux status hooks fail silently |
 | `~/.cache/claude-statusline` read-write | the status line can't cache; safehouse only lets the sandbox list `~/.cache` |
 | `shell-init` feature plus the startup chain in `agents.sb` | "~/.bashrc: Operation not permitted" at start, host aliases missing |
