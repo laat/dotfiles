@@ -105,7 +105,8 @@ Everywhere else, use `prctl wait`:
 ~/.agents/skills/babysit/prctl wait "$pr" -R "$owner/$repo" 2>&1
 ```
 
-- Claude Code: run it with the Monitor tool and `timeout_ms: 3600000`, so each line wakes you.
+- Claude Code: run it with the Monitor tool and `timeout_ms: 1800000` (the Monitor cap), so each
+  line wakes you. When the monitor expires, start it again; nothing is lost.
 - A shell tool with a time limit, or a subagent: run it in the foreground with `--timeout 270`
   and a tool timeout above that. On exit 124 run it again; nothing is lost.
 
