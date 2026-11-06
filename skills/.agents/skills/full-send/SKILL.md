@@ -75,7 +75,7 @@ In T3 Code (the `t3-code` MCP tools are present):
 - While babysitting, call `watch_pull_request` and end your turn instead of blocking on
   `prctl wait`. T3 Code wakes you when checks finish, someone comments, or the branch
   conflicts, and the watch keeps the thread in Working. Keep `galley pr wait` running in the
-  background as well (Bash with `run_in_background` is enough now); it reports a merge or close.
+  background as well (Bash with `run_in_background` is enough); it reports a merge or close.
 - When a wake needs no action, end your turn without a message.
 - Before the final message or a question, call `unwatch_pull_request`, and call
   `t3_background_wait` with `waiting: false` for any wait you marked, also when you stop before
