@@ -3,5 +3,5 @@
 - Please remove all mannered prose.
 - My npm token is short-lived. Before running `npm install`, run `npm whoami`. Before running `pnpm install`, run `pnpm whoami`. If either check fails, ask me to run `! npm login` before continuing. Never suggest `pnpm login`; it only updates pnpm's auth and leaves npm logged out.
 - Never add a `Co-Authored-By` trailer to commits or PR bodies.
-- `pkill -f <name>` kills the shell that runs it, since its command line contains `<name>`; use `pkill -x <name>`.
+- Never kill processes by name (`pkill`, `killall`). The machine is shared, so a name also matches processes of other sessions and other users. Stop a process you started by its PID, or a background task with TaskStop. If something you did not start needs stopping, ask me.
 - Never search the whole disk (`find /`, `find ~`). Look in the project, `~/Downloads` or a path I name, or ask.
