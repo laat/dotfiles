@@ -5,8 +5,8 @@ description: Trigger when the user says "ai moot", or invokes /ai-moot.
 
 # AI moot
 
-Strong models from different providers look at the same request in parallel, usually a review or
-feedback on a change. You brief them, weigh what they say, act on what holds, and report.
+Strong models from more than one provider look at the same request in parallel, usually a review
+or feedback on a change. You brief them, weigh what they say, act on what holds, and report.
 
 ## 1. Get the work ready first
 
@@ -24,11 +24,11 @@ not fix code that is about to be replaced.
 
 ## 2. Pick the members
 
-One model per provider, at high reasoning effort.
+One model per model family, at high reasoning effort.
 
 - If the user named members, use those.
-- Otherwise use two: the newest Claude Opus and the newest GPT Sol. Read the model IDs from the
-  harness; do not hardcode them.
+- Otherwise use three: the newest Claude Opus, the newest Claude Fable and the newest GPT Sol.
+  Read the model IDs from the harness; do not hardcode them.
 
 If a member is unavailable, tell the user and stop. Do not swap in another model or provider.
 
@@ -42,8 +42,8 @@ In T3 Code:
    result echoes the model and effort you asked for.
 3. End the turn and wait for the completion notices. Do not poll.
 
-Elsewhere, run a member the harness offers with its own subagent tool (Opus in Claude Code), and
-reach Sol through the codex CLI as the `sol-loop` skill does.
+Elsewhere, run a member the harness offers with its own subagent tool (Opus and Fable in Claude
+Code), and reach Sol through the codex CLI as the `sol-loop` skill does.
 
 Each delegate starts with no history, so the brief must stand on its own:
 
@@ -96,6 +96,7 @@ Rounds: 2
 | Delegate | Round 1 | Round 2 |
 | --- | --- | --- |
 | Claude Opus | 7/10 | 9/10 |
+| Claude Fable | 8/10 | 9/10 |
 | GPT Sol | 8/10 | 10/10 |
 ```
 
