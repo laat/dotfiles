@@ -27,8 +27,8 @@ not fix code that is about to be replaced.
 One model per model family, at high reasoning effort.
 
 - If the user named members, use those.
-- Otherwise use three: the newest Claude Opus, the newest Claude Fable and the newest GPT Sol.
-  Read the model IDs from the harness; do not hardcode them.
+- Otherwise use four: the newest Claude Opus, the newest Claude Fable, the newest GPT Sol and
+  the newest GPT Astra. Read the model IDs from the harness; do not hardcode them.
 
 If a member is unavailable, tell the user and stop. Do not swap in another model or provider.
 
@@ -43,7 +43,7 @@ In T3 Code:
 3. End the turn and wait for the completion notices. Do not poll.
 
 Elsewhere, run a member the harness offers with its own subagent tool (Opus and Fable in Claude
-Code), and reach Sol through the codex CLI as the `sol-loop` skill does.
+Code), and reach Sol and Astra through the codex CLI as the `sol-loop` skill does for Sol.
 
 Each delegate starts with no history, so the brief must stand on its own:
 
@@ -98,6 +98,7 @@ Rounds: 2
 | Claude Opus | 7/10 | 9/10 |
 | Claude Fable | 8/10 | 9/10 |
 | GPT Sol | 8/10 | 10/10 |
+| GPT Astra | 7/10 | 9/10 |
 ```
 
 For an open pull request, edit the description (`gh pr edit`, or `galley pr edit` if galley owns
