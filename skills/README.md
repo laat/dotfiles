@@ -18,7 +18,6 @@ and Claude Code loads the skill once.
 | Skill    | Source |
 |----------|--------|
 | `zizmor` | own; user-invoked only (`/zizmor`); audit GitHub Actions, fix findings, open a PR |
-| `skill-me` | own; user-invoked only (`/skill-me`); how to add or update a skill in this package: SKILL.md, symlink, README row, restow |
 | `fetchmd` | own; last-resort verbatim URL fetcher, wraps the `fetchmd` uv script in its folder; try WebFetch first |
 | `babysit` | own; triggers on "babysit" and similar or `/babysit <pr>`; watches a PR's checks, comments and review threads until clean, fixes and pushes, replies before resolving. Ships `prctl` (status, wait, reply), a stdlib Python script on `gh`. |
 | `sol-loop` | own; model-invoked on an explicit "sol loop" or "codex review loop", or `/sol-loop`; GPT Sol reviews the change as a T3 delegated task (codex CLI outside T3), fix what holds, re-review until approved or 3 rounds; pushes only if asked, never posts. |
@@ -26,7 +25,6 @@ and Claude Code loads the skill once.
 | `full-send` | own; model-invoked on an explicit "full send"; same as `full-stop`, then merges once the merge gate holds |
 | `leo` | own; model-invoked on an explicit "leo", "leonardo" or "dicaprio", or `/leo`; judges whether the PR still makes sense (`REBASE`, `REWRITE` or `CLOSE`) before rebasing; pushes only with a lease, never merges or closes |
 | `ai-moot` | own; model-invoked on an explicit "ai moot", or `/ai-moot`; Claude Opus and GPT Sol (or members the user names) review in parallel at high effort, fix what holds, re-review until all are satisfied; scores per round go in the PR description |
-| `skill-climb` | own; user-invoked only (`/skill-climb`); hill-climbs a skill: realistic prompts run through the new and previous version, a check script grades them, Claude Opus and GPT Sol judge, revise from what holds, repeat until the judges are satisfied |
 
 Skills marked `own` are dedicated to the public domain under CC0 1.0; each
 folder has the `LICENSE`. Vendored skills keep their upstream licence beside
